@@ -1,0 +1,17 @@
+markdown.*.pdf
+markdown.*.mobi
+markdown.*.epub
+markdown.*.html
+markdown.*.md
+markdown-*.epub
+*.pdf
+*.swp
+latex/*
+!latex/makepdf
+!latex/README
+!latex/template.tex
+!latex/config.yml
+epub/temp
+*~
+.#*
+*.epub
