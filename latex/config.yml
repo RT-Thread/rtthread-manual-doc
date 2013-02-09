@@ -14,7 +14,7 @@ default:
   tab: "Table "
   appendix: "Appendix "
   indent: "\\qquad"
-  thanks: "This is the PDF file for the RT-Thread Programming Manual book contents. It is licensed under RT-Thread license."
+  thanks: "This is the PDF file for the RT-Thread Programming Manual book contents."
 zh:
   title: RT-Thread Programming Manual
   langrule: "\\XeTeXlinebreakskip=0em plus 0.1em minus 0.01em\n\\XeTeXlinebreakpenalty=0"
