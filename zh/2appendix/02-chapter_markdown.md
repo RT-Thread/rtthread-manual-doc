@@ -125,11 +125,11 @@ title 属性是选择性的，链接名称可以用字母、数字和空格，�
 它的效果类似于这样：
 
 ~~~{.c}
-#include <stdio.h>
-
-int main(int argc, char** argv)
-{
-	printf("hello\n");
-	return 0;
-}
+	#include <stdio.h>
+	
+	int main(int argc, char** argv)
+	{
+		printf("hello\n");
+		return 0;
+	}
 ~~~
