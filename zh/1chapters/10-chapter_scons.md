@@ -13,15 +13,17 @@ http://www.scons.org/doc/production/HTML/scons-user/index.html
 
 例如针对一个hello world的简单程序，假设它的源文件是：
 
-    /**
-     * file: hello.c
-     */
-    #include <stdio.h>
-    
-    int main(int argc, char** argv)
-    {
-        printf("Hello, world!\n");
-    }
+~~~{.c}
+/**
+ * file: hello.c
+ */
+#include <stdio.h>
+
+int main(int argc, char** argv)
+{
+    printf("Hello, world!\n");
+}
+~~~
 
 只需要在这个文件目录下添加一个SConstruct文件，它的内容是：
 
