@@ -265,7 +265,7 @@ def generate_pdf(options)
                 end
             end.join("\n\n")
 
-            preface = IO.popen('pandoc --highlight-style=tango -p --no-wrap -f markdown -t latex', 'w+') do |pipe|
+            preface = IO.popen('pandoc --highlight-style=pygments -p --no-wrap -f markdown -t latex', 'w+') do |pipe|
                 pipe.write(pre_pandoc(prefacemarkdown, config))
                 pipe.close_write
                 post_pandoc(pipe.read, config, lang, false)

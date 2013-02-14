@@ -126,9 +126,6 @@
 %\fancypagestyle{plain}{\fancyhf{}\fancyfoot[LE,RO]{\footnotesize\textbf\thepage}}
 \fancypagestyle{plain}{\fancyhf{}\fancyfoot{}} % make sure no page number in page of first chapter
 
-\pagestyle{plain}
-
-
 \renewcommand{\headrulewidth}{0pt}
 \renewcommand{\footrulewidth}{0pt}
 
@@ -203,16 +200,16 @@
 
 \frontmatter
 <%= preface %>
-\tableofcontents\newpage\thispagestyle{empty}
+\tableofcontents\thispagestyle{empty}
 
 % customize header & footer
 
-\fancyhf{}
-\fancyhead[LE]{\color{colorheader}\quad\small\textbf\thepage\quad\quad\small\leftmark}
-\fancyhead[RO]{\color{colorheader}\small\rightmark\quad\quad\small\textbf\thepage\quad}
-%\fancyhead[RE,LO]{\color{colorheader}\small{\savedtitle}} % book title 
-%\fancyfoot[LE,RO]{\small\textbf\thepage} % page number
-%\fancyfoot[C]{\small\textbf{hello}} % could add release information
+\fancyhf{} % clear the header and footer fields
+%\fancyhead[LE]{\color{colorheader}\quad\small\textbf\thepage\quad\quad\small\leftmark}
+\fancyhead[LE,RO]{\color{colorheader}\small\rightmark\quad\quad}
+\fancyhead[LO,RE]{\color{colorheader}\small{\savedtitle}} % book title
+\fancyfoot[LE,RO]{\small\textbf\thepage} % page number
+\fancyfoot[C]{\small\textbf{RT-Thread 1.2.0}} % could add release information
 
 %\renewcommand{\headrulewidth}{0.4pt}  % add one line
 %\renewcommand{\headrule}{\color{red}} % conflict with headrulewidth

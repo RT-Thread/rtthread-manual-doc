@@ -12,9 +12,8 @@ http://www.scons.org/doc/production/HTML/scons-user/index.html
 
 ~~~{.c}
 /* file: hello.c */
-
 #include <stdio.h>
-    
+
 int main(int argc, char** argv)
 {
     printf("Hello, world!\n");
