@@ -109,21 +109,27 @@ title 属性是选择性的，链接名称可以用字母、数字和空格，�
 	<img src="/path/to/img.jpg" alt="alt text" title="Title" />
 
 ### 代码 ###
-在一般的段落文字中，你可以使用反引号 `` ` `` 来标记代码区段，区段内的 `&`、`<` 和 `>` 都会被自动的转换成 HTML 实体，这项特性让你可以很容易的在代码区段内插入 HTML 码：
 
-	I strongly recommend against using any `<blink>` tags.
+在电子书中，当转换成PDF时，可以支持代码的语法高亮，可以使用如下的形式：
 
-	I wish SmartyPants used named entities like `&mdash;`
-	instead of decimal-encoded entites like `&#8212;`.
+	~~~{.c}
+	#include <stdio.h>
+	
+	int main(int argc, char** argv)
+	{
+		printf("hello\n");
+		return 0;
+	}
+	~~~
 
+它的效果类似于这样：
 
-如果要建立一个已经格式化好的代码区块，只要每行都缩进 4 个空格或是一个 tab 就可以了，而 `&`、`<` 和 `>` 也一样会自动转成 HTML 实体。
+~~~{.c}
+#include <stdio.h>
 
-Markdown 语法:
-
-	If you want your page to validate under XHTML 1.0 Strict,
-	you've got to put paragraph tags in your blockquotes:
-
-	<blockquote>
-	<p>For example.</p>
-	</blockquote>
+int main(int argc, char** argv)
+{
+	printf("hello\n");
+	return 0;
+}
+~~~
