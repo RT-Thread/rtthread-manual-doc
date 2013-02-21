@@ -120,17 +120,19 @@ I start my morning with a cup of coffee and
 
 行内形式（title 是选择性的）：
 
-	![alt text](/path/to/img.jpg "Title")
+	![alt text](figures/log.png "Title")
+
+![alt text](figures/log.png "Title")
 
 参考形式：
 
 	![alt text][id]
 
-	[id]: /path/to/img.jpg "Title"
+	[id]: figures/log.png "Title"
 
-上面两种方法都会输出 HTML 为：
+![alt text][id]
 
-	<img src="/path/to/img.jpg" alt="alt text" title="Title" />
+[id]: figures/log.png "Title"
 
 ### 代码 ###
 
