@@ -3,22 +3,27 @@
 绝大部分的嵌入式系统都包括一些输入输出(I/O)设备，例如仪器上的数据显示，工业设备上的串口通信，数据采集设备上用于保存数据的flash或SD卡，以及网络设备的以太网接口都是嵌入式系统中容易找到的I/O设备例子。嵌入式系统通常都是针对具有专有特殊需求的设备而设计的，例如移动电话、MP3播放器就是典型地为处理I/O设备而建造的嵌入式系统例子。
 
 在RT-Thread实时操作系统中，RT-Thread提供了一套简单的I/O设备管理框架，如图10-1所示，它把I/O设备分成了三层进行处理：
- 
+
 图10-1 RT-Thread I/O设备结构
 
 应用程序通过RT-Thread的设备操作接口获得正确的设备驱动，然后通过这个设备驱动与底层I/O硬件设备进行数据（或控制）交互。RT-Thread提供给上层应用的是一个抽象的设备接口，给下层设备提供的是底层驱动框架。从系统整体位置来说I/O设备模块相当于设备驱动程序和上层应用之间的一个中间层。
+
 I/O设备模块实现了对设备驱动程序的封装。应用程序通过I/O设备模块提供的标准接口访问底层设备，设备驱动程序的升级、更替不会对上层应用产生影响。这种方式使得设备的硬件操作相关的代码能够独立于应用程序而存在，双方只需关注各自的功能实现，从而降低了代码的耦合性、复杂性，提高了系统的可靠性。
+
 RT-Thread的设备模型是建立在内核对象模型基础之上的。在第4章中我们已经介绍过RT-Thread的内核对象管理器，读者若对这部分还不太了解，可以再回顾下这一章节。在RT-Thread中，设备也被认为是一类对象，被纳入对象管理器的范畴。每个设备对象都是由基对象派生而来，每个具体设备都可以继承其父类对象的属性，并派生出其私有属性。图10-2是设备对象的继承和派生关系示意图。
- 
+
 图10-2 设备继承关系图
 
 ## 块设备 ##
 
 在传统操作系统中一般将I/O设备分成字符设备、块设备和网络接口，分类的依据是设备数据与系统之间的传输处理方式。
+
 字符模式设备允许非结构的数据传输，即通常数据传输采用串行的形式，每次一个字节。字符设备通常是一些简单设备，如串口、按键。
+
 块设备每次传输一个数据块，例如每次传输512个字节数据。这个数据块是硬件强制性的，数据块可能使用某类数据接口或某些强制性的传输协议，否则就可能发生错误。因此，有时块设备驱动程序对读或写操作必须执行附加的工作，如图10-3所示。
- 
+
 图10-3 块设备
+
 当系统服务于一个具有大量数据的写操作时，设备驱动程序必须首先将数据划分为多个包，每个包采用设备指定的数据尺寸。而在实际过程中，最后一部分数据尺寸有可能小于正常的设备块尺寸。如图10-3中每个块使用单独的写请求写入到设备中，头3个直接进行写操作。但最后一个数据块尺寸小于设备块尺寸，设备驱动程序必须使用不同于前3个块的方式处理最后的数据块。通常情况下，设备驱动程序需要首先执行相对应的设备块的读操作，然后把写入数据覆盖到读出数据上，然后再把这个“合成”的数据块做为一整个块写回到设备中。例如图10-3中的块4，驱动程序需要先把块4所对应的设备块读出来，然后将需要写入的数据覆盖至从设备块读出的数据上，使其合并成一个新的块，最后再写回到块设备中。
 
 ## I/O设备控制块 ##
@@ -65,9 +70,9 @@ enum rt_device_class_type
 	RT_Device_Class_Char = 0,	/* 字符设备 	*/
 	RT_Device_Class_Block,		/* 块设备 	*/
 	RT_Device_Class_NetIf,		/* 网络接口 	*/
-	RT_Device_Class_MTD,			/* 内存设备	*/
-	RT_Device_Class_CAN,			/* CAN设备	*/
-	RT_Device_Class_RTC,			/* RTC设备	*/
+	RT_Device_Class_MTD,		/* 内存设备	*/
+	RT_Device_Class_CAN,		/* CAN设备	*/
+	RT_Device_Class_RTC,		/* RTC设备	*/
 	RT_Device_Class_Sound,		/* 声音设备	*/
 	RT_Device_Class_Display, 	/* 显示设备 	*/
 	RT_Device_Class_Unknown		/* 未知设备	*/
@@ -77,64 +82,72 @@ enum rt_device_class_type
 注：	suspend、resume回调函数只会在RT_USING_DEVICE_SUSPEND宏使能的情况下才会有效。
 从设备控制块，我们可以看到，每个设备对象都会在内核中维护一个设备控制块结构，这种结构是使设备对象继承rt_object基类，然后形成rt_device设备类型。
 
-## I/O设备管理接口 ###
+## I/O设备管理接口 ##
 
 ### 注册设备 ###
 
 一个设备能够被上层应用访问前，需要先把这个设备注册到系统中，并添加一些相应的属性。这些注册的设备均可以通过设备名，采用“查找设备接口”的方式来查找，从而获得该设备控制块（或设备句柄）。注册设备的函数接口如下：
-rt_err_t rt_device_register(rt_device_t dev, const char* name, rt_uint8_t flags);
-参数：	  
-  dev		- 设备句柄；
-	name	- 设备名称；
-	flag	- 设备模式标志：
+
+	rt_err_t rt_device_register(rt_device_t dev, const char* name, rt_uint8_t flags);
+
+参数：
+dev		- 设备句柄；
+name	- 设备名称；
+flag	- 设备模式标志：
+
 flags参数支持下列参数(可以采用或的方式支持多种参数)：
 
 ~~~{.c}
 #define RT_DEVICE_FLAG_DEACTIVATE 	0x000    /* 未初始化设备		*/
-#define RT_DEVICE_FLAG_RDONLY       	0x001    /* 只读设备			*/
-#define RT_DEVICE_FLAG_WRONLY       	0x002    /* 只写设备			*/
-#define RT_DEVICE_FLAG_RDWR         	0x003    /* 读写设备			*/
-#define RT_DEVICE_FLAG_REMOVABLE  	0x004    /* 可移除设备			*/
+#define RT_DEVICE_FLAG_RDONLY       0x001    /* 只读设备			*/
+#define RT_DEVICE_FLAG_WRONLY       0x002    /* 只写设备			*/
+#define RT_DEVICE_FLAG_RDWR         0x003    /* 读写设备			*/
+#define RT_DEVICE_FLAG_REMOVABLE  	0x004    /* 可移除设备		*/
 #define RT_DEVICE_FLAG_STANDALONE  	0x008    /* 独立设备			*/
-#define RT_DEVICE_FLAG_ACTIVATED   	0x010    /* 已激活设备			*/
+#define RT_DEVICE_FLAG_ACTIVATED   	0x010    /* 已激活设备		*/
 #define RT_DEVICE_FLAG_SUSPENDED  	0x020    /* 挂起设备			*/
-#define RT_DEVICE_FLAG_STREAM       	0x040    /* 设备处于流模式		*/
-#define RT_DEVICE_FLAG_INT_RX       	0x100    /* 设备处于中断接收模式	*/
-#define RT_DEVICE_FLAG_DMA_RX       	0x200    /* 设备处于DMA接收模式	*/
-#define RT_DEVICE_FLAG_INT_TX       	0x400    /* 设备处于中断发送模式	*/
-#define RT_DEVICE_FLAG_DMA_TX       	0x800    /* 设备处于DMA发送模式	*/
+#define RT_DEVICE_FLAG_STREAM       0x040    /* 设备处于流模式		*/
+#define RT_DEVICE_FLAG_INT_RX       0x100    /* 设备处于中断接收模式	*/
+#define RT_DEVICE_FLAG_DMA_RX       0x200    /* 设备处于DMA接收模式	*/
+#define RT_DEVICE_FLAG_INT_TX       0x400    /* 设备处于中断发送模式	*/
+#define RT_DEVICE_FLAG_DMA_TX       0x800    /* 设备处于DMA发送模式	*/
 ~~~
 
-设备流模式RT_DEVICE_FLAG_STREAM参数用于向串口终端输出字符串，当输出的字符是”\n”时，自动在前面补一个”\r”做分行。
+设备流模式RT_DEVICE_FLAG_STREAM参数用于向串口终端输出字符串：当输出的字符是"\\n"时，自动在前面补一个"\\r"做分行。
 
-返回值：
-	  返回RT_EOK
-警告：	应当避免重复注册已经注册的设备，以及注册已有名字的设备驱动程序。
+返回值：返回RT_EOK
 
-10.3.2 卸载设备
+警告：应当避免重复注册已经注册的设备，以及注册已有名字的设备驱动程序。
+
+### 卸载设备 ###
+
 将设备从设备系统中卸载，被卸载的设备将不能再通过“查找设备接口”被查找到。卸载设备的函数接口如下所示：
-rt_err_t rt_device_unregister(rt_device_t dev)
 
-参数：	  
+	rt_err_t rt_device_unregister(rt_device_t dev)
+
+参数：
 dev		- 设备句柄；
-返回值：
-	返回RT_EOK
+返回值：	返回RT_EOK
+
 注：	卸载设备并不会释放设备控制块所占用的内存。
 
-10.3.3 初始化所有设备
+### 初始化所有设备 ###
+
 初始化所有注册到设备对象管理器中的未初始化的设备，可以通过如下函数接口完成：
-rt_err_t rt_device_init_all(void)
 
-参数：	  
-无
-返回值：
-	返回RT_EOK
+	rt_err_t rt_device_init_all(void)
 
-注：	当一个设备初始化完成后它的flags域中的RT_DEVICE_FLAG_ACTIVATED应该被置位。如果设备的flags域已经是RT_DEVICE_FLAG_ACTIVATED，调用这个接口将不再重复做初始化。
+参数：无
+返回值：	返回RT_EOK
 
-10.3.4 查找设备
+注：	此函数将逐渐废弃，不推荐在应用程序中调用。当一个设备初始化完成后它的flags域中的RT_DEVICE_FLAG_ACTIVATED应该被置位。如果设备的flags域已经是RT_DEVICE_FLAG_ACTIVATED，调用这个接口将不再重复做初始化。
+
+### 查找设备 ###
+
 根据指定的设备名称来查找设备，可以通过如下接口完成：
-rt_device_t rt_device_find(const char* name)
+
+	rt_device_t rt_device_find(const char* name)
+
 使用这个函数接口时，系统会在设备对象类型所对应的对象容器中遍历寻找设备对象，然后返回该设备，如果没有找到相应的设备对象，则返回RT_NULL。
 
 参数：
@@ -142,36 +155,44 @@ rt_device_t rt_device_find(const char* name)
 返回值：
 	查找到对应设备将返回相应的设备对象；否则返回RT_NULL
 
-10.3.5 打开设备
+### 打开设备 ###
+
 根据设备控制块来打开设备，可以通过如下函数接口完成：
-rt_err_t rt_device_open (rt_device_t dev, rt_uint16_t oflags)
+
+	rt_err_t rt_device_open (rt_device_t dev, rt_uint16_t oflags)
 
 参数：
 	dev		- 设备句柄；
 	oflags	- 访问模式。
 其中oflags支持以下列表中的参数：
+
+~~~{.c}
 #define RT_DEVICE_OFLAG_RDONLY  	0x001    	/* 只读模式访问	*/
 #define RT_DEVICE_OFLAG_WRONLY   	0x002    	/* 只写模式访问	*/
 #define RT_DEVICE_OFLAG_RDWR     	0x003    	/* 读写模式访问	*/
+~~~
 
 返回值：
 	  返回驱动的open函数返回值
 
-
 注：	如果设备flags域包含RT_DEVICE_FLAG_STANDALONE参数，将不允许重复打开。
 
-10.3.6 关闭设备
+### 关闭设备 ###
+
 根据设备控制块来关闭设备，可以通过如下函数接口完成：
-rt_err_t rt_device_close(rt_device_t dev)
+
+	rt_err_t rt_device_close(rt_device_t dev)
 
 参数：
 	dev		- 设备句柄；
 返回值：
 	  返回驱动的close函数返回值
 
-10.3.7 读设备
+### 读设备 ###
+
 根据设备控制块来读取设备，可以通过如下函数接口完成：
-rt_size_t rt_device_read (rt_device_t dev, rt_off_t pos, void* buffer, rt_size_t size)
+
+	rt_size_t rt_device_read (rt_device_t dev, rt_off_t pos, void* buffer, rt_size_t size)
 
 根据底层驱动的实现，通常这个接口并不会阻塞上层应用线程。
 
@@ -183,9 +204,11 @@ rt_size_t rt_device_read (rt_device_t dev, rt_off_t pos, void* buffer, rt_size_t
 返回值：
 	返回读到数据的实际大小(以字节为单位)；如果返回0，则需要读取当前线程的errno来判断错误状态。
 
-10.3.8 写设备
+### 写设备 ###
+
 根据设备控制块来写入设备，可以通过如下函数接口完成：
-rt_size_t rt_device_write(rt_device_t dev, rt_off_t pos, const void* buffer, rt_size_t size)
+
+	rt_size_t rt_device_write(rt_device_t dev, rt_off_t pos, const void* buffer, rt_size_t size)
 
 根据底层驱动的实现，通常这个接口也不会阻塞上层应用线程。
 
@@ -199,9 +222,11 @@ rt_size_t rt_device_write(rt_device_t dev, rt_off_t pos, const void* buffer, rt_
 
 注：	在RT-Thread的块设备中，从1.0.0版本开始，rt_device_write()接口的pos、size参数按照以块为单位。0.3.x以前的版本则按字节为单位。
 
-10.3.9 控制设备
+### 控制设备 ###
+
 根据设备控制块来控制设备，可以通过下面的函数接口完成：
-rt_err_t rt_device_control(rt_device_t dev, rt_uint8_t cmd, void* arg)
+
+	rt_err_t rt_device_control(rt_device_t dev, rt_uint8_t cmd, void* arg)
 
 参数：
 	dev		- 设备句柄；
@@ -210,9 +235,11 @@ rt_err_t rt_device_control(rt_device_t dev, rt_uint8_t cmd, void* arg)
 返回值：
 	返回驱动控制接口的返回值
 
-10.3.10 设置数据接收指示
+### 设置数据接收指示 ###
+
 设置一个回调函数，当硬件设备收到数据时回调以通知用程序有数据到达。可以通过如下函数接口完成设置接收指示：
-rt_err_t rt_device_set_rx_indicate(rt_device_t dev, rt_err_t (*rx_ind )(rt_device_t dev,rt_size_t size))
+
+	rt_err_t rt_device_set_rx_indicate(rt_device_t dev, rt_err_t (*rx_ind )(rt_device_t dev,rt_size_t size))
 
 在调用这个函数时，回调函数rx_ind由调用者提供。当硬件设备接收到数据时，会回调这个函数并把收到的数据长度放在size参数中传递给上层应用。上层应用线程应在收到指示后，立刻从设备中读取数据。
 
@@ -222,9 +249,11 @@ rt_err_t rt_device_set_rx_indicate(rt_device_t dev, rt_err_t (*rx_ind )(rt_devic
 返回值：
 	  RT_EOK
 
-10.3.11 设置发送完成指示
+### 设置发送完成指示 ###
+
 在上层应用调用rt_device_write写入数据时，如果底层硬件能够支持自动发送，那么上层应用可以设置一个回调函数。这个回调函数会在底层硬件给出的发送完成后(例如DMA传送完成或FIFO已经写入完毕产生完成中断时)被调用。可以通过如下函数接口设置设备发送完成指示：
-rt_err_t rt_device_set_tx_complete(rt_device_t dev, rt_err_t (*tx_done)(rt_device_t dev,void *buffer))
+
+	rt_err_t rt_device_set_tx_complete(rt_device_t dev, rt_err_t (*tx_done)(rt_device_t dev,void *buffer))
 
 调用这个函数时，回调函数tx_done参数由调用者提供，当硬件设备发送完数据时，由驱动程序回调这个函数并把发送完成的数据块地址buffer做为参数传递给上层应用。上层应用（线程）在收到指示时应根据发送buffer的情况，释放buffer内存块或将其做为下一个写数据的缓存。
 
@@ -234,10 +263,16 @@ rt_err_t rt_device_set_tx_complete(rt_device_t dev, rt_err_t (*tx_done)(rt_devic
 返回值：
 	  RT_EOK
 
-10.4 设备驱动
+## 设备驱动 ##
+
 上一节说到了如何使用RT-Thread的设备接口，但对于底层来说，如何编写一个设备驱动程序可能会更为重要，这节将详细描述如何编写一个设备驱动程序，并以STM32上的一个串口设备为例子进行说明。
-10.4.1 设备驱动必须实现的接口
+
+### 设备驱动必须实现的接口 ###
+
 在10.1节中提及了RT-Thread设备接口类，我们着重看看其中包含的一套公共设备接口(类似上节说的设备访问接口，但面向的层次已经不一样，这里是面向底层驱动)：
+
+
+~~~{.c}
 /* 公共的设备接口(由驱动程序提供) */
 rt_err_t  (*init)	(rt_device_t dev);
 rt_err_t  (*open)	(rt_device_t dev, rt_uint16_t oflag);
@@ -251,38 +286,47 @@ rt_err_t  (*control)(rt_device_t dev, rt_uint8_t cmd, void *args);
 rt_err_t (*suspend) (rt_device_t dev);
 rt_err_t (*resumed) (rt_device_t dev);
 #endif
+~~~
 
 这些接口也是上层应用通过RT-Thread设备接口进行访问的实际底层接口（如图10-4）：
- 
+
 图10-4 设备操作接口与设备驱动程序接口的映射
 即这些驱动实现的底层接口是上层应用最终访问的落脚点，例如上层应用调用rt_device_read接口进行设备读取数据操作，上层应先调用rt_device_find获得相对应的设备句柄，而在调用rt_device_read时，就是使用这个设备句柄所对应驱动的driver_read。上述的接口是一一对应关系。
-I/O设备模块提供的这六个接口（rt_device_init/open/read/write/control），对应到设备驱动程序的六个接口（driver_init/open/read/write/control等），可以认为是底层设备驱动必须提供的接口：
-方法名称	方法描述
-init	设备的初始化。设备初始化完成后， 设备控制块的flag会被置成已激活状态(RT_DEVICE_FLAG_ACTIVATED)。如果设备控制块的flag不是已激活状态，那么在设备框架调用rt_device_init_all接口时将调用此设备驱动的init接口进行设备初始化；
 
-如果设备控制块中的flag标志已经设置成激活状态，那么再运行初始化接口时，会立刻返回，而不会重新进行初始化。
+I/O设备模块提供的这六个接口（rt_device_init/open/read/write/control），对应到设备驱动程序的六个接口（driver_init/open/read/write/control等），可以认为是底层设备驱动必须提供的接口：
+
+方法名称	方法描述
+init	设备的初始化。设备初始化完成后， 设备控制块的flag会被置成已激活状态(RT_DEVICE_FLAG_ACTIVATED)。如果设备控制块的flag不是已激活状态，那么在设备框架调用rt_device_init_all接口时将调用此设备驱动的init接口进行设备初始化；如果设备控制块中的flag标志已经设置成激活状态，那么再运行初始化接口时，会立刻返回，而不会重新进行初始化。
+
 open	打开设备。有些设备并不是系统一启动就已经打开开始运行；或者设备需要进行数据接收，但如果上层应用还未准备好，设备也不应默认已经使能并开始接收数据。所以建议在写底层驱动程序时，应在调用open接口时才使能设备。
+
 close	关闭设备。建议在打开设备时，设备驱动自行维护一个打开计数，在打开设备时进行+1操作，在关闭设备时进行-1操作，当计数器变为0时，进行真正的关闭操作。
+
 read	从设备中读取数据。参数pos指出读取数据的偏移量，但是有些设备并不一定需要指定偏移量，例如串口设备，设备驱动应忽略这个参数。而对于块设备来说，pos以及size都是以块设备的数据块大小做为单位的。例如块设备的数据块大小是512，而参数中pos = 10, size = 2，那么驱动应该返回设备中第10个块（从第0个块做为起始），共计2个块的数据。
 
 这个接口返回的类型是rt_size_t，即读到的字节数或块数目。正常情况下应该会返回参数中size的数值，如果返回零请设置对应的errno值。
-write	向设备中写入数据。参数pos指出写入数据的偏移量。与读操作类似，对于块设备来说，pos以及size都是以块设备的数据块大小做为单位的。
 
+write	向设备中写入数据。参数pos指出写入数据的偏移量。与读操作类似，对于块设备来说，pos以及size都是以块设备的数据块大小做为单位的。
 这个接口返回的类型是rt_size_t，即真实写入数据的字节数或块数目。正常情况下应该会返回参数中size的数值，如果返回零请设置对应的errno值。
+
 control	根据不同的cmd命令控制设备。命令往往是由底层各类设备驱动自定义实现。例如参数RT_DEVICE_CTRL_BLK_GETGEOME，意思是获取块设备的大小信息。
 
-10.4.2 设备驱动实现的步骤
-在实现一个RT-Thread设备时，可以按照如下的步骤进行（对于一些复杂的设备驱动，例如以太网接口驱动、图形设备驱动，请参看网络组件、GUI部分章节）：
-	按照RT-Thread的对象模型，扩展一个对象有两种方式：
-	定义自己的私有数据结构，然后赋值到RT-Thread设备控制块的user_data指针上；
-	从struct rt_device结构中进行派生。
-	实现RT-Thread I/O设备模块中定义的6个公共设备接口，开始可以是空函数(返回类型是rt_err_t的可默认返回RT_EOK)；
-	根据自己的设备类型定义自己的私有数据域。特别是在可能有多个相类似设备的情况下（例如串口1、2），设备接口可以共用同一套接口，不同的只是各自的数据域(例如寄存器基地址)；
-	根据设备的类型，注册到RT-Thread设备框架中。
+### 设备驱动实现的步骤 ###
 
-10.4.3 STM32F103的串口驱动
+在实现一个RT-Thread设备时，可以按照如下的步骤进行（对于一些复杂的设备驱动，例如以太网接口驱动、图形设备驱动，请参看网络组件、GUI部分章节）：
+
+* 按照RT-Thread的对象模型，扩展一个对象有两种方式：
+* 定义自己的私有数据结构，然后赋值到RT-Thread设备控制块的user_data指针上；
+* 从struct rt_device结构中进行派生。
+* 实现RT-Thread I/O设备模块中定义的6个公共设备接口，开始可以是空函数(返回类型是rt_err_t的可默认返回RT_EOK)；
+* 根据自己的设备类型定义自己的私有数据域。特别是在可能有多个相类似设备的情况下（例如串口1、2），设备接口可以共用同一套接口，不同的只是各自的数据域(例如寄存器基地址)；
+* 根据设备的类型，注册到RT-Thread设备框架中。
+
+### STM32F103的串口驱动 ###
+
 做为一个例子，例10-1中详细分析了STM32F103的串口驱动，也包括上层应该如何使用这个设备的代码。STM32F103串口驱动代码，详细的中文注释已经放在其中了。
-例10-1
+
+~~~{.c}
 /*
  * 程序清单：串口设备驱动头文件
  */
@@ -620,7 +664,7 @@ void rt_hw_serial_isr(rt_device_t device)
 
 			/* 获得已接收的长度 */
 			rx_length = int_rx->read_index > int_rx->save_index ?
-				UART_RX_BUFFER_SIZE - int_rx->read_index + 
+				UART_RX_BUFFER_SIZE - int_rx->read_index +
 				int_rx->save_index :
 				int_rx->save_index - int_rx->read_index;
 			/* 执行回调函数 */
@@ -634,8 +678,11 @@ void rt_hw_serial_isr(rt_device_t device)
 		USART_ClearITPendingBit(uart->uart_device, USART_IT_TC);
 	}
 }
+~~~
 
 对于包含中断发送、接收的情况的驱动程序，例10-2给出了具体的使用代码。在这个例子中，用户线程将在两个设备上(UART1, UART2)读取数据，然后再写到UART1设备中。
+
+~~~{.c}
 /*
  * 程序清单：串口设备操作例程
  *
@@ -737,5 +784,7 @@ int rt_application_init()
 	if (thread_!= RT_NULL)
 		rt_thread_startup(&thread);
 }
+~~~
+
 线程devt启动后，系统将先查找是否存在uart1, uart2这两个设备，如果存在则设置数据接收回调函数。在数据接收回调函数中，系统将对应的设备句柄，接收到的数据长度填充到一个消息结构体（struct rx_msg）上，然后发送到消息队列rx_mq中。devt线程在打开设备后，将在消息队列中等待消息的到来。如果消息队列是空的，devt线程将被阻塞，直到它接被唤醒，被唤醒的条件是devt线程收到消息后或在0.5秒(50 OS tick)内都没收到消息的情况下。这两种被唤醒的情况，可以根据rt_mq_recv函数返回值的不同，可以区分出devt线程是因为什么原因而被唤醒。如果devt线程是因为接收到消息而被唤醒（rt_mq_recv函数的返回值是RT_EOK），那么它将主动调用rt_device_read去读取消息，然后写入UART1设备中。
 

@@ -116,23 +116,13 @@ I start my morning with a cup of coffee and
 
 ### 图片 ###
 
-图片的语法和链接很像。
+图片的语法和链接很像，同时图也可以选择一个标题，标题序号会在生成PDF时自动加上序号，例如：
 
-行内形式（title 是选择性的）：
+	![标题](figures/logo.png)
 
-	![alt text](figures/log.png "Title")
+![标题](figures/logo.png)
 
-![alt text](figures/log.png "Title")
-
-参考形式：
-
-	![alt text][id]
-
-	[id]: figures/log.png "Title"
-
-![alt text][id]
-
-[id]: figures/log.png "Title"
+其中，请确保指向的图形文件在figures目录下存在，否则在生成PDF文件时会报错。
 
 ### 代码 ###
 
