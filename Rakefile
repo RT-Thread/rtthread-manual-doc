@@ -158,3 +158,50 @@ namespace :pdf do
                 system("ruby makepdfs")
         end
 end
+
+namespace :html do
+  GH_PAGES_BRANCH = "gh-pages"
+  GH_PAGES_INDEX = "index.html"
+  HTML_EBOOK = "manual-doc.zh.html"
+  OLD_BRANCH = `git rev-parse --abbrev-ref HEAD`.chomp
+
+  def exec_cmds(cmds)
+    cmds.split("\n").each { |line| puts line }
+  end
+
+  desc "create #{GH_PAGES_BRANCH} branch"
+  task :branch do
+    unless `git branch`.include? GH_PAGES_BRANCH then
+      GH_PAGES_FILES = "stylesheets figures Rakefile"
+
+CR_BR_CMD=<<CMD
+git checkout --orphan #{GH_PAGES_BRANCH}
+git rm . -rfq
+touch #{GH_PAGES_INDEX}
+git checkout #{OLD_BRANCH} -- #{GH_PAGES_FILES}
+git add #{GH_PAGES_INDEX}
+git commit -a -m "Create Github pages branch"
+git checkout #{OLD_BRANCH}
+CMD
+
+      exec_cmds CR_BR_CMD
+    end
+  end
+
+  file HTML_EBOOK do
+    exec_cmds "./mkbok -b html"
+  end
+
+  desc "publish html to Github pages"
+  task :publish => [HTML_EBOOK, :branch] do
+
+PUB_CMD=<<CMD
+git checkout #{GH_PAGES_BRANCH}
+mv manual-doc.zh.html index.html
+git commit -a -u -m "Update pages"
+git checkout #{OLD_BRANCH}
+CMD
+
+    exec_cmds PUB_CMD
+  end
+end
