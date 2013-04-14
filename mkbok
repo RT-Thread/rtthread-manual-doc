@@ -64,14 +64,14 @@ def main()
             options["template"] = template
         end
         opts.on("-n","--name book name","book name") do |name|
-            unless name =~ /^[a-zA-Z0-9]+$/
-                raise ArgumentError,"name should be [a-zA-Z0-9]"
+            unless name =~ /^[a-zA-Z0-9_]+$/
+                raise ArgumentError,"name should be [a-zA-Z0-9_]"
             end
             options["name"] = name
         end
         opts.on("-g","--generate project","project name") do |name|
-            unless name =~ /^[a-zA-Z0-9]+$/
-                raise ArgumentError,"name should be [a-zA-Z0-9]"
+            unless name =~ /^[a-zA-Z0-9_]+$/
+                raise ArgumentError,"name should be [a-zA-Z0-9_]"
             end
             options["command"] = "generate"
             options["name"] = name
@@ -360,7 +360,7 @@ def generate_pdf(options)
 end
 
 def generate_ebook(options)
-    name = File.basename(Dir.getwd)
+    name = options["name"] || File.basename(Dir.getwd)
     
     missing = ['pandoc'].reject{|command| command_exists?(command)}
     unless missing.empty?
