@@ -166,7 +166,7 @@ namespace :html do
   OLD_BRANCH = `git rev-parse --abbrev-ref HEAD`.chomp
 
   def exec_cmds(cmds)
-    cmds.split("\n").each { |line| puts line }
+    cmds.split("\n").each { |line| sh line }
   end
 
   desc "create #{GH_PAGES_BRANCH} branch"
@@ -192,8 +192,11 @@ CMD
     exec_cmds "./mkbok -b html"
   end
 
+  desc "generate html"
+  task :generate => [HTML_EBOOK]
+
   desc "publish html to Github pages"
-  task :publish => [HTML_EBOOK, :branch] do
+  task :publish => [:generate, :branch] do
 
 PUB_CMD=<<CMD
 git checkout #{GH_PAGES_BRANCH}
