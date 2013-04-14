@@ -9,4 +9,10 @@
 
 ## 如何参与 ##
 
-您可以在github上发出issues以希望提供哪方面的内容，也可以发出pull requests把您觉得更好的修正、内容提供出来，然后最终合并到电子书籍中。
+### 提出需求 ###
+
+您可以在github上提交[Issues](https://github.com/RT-Thread/manual-doc/issues)以希望提供哪方面的内容
+
+### 修改内容 ###
+
+找到目录里相应的源文件，例如[线程管理与调度](https://github.com/RT-Thread/manual-doc/blob/master/zh/1chapters/02-chapter_thread.md)，点击“编辑/Edit”，修改或增加内容之后，Github会自动创建分支，并发出pull requests，审核之后会合并到电子书中。
