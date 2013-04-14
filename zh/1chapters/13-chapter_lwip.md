@@ -1,13 +1,13 @@
 # lwIP - 轻型TCP/IP协议栈 #
 
 ## 简介 ##
-LwIP（Light Weight IP）是瑞士计算机科学院（Swedish Institute of Computer Science）的Adam Dunkels等开发的一套用于嵌入式系统的开放源代码TCP/IP协议栈，它在包含完整的TCP协议的基础上实现了小型化的资源占用，因此它十分适合于应用到嵌入式设备中，其占用的资源体积RAM大概为几十kB，ROM大概为40KB。
+[lwIP（light-weight IP)](http://savannah.nongnu.org/projects/lwip/)最初由瑞士计算机科学院（Swedish Institute of Computer Science）的Adam Dunkels开发，现在由Kieran Mansley领导的一个全球开发团队开发、维护的一套用于嵌入式系统的开放源代码TCP/IP协议栈，它在包含完整的TCP协议的基础上实现了小型化的资源占用，因此它十分适合于应用到嵌入式设备中，其占用的资源体积RAM大概为几十kB，ROM大概为40KB。
 
-LwIP结构精简，功能完善，因而用户群较为广泛。本书所讲述的实时操作系统RT-Thread就采用了LwIP做为默认的TCP/IP协议栈，同时根据小型设备的特点对LwIP进行了再次优化，使其资源占用体积又进一步地缩小，RAM 的占用可缩小到5kB附近（依据上层应用使用情况会有浮动）。本章内容将为您讲述LwIP在RT-Thread中的使用方法。
+lwIP结构精简，功能完善，因而用户群较为广泛。RT-Thread实时操作系统就采用了lwIP做为默认的TCP/IP协议栈，同时根据小型设备的特点对lwIP进行了再次优化，使其资源占用体积进一步地缩小，RAM 的占用可缩小到5kB附近（未计算上层应用使用TCP/IP协议时的空间占用量）。本章内容将为您讲述lwIP在RT-Thread中的使用方法。
 
-## LwIP在RT-Thread中的结构 ##
+## lwIP在RT-Thread中的结构 ##
 
-由于原版的LwIP更适合于在无操作系统的情况下运行，所以RT-Thread在移植LwIP的过程中根据RT-Thread的特点进行了适当调整。其结构如下图所示：
+由于原版的lwIP更适合于在无操作系统的情况下运行，所以RT-Thread在移植lwIP的过程中根据RT-Thread的特点进行了适当调整。其结构如下图所示：
 
 RT-Thread操作系统中的lwIP是从lwIP发布原始版本移植过来，然后添加了设备层以替换原来的驱动层。不同于原版，这里RT-Thread对于以太网数据的收发采用了独立的双线程（erx线程与etx线程）结构：
 
@@ -40,8 +40,6 @@ void rt_init_thread_entry(void *parameter)
 
 		/* 注册以太网接口驱动 */
 		rt_hw_stm32_eth_init();
-		/* 初始化注册的设备驱动，它仅会初始化未初始化的驱动 */
-		rt_device_init_all();
 
 		/* 初始化LwIP系统 */
 		lwip sys_init();
@@ -52,35 +50,35 @@ void rt_init_thread_entry(void *parameter)
 
 int rt_application_init()
 {
-	rt_thread_t init_thread;
+	rt_thread_t tid;
 
 	/* 以动态线程方式，创建初始化线程 */
-	init_thread = rt_thread_create("init",
-			rt_init_thread_entry, RT_NULL,
-			2048, 10, 5);
+	tid = rt_thread_create("init",
+		rt_init_thread_entry, RT_NULL,
+		2048, 10, 5);
 
 	/* 启动线程*/
-	if (init_thread_ != RT_NULL)
-		rt_thread_startup(init_thread);
+	if (tid != RT_NULL)
+		rt_thread_startup(tid);
 
 	return 0;
 }
 ~~~
 
-另外，在RT-Thread操作系统中为了使用LwIP协议栈需要在rtconfig.h头文件中定义使用LwIP的宏：
+另外，在RT-Thread操作系统中为了使用lwIP协议栈需要在rtconfig.h头文件中定义使用lwIP的宏：
 
 ~~~{.c}
 /* 定义RT_USING_LWIP以支持lightweight TCP/IP 协议栈 */
 #define RT_USING_LWIP
 ~~~
 
-在LwIP协议栈中主线程TCP的参数（优先级，信箱大小，栈空间大小）也可以在rtconfig.h头文件中定义：
+在lwIP协议栈中主线程TCP的参数（优先级，信箱大小，栈空间大小）也可以在rtconfig.h头文件中定义：
 
 ~~~{.c}
 /* TCP线程选项 */
-#define RT_LWIP_TCPTHREAD_PRIORITY 		20		/* TCP线程的优先级 */
+#define RT_LWIP_TCPTHREAD_PRIORITY 	20		/* TCP线程的优先级 */
 #define RT_LWIP TCPTHREAD_MBOX_SIZE 	10		/* TCP中使用到的邮箱大小 */
-#define RT_LWIP_TCPTHREAD_STACKSIZE 	1024	/* TCP线程的栈大小 */
+#define RT_LWIP_TCPTHREAD_STACKSIZE 	1024		/* TCP线程的栈大小 */
 ~~~
 
 默认的IP地址，网关地址，子网掩码也可以在rtconfig.h头文件中定义（如果要使用DHCP方式分配，则需要定义RT_USING_DHCP宏）：
@@ -106,13 +104,11 @@ int rt_application_init()
 ~~~
 
 ## 网络编程示例 ##
-### UDP例子 ###
+### UDP使用示例 ###
 
 下面是一个在RT-Thread上使用BSD socket接口的UDP服务端例子，当把这个代码加入到RT-Thread操作系统时，它会自动向finsh命令行添加一个udpserv命令，在finsh上执行udpserv()函数即可启动这个UDP服务端，该UDP服务端在端口5000上进行监听。
 
 当服务端接收到数据时，它将把数据打印到控制终端中；如果服务端接收到exit字符串时，那么服务端将退出服务。
-
-例13-10 UDP服务端示例
 
 ~~~{.c}
 /*
@@ -266,7 +262,7 @@ FINSH_FUNCTION_EXPORT(udpclient, startup udp client);
 #endif
 ~~~
 
-### TCP例子 ###
+### TCP使用示例 ###
 
 下面是一个在RT-Thread上使用BSD socket接口的TCP服务端例子。当把这个代码加入到RT-Thread时，它会自动向finsh命令行添加一个tcpserv命令，在finsh上执行tcpserv()函数即可启动这个TCP服务端，该TCP服务端在端口5000上进行监听。
 当有TCP客户向这个服务端进行连接后，只要服务端接收到数据，它就会立即向客户端发送“This is TCP Server from RT-Thread.”的字符串。
@@ -458,7 +454,7 @@ void tcpclient(const char* url, int port)
 
 	/* 连接到服务端 */
 	if (connect(sock, (struct sockaddr *) &server_addr, 
-sizeof(struct sockaddr))	== -1)
+		sizeof(struct sockaddr)) == -1)
 	{
 		/* 连接失败 */
 		rt_kprintf("Connect error\n");
