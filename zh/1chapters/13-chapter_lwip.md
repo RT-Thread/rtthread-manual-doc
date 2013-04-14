@@ -42,7 +42,7 @@ void rt_init_thread_entry(void *parameter)
 		rt_hw_stm32_eth_init();
 
 		/* 初始化LwIP系统 */
-		lwip sys_init();
+		lwip_sys_init();
 		rt_kprintf("TCP/IP initialized!\n");
 	}
 #endif
