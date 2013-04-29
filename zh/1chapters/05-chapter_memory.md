@@ -443,3 +443,8 @@ int rt_application_init()
 }
 ~~~
 
+## 更改情况 ##
+
+* RT-Thread 1.2.0中引入RT_USING_MEMHEAP_AS_HEAP选项，可以把多个memheap（地址可不连续）粘合起来用于系统的heap分配；
+* RT-Thread 1.2.0中引入rt_memheap_realloc函数，用于在memheap中进行memory重新分配；
+
