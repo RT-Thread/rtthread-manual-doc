@@ -176,3 +176,9 @@ b，参数b，意义是balabala
     /* 调用函数 */
     result = function(1, 2);
 ~~~
+
+## 注意事项 ##
+
+在markdown向PDF转换过程中，pandoc会生成中间的LaTex文件，如果markdown文本中（不是引用、代码中使用）使用了反斜杠，会导致转化PDF文件报错。所以最好的方式是使用双反斜杠，如下所示：
+
+    C:\\Python27路径balabala
