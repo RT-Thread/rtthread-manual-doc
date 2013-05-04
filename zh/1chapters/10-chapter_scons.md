@@ -24,7 +24,7 @@ SCons是一套由Python语言编写的开源构建系统，类似于GNU Make。�
 
     C:\Python27
 
-目录下，可以把 C:\Python27\Scripts 目录加入到PATH环境变量中。在Windows的我的电脑中，右键把系统属性设置窗口点出来，如下图所示：
+目录下，可以把 C:\\Python27\\Scripts 目录加入到PATH环境变量中。在Windows的我的电脑中，右键把系统属性设置窗口点出来，如下图所示：
 
 ![我的电脑系统属性设置](figures/scons_SettingENV1.png)
 
@@ -32,7 +32,7 @@ SCons是一套由Python语言编写的开源构建系统，类似于GNU Make。�
 
 ![修改PATH环境变量](figures/scons_SettingENV2.png)
 
-选择PATh项，然后点击编辑按钮，然后把C:\Python27\Scripts目录添加到PATH最后的位置。添加完成后，可以按Win键+R，然后输入cmd回车打开Windows命令行窗口，在其中输入：
+选择PATh项，然后点击编辑按钮，然后把C:\\Python27\\Scripts目录添加到PATH最后的位置。添加完成后，可以按Win键+R，然后输入cmd回车打开Windows命令行窗口，在其中输入：
 
     scons
 
