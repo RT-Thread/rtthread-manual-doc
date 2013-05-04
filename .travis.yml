@@ -1,15 +1,18 @@
+language: haskell
+install:
+  - cabal install pandoc
 before_script:
   - uname -a 
   - cat /etc/lsb-release
   - sudo apt-get update -q
-  - sudo apt-get install -q pandoc
   - sudo apt-get install -q ttf-arphic-gbsn00lp ttf-arphic-ukai ttf-wqy-microhei ttf-wqy-zenhei
   - sudo apt-get install -q texlive-xetex texlive-latex-recommended texlive-latex-extra
-  - pandoc -v
+  - ~/.cabal/bin/pandoc -v
+  - export PATH=~/.cabal/bin:$PATH
 
 env:
   global:
-    - secure: "ZmpIwMG9zZ8XTLiNPuBQhoJbtaODMiAUQkg87wUkUn4x8jGu5DFSH+Epqu+O\n0J49KP7xvKrJAmNWCVkp5oc/LQO6ruot5Kqs4ZZKVU9IdB6md4skZp8LvfB9\nBRFybm0bymUd3A510RvNEBCAgqIiS2txcH/f6ieIC7hLgkgx+Tc="
+    - secure: "O5U/e5r6b1Pq1c3EvGGK76DlHbIFsoSJsRaD0PJ3swNdZJR5lALrR3SaLm+s\nF70uI6nQxeNUjGh0MPIMQmDO7xIuUHUsVmN95YZJq/vJTzND6JtXK6LmImvS\ncBkSyWMm5JLpmaglDwVkmu7B7/PIdpM5Pe63xYg8xwZ+ApRwcvk="
 
 rvm:
   - 1.9.3
