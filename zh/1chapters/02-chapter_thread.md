@@ -7,15 +7,20 @@
 ## 实时系统的需求 ##
 
 如第二章里描述的，系统的实时性指的是在固定的时间内正确地对外部事件做出响应。这个“时间内”(英文叫做deadline、有时中文也翻译成时间约束)，系统内部会做一些处理，例如输入数据的分析计算，加工处理等。而在这段时间之外，系统可能会空闲下来，做一些空余的事。
+
 例如一个手机终端，当一个电话拨入的时候，系统应当及时发出振铃、声音提示以通知主人有来电，询问是否进行接听。而在非电话拨入的时候，人们可以用它进行一些其它工作，例如听音乐，玩游戏等。
+
 从上面的例子我们可以看出，实时系统是一种需求倾向性的系统，对于实时的事件需要在第一时间内做出回应，而对非实时任务则可以在实时事件到达时为之让路——被抢占。所以实时系统也可以看成是一个等级系统，不同重要性的任务具有不同的优先等级：重要的事件能够优先被响应执行，非重要的事件可以适当往后推迟。
+
 在RT-Thread实时操作系统中，任务采用了线程来实现，线程是RT-Thread中最基本的调度单位，它描述了一个任务执行的上下文关系，也描述了这个任务所处的优先等级。重要的任务能拥有相对较高的优先级，非重要的任务优先级可以放低，并且可以类似Linux一样具备分时的效果。
 
 ## 线程调度器 ##
 
 RT-Thread中提供的线程调度器是基于优先级的全抢占式调度：在系统中除了中断处理函数、调度器上锁部分的代码和禁止中断的代码是不可抢占的之外，系统的其他部分都是可以抢占的，包括线程调度器自身。系统总共支持256个优先级(0 ～ 255，数值越小的优先级越高，0为最高优先级，255分配给空闲线程使用，一般用户不使用。在一些资源比较紧张的系统中，可以根据实际情况选择只支持8个或32个优先级的系统配置)。当系统中，当有比当前线程优先级更高的线程就绪时，当前线程将立刻被换出，高优先级线程抢占处理器运行。
 
-如图5-1所示，在RT-Thread调度器的实现中,包含了一个共256个优先级队列的数组(如果系统最大支持32个优先级，那么这里将是一个包含了32个优先级队列的数组)，每个数组元素中放置相同优先级链表的表头。这些相同优先级的列表形成一个双向环形链表，最低优先级线程链表一般只包含一个idle线程。
+如图 ***线程就绪优先级队列*** 所示，在RT-Thread调度器的实现中,包含了一个共256个优先级队列的数组(如果系统最大支持32个优先级，那么这里将是一个包含了32个优先级队列的数组)，每个数组元素中放置相同优先级链表的表头。这些相同优先级的列表形成一个双向环形链表，最低优先级线程链表一般只包含一个idle线程。
+
+![线程就绪优先级队列](figures/rt_thread_ready.png)
  
 在优先级队列1#和2#中，可以看到三个线程：线程A、线程B和线程C。由于线程A、B的优先级比线程C的高，所以此时线程C得不到运行，必须要等待优先级队列1#的中所有线程（因为阻塞）都让出处理器后才能得到执行。
 
@@ -97,25 +102,47 @@ rt_uint8_t		flags;               	/* 对象的参数       			*/
 线程运行的过程中，一个时间内只允许一个线程在处理器中运行，从运行的过程上划分，线程有多种不同的运行状态，如运行态，非运行态等。在RT-Thread实时操作系统中，线程包含四种状态，操作系统会自动根据它运行的情况而动态调整它的状态。
 RT-Thread中的四种线程状态如下所示：
 
-状态	描述 
-RT_THREAD_INIT	线程初始状态。当线程刚开始创建还没开始运行时就处于这个状态；在这个状态下，线程不参与调度
-RT_THREAD_SUSPEND	挂起态、阻塞态。线程此时被挂起：它可能因为资源不可用而挂起等待；或线程主动延时一段时间而被挂起。在这个状态下，线程不参与调度
-RT_THREAD_READY	就绪态。线程正在运行；或当前线程运行完让出处理器后，操作系统寻找最高优先级的就绪态线程运行
-RT_THREAD_RUNNING	运行态。线程当前正在运行，在单核系统中，只有rt_thread_self()函数返回的线程处于这个状态；在多核系统中则不受这个限制。
-RT_THREAD_CLOSE	线程结束态。当线程运行结束时将处于这个状态。这个状态的线程不参与线程的调度。
++------------------------+---------------------------------------------------------+
+|      状态              |   描述                                                  |
++========================+=========================================================+
+|   RT_THREAD_INIT       |  线程初始状态。当线程刚开始创建还没开始运行时就处于这个 |
+|                        |  状态；在这个状态下，线程不参与调度                     |
++------------------------+---------------------------------------------------------+
+|   RT_THREAD_SUSPEND    |  挂起态、阻塞态。线程此时被挂起：它可能因为资源不可用而 |
+|                        |  挂起等待；或线程主动延时一段时间而被挂起。在这个状态下 |
+|                        |  ，线程不参与调度                                       |
++------------------------+---------------------------------------------------------+
+|   RT_THREAD_READY      |  就绪态。线程正在运行；或当前线程运行完让出处理器后，操 |
+|                        |  作系统寻找最高优先级的就绪态线程运行                   |
++------------------------+---------------------------------------------------------+
+|   RT_THREAD_RUNNING    |  运行态。线程当前正在运行，在单核系统中，只有           |
+|                        |  rt_thread_self()函数返回的线程处于这个状态；在多核系统 |
+|                        |  中则不受这个限制。                                     |
++------------------------+---------------------------------------------------------+
+|   RT_THREAD_CLOSE      |  线程结束态。当线程运行结束时将处于这个状态。这个状态的 |
+|                        |  线程不参与线程的调度。                                 |
++------------------------+---------------------------------------------------------+
+
+Table:四种线程状态-描述
+
+
+
 
 RT-Thread实时操作系统提供一系列的操作系统调用接口，使得线程的状态在这五个状态之间来回的变换。例如一个就绪态的线程由于申请一个资源（例如使用rt_sem_take)，而可能进入挂起态。又例如因为一个外部中断发生了，系统转入中断服务例程，在中断服务例程中释放了相应的资源，导致把等待在这个资源上的高优先级线程唤醒，改变其状态为就绪态，导致当前运行线程切换等等。
 
-几种状态间的转换关系如图5-2所示：
- 
+几种状态间的转换关系如 ***线程转换图*** 所示：
+
+![线程转换图](figures/rt_thread_states.png)
+
 线程通过调用函数rt_thread_create/init进入到初始状态（RT_THREAD_INIT）；再通过调用函数rt_thread_startup进入到就绪状态（RT_THREAD_READY）；当处于就绪状态的线程调用rt_thread_delay，rt_sem_take，rt_mb_recv等函数或由于获取不到资源时，将进入到挂起状态（RT_THREAD_SUSPEND）；处于挂起状态的线程，如果等待超时依然未能获得资源或由于其他线程释放了资源，那么它将返回到就绪状态。挂起状态的线程，如果调用rt_thread_delete/detach将更改为关闭状态（RT_THREAD_CLOSE）；而运行状态的线程，如果运行结束会在线程最后部分执行rt_thread_exit函数而更改为关闭状态（RT_THREAD_CLOSE）
 
 ## 空闲线程 ##
 
 空闲线程是系统线程中一个比较特殊的线程，它具有最低的优先级，当系统中无其他线程可运行时，调度器将调度到空闲线程。空闲线程通常是一个死循环，永远不被挂起。
+
 RT-Thread实时操作系统为空闲线程提供了钩子函数（钩子函数：用户提供的一段代码，在系统运行的某一路径上设置一个钩子，当系统经过这个位置时，转而执行这个钩子函数，然后再返回到它的正常路径上），可以让系统在空闲的时候执行一些特定的任务，例如系统运行指示灯闪烁，电源管理等。除了调用钩子函数，RT-Thread也把线程清理（rt_thread->cleanup回调函数）函数、真正的线程删除动作放到了空闲线程中（在删除线程时，仅改变线程的状态为关闭状态不再参与系统调度）。
 
-##调度器相关接口 ##
+##调度器相关接口##
 
 ### 调度器初始化 ###
 
@@ -206,9 +233,9 @@ tick 		– 线程的时间片大小。时间片（tick）的单位是操作系�
  */
 #include <rtthread.h>
 
-#define THREAD_PRIORITY		25
-#define THREAD_STACK_SIZE	512
-#define THREAD_TIMESLICE		5
+#define THREAD_PRIORITY        25
+#define THREAD_STACK_SIZE    512
+#define THREAD_TIMESLICE        5
 
 /* 指向线程控制块的指针 */
 static rt_thread_t tid1 = RT_NULL;
@@ -216,41 +243,41 @@ static rt_thread_t tid2 = RT_NULL;
 /* 线程入口 */
 static void thread_entry(void* parameter)
 {
-	rt_uint32_t count = 0;
-	rt_uint32_t no = (rt_uint32_t) parameter; /* 获得正确的入口参数 */
+    rt_uint32_t count = 0;
+    rt_uint32_t no = (rt_uint32_t) parameter; /* 获得正确的入口参数 */
 
-	while (1)
-	{
-		/* 打印线程计数值输出 */
-		rt_kprintf("thread%d count: %d\n", no, count ++);
+    while (1)
+    {
+        /* 打印线程计数值输出 */
+        rt_kprintf("thread%d count: %d\n", no, count ++);
 
-		/* 休眠10个OS Tick */
-		rt_thread_delay(10);
-	}
+        /* 休眠10个OS Tick */
+        rt_thread_delay(10);
+    }
 }
 
 /* 用户应用入口 */
 int rt_application_init()
 {
-	/* 创建线程1 */
-	tid1 = rt_thread_create("t1",
-		thread_entry, (void*)1, /* 线程入口是thread_entry, 入口参数是1 */
-		THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
-	if (tid1 != RT_NULL)
-		rt_thread_startup(tid1);
-	else
-		return -1;
+    /* 创建线程1 */
+    tid1 = rt_thread_create("t1",
+        thread_entry, (void*)1, /* 线程入口是thread_entry, 入口参数是1 */
+        THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
+    if (tid1 != RT_NULL)
+        rt_thread_startup(tid1);
+    else
+        return -1;
 
-	/* 创建线程2 */
-	tid2 = rt_thread_create("t2",
-		thread_entry, (void*)2, /* 线程入口是thread_entry, 入口参数是2 */
-		THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
-	if (tid2 != RT_NULL)
-		rt_thread_startup(tid2);
-	else
-		return -1;
+    /* 创建线程2 */
+    tid2 = rt_thread_create("t2",
+        thread_entry, (void*)2, /* 线程入口是thread_entry, 入口参数是2 */
+        THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
+    if (tid2 != RT_NULL)
+        rt_thread_startup(tid2);
+    else
+        return -1;
 
-	return 0;
+    return 0;
 }
 ~~~
 
@@ -280,9 +307,9 @@ thread 		- 要删除的线程句柄；
  */
 #include <rtthread.h>
 
-#define THREAD_PRIORITY		25
-#define THREAD_STACK_SIZE	512
-#define THREAD_TIMESLICE		5
+#define THREAD_PRIORITY        25
+#define THREAD_STACK_SIZE    512
+#define THREAD_TIMESLICE        5
 
 /*
  * 线程删除(rt_thread_delete)函数仅适合于动态线程，为了在一个线程
@@ -294,65 +321,65 @@ static rt_thread_t tid1 = RT_NULL, tid2 = RT_NULL;
 /* 线程1的入口函数 */
 static void thread1_entry(void* parameter)
 {
-	rt_uint32_t count = 0;
+    rt_uint32_t count = 0;
 
-	while (1)
-	{
-		/* 线程1采用低优先级运行，一直打印计数值 */
-		rt_kprintf("thread count: %d\n", count ++);
-	}
+    while (1)
+    {
+        /* 线程1采用低优先级运行，一直打印计数值 */
+        rt_kprintf("thread count: %d\n", count ++);
+    }
 }
 
 /* 线程2的入口函数 */
 static void thread2_entry(void* parameter)
 {
-	/* 线程2拥有较高的优先级，以抢占线程1而获得执行 */
+    /* 线程2拥有较高的优先级，以抢占线程1而获得执行 */
 
-	/* 线程2启动后先睡眠10个OS Tick */
-	rt_thread_delay(10);
+    /* 线程2启动后先睡眠10个OS Tick */
+    rt_thread_delay(10);
 
-	/*
-	 * 线程2唤醒后直接删除线程1，删除线程1后，线程1自动脱离就绪线程
-	 * 队列
-	 */
-	rt_thread_delete(tid1);
-	tid1 = RT_NULL;
+    /*
+     * 线程2唤醒后直接删除线程1，删除线程1后，线程1自动脱离就绪线程
+     * 队列
+     */
+    rt_thread_delete(tid1);
+    tid1 = RT_NULL;
 
-	/*
-	 * 线程2继续休眠10个OS Tick然后退出，线程2休眠后应切换到idle线程
-	 * idle线程将执行真正的线程1控制块和线程栈的删除
-	 */
-	rt_thread_delay(10);
+    /*
+     * 线程2继续休眠10个OS Tick然后退出，线程2休眠后应切换到idle线程
+     * idle线程将执行真正的线程1控制块和线程栈的删除
+     */
+    rt_thread_delay(10);
 
-	/*
-	 * 线程2运行结束后也将自动被删除(线程控制块和线程栈依然在idle线
-	 * 程中释放)
-	 */
-	tid2 = RT_NULL;
+    /*
+     * 线程2运行结束后也将自动被删除(线程控制块和线程栈依然在idle线
+     * 程中释放)
+     */
+    tid2 = RT_NULL;
 }
 
 /* 应用入口 */
 int rt_application_init()
 {
-	/* 创建线程1 */
-	tid1 = rt_thread_create("t1", /* 线程1的名称是t1 */
-		thread1_entry, RT_NULL,   /* 入口是thread1_entry，参数是RT_NULL */
-		THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
-	if (tid1 != RT_NULL) /* 如果获得线程控制块，启动这个线程 */
-		rt_thread_startup(tid1);
-	else
-		return -1;
+    /* 创建线程1 */
+    tid1 = rt_thread_create("t1", /* 线程1的名称是t1 */
+        thread1_entry, RT_NULL,   /* 入口是thread1_entry，参数是RT_NULL */
+        THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
+    if (tid1 != RT_NULL) /* 如果获得线程控制块，启动这个线程 */
+        rt_thread_startup(tid1);
+    else
+        return -1;
 
-	/* 创建线程1 */
-	tid2 = rt_thread_create("t2", /* 线程1的名称是t2 */
-		thread2_entry, RT_NULL,   /* 入口是thread2_entry，参数是RT_NULL */
-		THREAD_STACK_SIZE, THREAD_PRIORITY - 1, THREAD_TIMESLICE);
-	if (tid2 != RT_NULL) /* 如果获得线程控制块，启动这个线程 */
-		rt_thread_startup(tid2);
-	else
-		return -1;
+    /* 创建线程1 */
+    tid2 = rt_thread_create("t2", /* 线程1的名称是t2 */
+        thread2_entry, RT_NULL,   /* 入口是thread2_entry，参数是RT_NULL */
+        THREAD_STACK_SIZE, THREAD_PRIORITY - 1, THREAD_TIMESLICE);
+    if (tid2 != RT_NULL) /* 如果获得线程控制块，启动这个线程 */
+        rt_thread_startup(tid2);
+    else
+        return -1;
 
-	return 0;
+    return 0;
 }
 ~~~
 
@@ -389,9 +416,9 @@ tick 		– 线程的时间片大小。时间片（tick）的单位是操作系�
  */
 #include <rtthread.h>
 
-#define THREAD_PRIORITY		25
-#define THREAD_STACK_SIZE	512
-#define THREAD_TIMESLICE		5
+#define THREAD_PRIORITY        25
+#define THREAD_STACK_SIZE    512
+#define THREAD_TIMESLICE        5
 
 /* 线程1控制块 */
 static struct rt_thread thread1;
@@ -407,45 +434,45 @@ static rt_uint8_t thread2_stack[THREAD_STACK_SIZE];
 /* 线程入口 */
 static void thread_entry(void* parameter)
 {
-	rt_uint32_t count = 0;
-	rt_uint32_t no = (rt_uint32_t) parameter; /* 获得正确的入口参数 */
+    rt_uint32_t count = 0;
+    rt_uint32_t no = (rt_uint32_t) parameter; /* 获得正确的入口参数 */
 
-	while (1)
-	{
-		/* 打印线程计数值输出 */
-		rt_kprintf("thread%d count: %d\n", no, count ++);
+    while (1)
+    {
+        /* 打印线程计数值输出 */
+        rt_kprintf("thread%d count: %d\n", no, count ++);
 
-		/* 休眠10个OS Tick */
-		rt_thread_delay(10);
-	}
+        /* 休眠10个OS Tick */
+        rt_thread_delay(10);
+    }
 }
 
 /* 用户应用入口 */
 int rt_application_init()
 {
-	rt_err_t result;
+    rt_err_t result;
 
-	/* 初始化线程1 */
-	result = rt_thread_init(&thread1, "t1", /* 线程名：t1 */
-		thread_entry, (void*)1, /* 线程的入口是thread_entry，入口参数是1 */
-		&thread1_stack[0], sizeof(thread1_stack), /* 线程栈是thread1_stack */
-		THREAD_PRIORITY, 10);
-	if (result == RT_EOK) /* 如果返回正确，启动线程1 */
-		rt_thread_startup(&thread1);
-	else
-		return -1;
+    /* 初始化线程1 */
+    result = rt_thread_init(&thread1, "t1", /* 线程名：t1 */
+        thread_entry, (void*)1, /* 线程的入口是thread_entry，入口参数是1 */
+        &thread1_stack[0], sizeof(thread1_stack), /* 线程栈是thread1_stack */
+        THREAD_PRIORITY, 10);
+    if (result == RT_EOK) /* 如果返回正确，启动线程1 */
+        rt_thread_startup(&thread1);
+    else
+        return -1;
 
-	/* 初始化线程2 */
-	result = rt_thread_init(&thread2, "t2", /* 线程名：t2 */
-		thread_entry, (void*)2, /* 线程的入口是thread_entry，入口参数是2 */
-		&thread2_stack[0], sizeof(thread2_stack), /* 线程栈是thread2_stack */
-		THREAD_PRIORITY + 1, 10);
-	if (result == RT_EOK) /* 如果返回正确，启动线程2 */
-		rt_thread_startup(&thread2);
-	else
-		return -1;
+    /* 初始化线程2 */
+    result = rt_thread_init(&thread2, "t2", /* 线程名：t2 */
+        thread_entry, (void*)2, /* 线程的入口是thread_entry，入口参数是2 */
+        &thread2_stack[0], sizeof(thread2_stack), /* 线程栈是thread2_stack */
+        THREAD_PRIORITY + 1, 10);
+    if (result == RT_EOK) /* 如果返回正确，启动线程2 */
+        rt_thread_startup(&thread2);
+    else
+        return -1;
 
-	return 0;
+    return 0;
 }
 ~~~
 
@@ -485,64 +512,109 @@ static rt_uint8_t thread2_stack[THREAD_STACK_SIZE];
 /* 线程1入口 */
 static void thread1_entry(void* parameter)
 {
-	rt_uint32_t count = 0;
+    rt_uint32_t count = 0;
 
-	while (1)
-	{
-		/* 线程1采用低优先级运行，一直打印计数值 */
-		rt_kprintf("thread count: %d\n", count ++);
-	}
+    while (1)
+    {
+        /* 线程1采用低优先级运行，一直打印计数值 */
+        rt_kprintf("thread count: %d\n", count ++);
+    }
 }
 
 /* 线程2入口 */
 static void thread2_entry(void* parameter)
 {
-	/* 线程2拥有较高的优先级，以抢占线程1而获得执行 */
+    /* 线程2拥有较高的优先级，以抢占线程1而获得执行 */
 
-	/* 线程2启动后先睡眠10个OS Tick */
-	rt_thread_delay(10);
+    /* 线程2启动后先睡眠10个OS Tick */
+    rt_thread_delay(10);
 
-	/*
-	 * 线程2唤醒后直接执行线程1脱离，线程1将从就绪线程队列中删除
-	 */
-	rt_thread_detach(&thread1);
+    /*
+     * 线程2唤醒后直接执行线程1脱离，线程1将从就绪线程队列中删除
+     */
+    rt_thread_detach(&thread1);
 
-	/*
-	 * 线程2继续休眠10个OS Tick然后退出
-	 */
-	rt_thread_delay(10);
+    /*
+     * 线程2继续休眠10个OS Tick然后退出
+     */
+    rt_thread_delay(10);
 
-	/*
-	 * 线程2运行结束后也将自动被从就绪队列中删除，并脱离线程队列
-	 */
+    /*
+     * 线程2运行结束后也将自动被从就绪队列中删除，并脱离线程队列
+     */
 }
 
-int rt_application_init(void)
+int thread_detach_init()
 {
-	rt_err_t result;
+    rt_err_t result;
 
-	/* 初始化线程1 */
-	result = rt_thread_init(&thread1, "t1", /* 线程名：t1 */
-		thread1_entry, 		/* 线程的入口是thread1_entr */
-		RT_NULL, 			/* 入口参数是RT_NULL*/
-		&thread1_stack[0], 	/* 线程栈是thread1_stack */
-		sizeof(thread1_stack),
-		THREAD_PRIORITY, 10);
-	if (result == RT_EOK) /* 如果返回正确，启动线程1 */
-		rt_thread_startup(&thread1);
+    /* 初始化线程1 */
+    result = rt_thread_init(&thread1, "t1", /* 线程名：t1 */
+        thread1_entry,         /* 线程的入口是thread1_entr */
+        RT_NULL,             /* 入口参数是RT_NULL*/
+        &thread1_stack[0],     /* 线程栈是thread1_stack */
+        sizeof(thread1_stack),
+        THREAD_PRIORITY, 10);
+    if (result == RT_EOK) /* 如果返回正确，启动线程1 */
+        rt_thread_startup(&thread1);
+    else
+        tc_stat(TC_STAT_END | TC_STAT_FAILED);
 
-	/* 初始化线程2 */
-	result = rt_thread_init(&thread2, "t2", /* 线程名：t2 */
-		thread2_entry, 		/* 线程的入口是thread2_entry */
-		RT_NULL, 			/* 入口参数是RT_NULL*/
-		&thread2_stack[0], 	/* 线程栈是thread2_stack */
-		sizeof(thread2_stack),
-		THREAD_PRIORITY - 1, 10);
-	if (result == RT_EOK) /* 如果返回正确，启动线程2 */
-		rt_thread_startup(&thread2);
+    /* 初始化线程2 */
+    result = rt_thread_init(&thread2, "t2", /* 线程名：t2 */
+        thread2_entry,         /* 线程的入口是thread2_entry */
+        RT_NULL,             /* 入口参数是RT_NULL*/
+        &thread2_stack[0],     /* 线程栈是thread2_stack */
+        sizeof(thread2_stack),
+        THREAD_PRIORITY - 1, 10);
+    if (result == RT_EOK) /* 如果返回正确，启动线程2 */
+        rt_thread_startup(&thread2);
+    else
+        tc_stat(TC_STAT_END | TC_STAT_FAILED);
 
-	return 0;
+    return 0;
 }
+
+#ifdef RT_USING_TC
+static void _tc_cleanup()
+{
+    /* 调度器上锁，上锁后，将不再切换到其他线程，仅响应中断 */
+    rt_enter_critical();
+
+    /* 执行线程脱离 */
+    if (thread1.stat != RT_THREAD_CLOSE)
+        rt_thread_detach(&thread1);
+    if (thread2.stat != RT_THREAD_CLOSE)
+        rt_thread_detach(&thread2);
+
+    /* 调度器解锁 */
+    rt_exit_critical();
+
+    /* 设置TestCase状态 */
+    tc_done(TC_STAT_PASSED);
+}
+
+int _tc_thread_detach()
+{
+    /* 设置TestCase清理回调函数 */
+    tc_cleanup(_tc_cleanup);
+    thread_detach_init();
+
+    /* 返回TestCase运行的最长时间 */
+    return 100;
+}
+/* 输出函数命令到finsh shell中 */
+FINSH_FUNCTION_EXPORT(_tc_thread_detach, a static thread example);
+#else
+/* 用户应用入口 */
+int rt_application_init()
+{
+    thread_detach_init();
+
+    return 0;
+}
+#endif
+
 ~~~
 
 ### 线程启动 ###
@@ -599,57 +671,98 @@ static rt_thread_t tid2 = RT_NULL;
 /* 线程1入口 */
 static void thread1_entry(void* parameter)
 {
-	rt_uint32_t count = 0;
+    rt_uint32_t count = 0;
 
-	while (1)
-	{
-		/* 打印线程1的输出 */
-		rt_kprintf("thread1: count = %d\n", count ++);
+    while (1)
+    {
+        /* 打印线程1的输出 */
+        rt_kprintf("thread1: count = %d\n", count ++);
 
-		/* 执行yield后应该切换到thread2执行 */
-		rt_thread_yield();
-	}
+        /* 执行yield后应该切换到thread2执行 */
+        rt_thread_yield();
+    }
 }
 
 /* 线程2入口 */
 static void thread2_entry(void* parameter)
 {
-	rt_uint32_t count = 0;
+    rt_uint32_t count = 0;
 
-	while (1)
-	{
-		/* 打印线程2的输出 */
-		rt_kprintf("thread2: count = %d\n", count ++);
+    while (1)
+    {
+        /* 打印线程2的输出 */
+        rt_kprintf("thread2: count = %d\n", count ++);
 
-		/* 执行yield后应该切换到thread1执行 */
-		rt_thread_yield();
-	}
+        /* 执行yield后应该切换到thread1执行 */
+        rt_thread_yield();
+    }
 }
 
-int rt_application_init(void)
+int thread_yield_init()
 {
-	/* 创建线程1 */
-	tid1 = rt_thread_create("thread",
-		thread1_entry, 	/* 线程入口是thread1_entry */
-		RT_NULL, 		/* 入口参数是RT_NULL */
-		THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
-	if (tid1 != RT_NULL)
-		rt_thread_startup(tid1);
-	else
-		return -1;
+    /* 创建线程1 */
+    tid1 = rt_thread_create("thread",
+        thread1_entry,     /* 线程入口是thread1_entry */
+        RT_NULL,         /* 入口参数是RT_NULL */
+        THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
+    if (tid1 != RT_NULL)
+        rt_thread_startup(tid1);
+    else
+        tc_stat(TC_STAT_END | TC_STAT_FAILED);
 
-	/* 创建线程2 */
-	tid2 = rt_thread_create("thread",
-		thread2_entry, 	/* 线程入口是thread2_entry */
-		RT_NULL, 		/* 入口参数是RT_NULL */
-		THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
-	if (tid2 != RT_NULL)
-		rt_thread_startup(tid2);
-	else
-		return -1;
+    /* 创建线程2 */
+    tid2 = rt_thread_create("thread",
+        thread2_entry,     /* 线程入口是thread2_entry */
+        RT_NULL,         /* 入口参数是RT_NULL */
+        THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
+    if (tid2 != RT_NULL)
+        rt_thread_startup(tid2);
+    else
+        tc_stat(TC_STAT_END | TC_STAT_FAILED);
 
-	return 0;
+    return 0;
 }
+
+#ifdef RT_USING_TC
+static void _tc_cleanup()
+{
+    /* 调度器上锁，上锁后，将不再切换到其他线程，仅响应中断 */
+    rt_enter_critical();
+
+    /* 删除线程 */
+    if (tid1 != RT_NULL && tid1->stat != RT_THREAD_CLOSE)
+        rt_thread_delete(tid1);
+    if (tid2 != RT_NULL && tid2->stat != RT_THREAD_CLOSE)
+        rt_thread_delete(tid2);
+
+    /* 调度器解锁 */
+    rt_exit_critical();
+
+    /* 设置TestCase状态 */
+    tc_done(TC_STAT_PASSED);
+}
+
+int _tc_thread_yield()
+{
+    /* 设置TestCase清理回调函数 */
+    tc_cleanup(_tc_cleanup);
+    thread_yield_init();
+
+    /* 返回TestCase运行的最长时间 */
+    return 100;
+}
+/* 输出函数命令到finsh shell中 */
+FINSH_FUNCTION_EXPORT(_tc_thread_yield, a thread yield example);
+#else
+/* 用户应用入口 */
+int rt_application_init()
+{
+    thread_yield_init();
+
+    return 0;
+}
+#endif
+
 ~~~
 
 注：	rt_thread_yield()函数和rt_schedule()函数比较相像，但在有相同优先级的其他就绪态线程存在时，系统的行为是完全不一样的。执行rt_thread_yield()函数后，当前线程被换出，相同优先级的下一个就绪线程将被执行。而执行rt_schedule()函数后，当前线程并不一定被换出，即使被换出，也不会被放到绪线程链表的尾部，而是在系统中选取就绪的优先级最高的线程执行（如果系统中没有比当前线程优先级更高的线程存在，那么执行完rt_schedule()函数后，系统将继续执行当前线程）。
@@ -702,54 +815,94 @@ static rt_thread_t tid2 = RT_NULL;
 /* 线程1入口 */
 static void thread1_entry(void* parameter)
 {
-	rt_uint32_t count = 0;
+    rt_uint32_t count = 0;
 
-	while (1)
-	{
-		/* 线程1采用低优先级运行，一直打印计数值 */
-		rt_kprintf("thread count: %d\n", count ++);
-	}
+    while (1)
+    {
+        /* 线程1采用低优先级运行，一直打印计数值 */
+        rt_kprintf("thread count: %d\n", count ++);
+    }
 }
 
 /* 线程2入口 */
 static void thread2_entry(void* parameter)
 {
-	/* 延时10个OS Tick */
-	rt_thread_delay(10);
+    /* 延时10个OS Tick */
+    rt_thread_delay(10);
 
-	/* 挂起线程1 */
-	rt_thread_suspend(tid1);
+    /* 挂起线程1 */
+    rt_thread_suspend(tid1);
 
-	/* 延时10个OS Tick */
-	rt_thread_delay(10);
+    /* 延时10个OS Tick */
+    rt_thread_delay(10);
 
-	/* 线程2自动退出 */
+    /* 线程2自动退出 */
 }
 
-int rt_application_init(void)
+int thread_suspend_init()
 {
-	/* 创建线程1 */
-	tid1 = rt_thread_create("t1",
-		thread1_entry,  /* 线程入口是thread1_entry */
-		RT_NULL, 		/* 入口参数是RT_NULL */
-		THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
-	if (tid1 != RT_NULL)
-		rt_thread_startup(tid1);
-	else
-		return -1;
+    /* 创建线程1 */
+    tid1 = rt_thread_create("t1",
+        thread1_entry,  /* 线程入口是thread1_entry */
+        RT_NULL,         /* 入口参数是RT_NULL */
+        THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
+    if (tid1 != RT_NULL)
+        rt_thread_startup(tid1);
+    else
+        tc_stat(TC_STAT_END | TC_STAT_FAILED);
 
-	/* 创建线程2 */
-	tid2 = rt_thread_create("t2",
-		thread2_entry, 	/* 线程入口是thread2_entry */
-		RT_NULL, 		/* 入口参数是RT_NULL */
-		THREAD_STACK_SIZE, THREAD_PRIORITY - 1, THREAD_TIMESLICE);
-	if (tid2 != RT_NULL)
-		rt_thread_startup(tid2);
-	else
-		return -1;
+    /* 创建线程2 */
+    tid2 = rt_thread_create("t2",
+        thread2_entry,     /* 线程入口是thread2_entry */
+        RT_NULL,         /* 入口参数是RT_NULL */
+        THREAD_STACK_SIZE, THREAD_PRIORITY - 1, THREAD_TIMESLICE);
+    if (tid2 != RT_NULL)
+        rt_thread_startup(tid2);
+    else
+        tc_stat(TC_STAT_END | TC_STAT_FAILED);
 
-	return 0;
+    return 0;
 }
+
+#ifdef RT_USING_TC
+static void _tc_cleanup()
+{
+    /* 调度器上锁，上锁后，将不再切换到其他线程，仅响应中断 */
+    rt_enter_critical();
+
+    /* 删除线程 */
+    if (tid1 != RT_NULL && tid1->stat != RT_THREAD_CLOSE)
+        rt_thread_delete(tid1);
+    if (tid2 != RT_NULL && tid2->stat != RT_THREAD_CLOSE)
+        rt_thread_delete(tid2);
+
+    /* 调度器解锁 */
+    rt_exit_critical();
+
+    /* 设置TestCase状态 */
+    tc_done(TC_STAT_PASSED);
+}
+
+int _tc_thread_suspend()
+{
+    /* 设置TestCase清理回调函数 */
+    tc_cleanup(_tc_cleanup);
+    thread_suspend_init();
+
+    /* 返回TestCase运行的最长时间 */
+    return 100;
+}
+/* 输出函数命令到finsh shell中 */
+FINSH_FUNCTION_EXPORT(_tc_thread_suspend, a thread suspend example);
+#else
+/* 用户应用入口 */
+int rt_application_init()
+{
+    thread_suspend_init();
+
+    return 0;
+}
+#endif
 ~~~
 
 ### 线程恢复 ###
@@ -782,58 +935,99 @@ static rt_thread_t tid2 = RT_NULL;
 /* 线程1入口 */
 static void thread1_entry(void* parameter)
 {
-	/* 低优先级线程1开始运行 */
-	rt_kprintf("thread1 startup%d\n");
+    /* 低优先级线程1开始运行 */
+    rt_kprintf("thread1 startup%d\n");
 
-	/* 挂起自身 */
-	rt_kprintf("suspend thread self\n");
-	rt_thread_suspend(tid1);
-	/* 主动执行线程调度 */
-	rt_schedule();
+    /* 挂起自身 */
+    rt_kprintf("suspend thread self\n");
+    rt_thread_suspend(tid1);
+    /* 主动执行线程调度 */
+    rt_schedule();
 
-	/* 当线程1被唤醒时 */
-	rt_kprintf("thread1 resumed\n");
+    /* 当线程1被唤醒时 */
+    rt_kprintf("thread1 resumed\n");
 }
 
 /* 线程2入口 */
 static void thread2_entry(void* parameter)
 {
-	/* 延时10个OS Tick */
-	rt_thread_delay(10);
+    /* 延时10个OS Tick */
+    rt_thread_delay(10);
 
-	/* 唤醒线程1 */
-	rt_thread_resume(tid1);
+    /* 唤醒线程1 */
+    rt_thread_resume(tid1);
 
-	/* 延时10个OS Tick */
-	rt_thread_delay(10);
+    /* 延时10个OS Tick */
+    rt_thread_delay(10);
 
-	/* 线程2自动退出 */
+    /* 线程2自动退出 */
 }
 
-int rt_application_init(void)
+int thread_resume_init()
 {
-	/* 创建线程1 */
-	tid1 = rt_thread_create("t1",
-		thread1_entry, 	/* 线程入口是thread1_entry */
-		RT_NULL, 		/* 入口参数是RT_NULL */
-		THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
-	if (tid1 != RT_NULL)
-		rt_thread_startup(tid1);
-	else
-		return -1;
+    /* 创建线程1 */
+    tid1 = rt_thread_create("t1",
+        thread1_entry,     /* 线程入口是thread1_entry */
+        RT_NULL,         /* 入口参数是RT_NULL */
+        THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
+    if (tid1 != RT_NULL)
+        rt_thread_startup(tid1);
+    else
+        tc_stat(TC_STAT_END | TC_STAT_FAILED);
 
-	/* 创建线程2 */
-	tid2 = rt_thread_create("t2",
-		thread2_entry, 	/* 线程入口是thread2_entry */
-		RT_NULL, 		/* 入口参数是RT_NULL */
-		THREAD_STACK_SIZE, THREAD_PRIORITY - 1, THREAD_TIMESLICE);
-	if (tid2 != RT_NULL)
-		rt_thread_startup(tid2);
-	else
-		return -1;
+    /* 创建线程2 */
+    tid2 = rt_thread_create("t2",
+        thread2_entry,     /* 线程入口是thread2_entry */
+        RT_NULL,         /* 入口参数是RT_NULL */
+        THREAD_STACK_SIZE, THREAD_PRIORITY - 1, 
+	THREAD_TIMESLICE);
+    if (tid2 != RT_NULL)
+        rt_thread_startup(tid2);
+    else
+        tc_stat(TC_STAT_END | TC_STAT_FAILED);
 
-	return 0;
+    return 0;
 }
+
+#ifdef RT_USING_TC
+static void _tc_cleanup()
+{
+    /* 调度器上锁，上锁后，将不再切换到其他线程，仅响应中断 */
+    rt_enter_critical();
+
+    /* 删除线程 */
+    if (tid1 != RT_NULL && tid1->stat != RT_THREAD_CLOSE)
+        rt_thread_delete(tid1);
+    if (tid2 != RT_NULL && tid2->stat != RT_THREAD_CLOSE)
+        rt_thread_delete(tid2);
+
+    /* 调度器解锁 */
+    rt_exit_critical();
+
+    /* 设置TestCase状态 */
+    tc_done(TC_STAT_PASSED);
+}
+
+int _tc_thread_resume()
+{
+    /* 设置TestCase清理回调函数 */
+    tc_cleanup(_tc_cleanup);
+    thread_resume_init();
+
+    /* 返回TestCase运行的最长时间 */
+    return 100;
+}
+/* 输出函数命令到finsh shell中 */
+FINSH_FUNCTION_EXPORT(_tc_thread_resume, a thread resume example);
+#else
+/* 用户应用入口 */
+int rt_application_init()
+{
+    thread_resume_init();
+
+    return 0;
+}
+#endif
 ~~~
 
 ### 线程控制 ###
