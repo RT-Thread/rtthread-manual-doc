@@ -1,8 +1,9 @@
 # 任务间同步及通信 #
 
-在多任务实时系统中，一项工作的完成往往可以通过多个任务协调的方式共同来完成，例如一个任务从传感器中接收数据并且将数据写到共享内存中，同时另一个任务周期性的从共享内存中读取数据并发送去显示（如图6-1）。
+在多任务实时系统中，一项工作的完成往往可以通过多个任务协调的方式共同来完成，例如一个任务从传感器中接收数据并且将数据写到共享内存中，同时另一个任务周期性的从共享内存中读取数据并发送去显示（如图 ***两个线程间的数据传递*** ）。
 
-图6-1 两个线程间的数据传递
+![两个线程间的数据传递](figures/Thread_Communication.png)
+
 如果对共享内存的访问不是排他性的，那么各个线程间可能同时访问它。这将引起数据一致性的问题，例如，在显示线程试图显示数据之前，传感器线程还未完成数据的写入，那么显示将包含不同时间采样的数据，造成显示数据的迷惑。
 将传感器数据写入到共享内存的代码是接收线程的关键代码段；将传感器数据从共享内存中读出的代码是显示线程的关键代码段；这两段代码都会访问共享内存。正常的操作序列应该是在一个线程对共享内存块操作完成后，才允许另一个线程去操作。对于操作/访问同一块区域，称之为临界区。任务的同步方式有很多种，其核心思想都是：在访问临界区的时候只允许一个(或一类)任务运行。
 
@@ -129,8 +130,10 @@ void rt_application_init()
 ## 信号量 ##
 
 信号量是一种轻型的用于解决线程间同步问题的内核对象，线程可以获取或释放它，从而达到同步或互斥的目的。信号量就像一把钥匙，把一段临界区给锁住，只允许有钥匙的线程进行访问：线程拿到了钥匙，才允许它进入临界区；而离开后把钥匙传递给排队在后面的等待线程，让后续线程依次进入临界区。
- 
-信号量工作示意图如图6-2所示，每个信号量对象都有一个信号量值和一个线程等待队列，信号量的值对应了信号量对象的实例数目、资源数目，假如信号量值为5，则表示共有5个信号量实例（资源）可以被使用，当信号量实例数目为零时，再申请该信号量的线程就会被挂起在该信号量的等待队列上，等待可用的信号量实例（资源）。
+
+![信号量工作示意图](figures/rt_semaphore.png)
+
+信号量工作示意图如图 ***信号量工作示意图*** 所示，每个信号量对象都有一个信号量值和一个线程等待队列，信号量的值对应了信号量对象的实例数目、资源数目，假如信号量值为5，则表示共有5个信号量实例（资源）可以被使用，当信号量实例数目为零时，再申请该信号量的线程就会被挂起在该信号量的等待队列上，等待可用的信号量实例（资源）。
 
 ### 信号量控制块 ###
 
@@ -233,23 +236,69 @@ flag 	– 信号量标志，取值可以使用如下类型：
 	}
 
 	int rt_application_init()
-	{
-		/* 创建一个信号量，初始值是0 */
-		sem = rt_sem_create("sem", 0, RT_IPC_FLAG_FIFO);
-		if (sem == RT_NULL)
-			return -1;
+    {
+        /* 创建一个信号量，初始值是0 */
+        sem = rt_sem_create("sem", 0, RT_IPC_FLAG_FIFO);
+        if (sem == RT_NULL)
+        {
+            tc_stat(TC_STAT_END | TC_STAT_FAILED);
+            return 0;
+        }
 
-		/* 创建线程 */
-		tid = rt_thread_create("thread",
-			thread_entry, RT_NULL, /* 线程入口是thread_entry, 参数RT_NULL */
-			THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
-		if (tid != RT_NULL)
-			rt_thread_startup(tid);
-		else
-			return -1;
+        /* 创建线程 */
+        tid = rt_thread_create("thread",
+            thread_entry, RT_NULL, /* 线程入口是thread_entry, 参数RT_NULL */
+            THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
+        if (tid != RT_NULL)
+            rt_thread_startup(tid);
+        else
+            tc_stat(TC_STAT_END | TC_STAT_FAILED);
 
-		return 0;
-	}
+        return 0;
+    }
+
+    #ifdef RT_USING_TC
+    static void _tc_cleanup()
+    {
+        /* 调度器上锁，上锁后，将不再切换到其他线程，仅响应中断 */
+        rt_enter_critical();
+
+        /* 删除线程 */
+        if (tid != RT_NULL && tid->stat != RT_THREAD_CLOSE)
+        {
+            rt_thread_delete(tid);
+
+            /* 删除信号量 */
+            rt_sem_delete(sem);
+        }
+
+        /* 调度器解锁 */
+        rt_exit_critical();
+
+        /* 设置TestCase状态 */
+        tc_done(TC_STAT_PASSED);
+    }
+
+    int _tc_semaphore_dynamic()
+    {
+        /* 设置TestCase清理回调函数 */
+        tc_cleanup(_tc_cleanup);
+        semaphore_dynamic_init();
+
+        /* 返回TestCase运行的最长时间 */
+        return 100;
+    }
+    /* 输出函数命令到finsh shell中 */
+    FINSH_FUNCTION_EXPORT(_tc_semaphore_dynamic, a dynamic semaphore example);
+    #else
+    /* 用户应用入口 */
+    int rt_application_init()
+    {
+        semaphore_dynamic_init();
+
+        return 0;
+    }
+    #endif
 ~~~
 
 #### 删除信号量 ####
@@ -350,31 +399,77 @@ RT_EOK
 		/* 脱离信号量对象 */
 		rt_sem_detach(&sem);
 	}
+	
+	int semaphore_static_init()
+    {
+        rt_err_t result;
 
-	int rt_application_init(void)
-	{
-		rt_err_t result;
+        /* 初始化信号量，初始值是0 */
+        result = rt_sem_init(&sem, "sem", 0, RT_IPC_FLAG_FIFO);
+        if (result != RT_EOK)
+        {
+            tc_stat(TC_STAT_END | TC_STAT_FAILED);
+            return 0;
+        }
 
-		/* 初始化信号量，初始值是0 */
-		result = rt_sem_init(&sem, "sem", 0, RT_IPC_FLAG_FIFO);
-		if (result != RT_EOK)
-		{
-			tc_stat(TC_STAT_END | TC_STAT_FAILED);
-			return 0;
-		}
+        /* 初始化线程1 */
+        result = rt_thread_init(&thread, "thread", /* 线程名：thread */
+            thread_entry, RT_NULL, /* 线程的入口是thread_entry，参数是RT_NULL*/
+            &thread_stack[0], sizeof(thread_stack), /* 线程栈thread_stack */
+            THREAD_PRIORITY, 10);
+        if (result == RT_EOK) /* 如果返回正确，启动线程1 */
+            rt_thread_startup(&thread);
+        else
+            tc_stat(TC_STAT_END | TC_STAT_FAILED);
 
-		/* 初始化线程1 */
-		result = rt_thread_init(&thread, "thread", /* 线程名：thread */
-			thread_entry, RT_NULL, /* 线程的入口是thread_entry，参数是RT_NULL*/
-			&thread_stack[0], sizeof(thread_stack), /* 线程栈thread_stack */
-			THREAD_PRIORITY, 10);
-		if (result == RT_EOK) /* 如果返回正确，启动线程1 */
-			rt_thread_startup(&thread);
-		else
-			tc_stat(TC_STAT_END | TC_STAT_FAILED);
+        return 0;
+    }
 
-		return 0;
-	}
+    #ifdef RT_USING_TC
+    static void _tc_cleanup()
+    {
+        /* 调度器上锁，上锁后，将不再切换到其他线程，仅响应中断 */
+        rt_enter_critical();
+
+        /* 执行线程脱离 */
+        if (thread.stat != RT_THREAD_CLOSE)
+        {
+            rt_thread_detach(&thread);
+
+            /* 执行信号量对象脱离 */
+            rt_sem_detach(&sem);
+        }
+
+        /* 调度器解锁 */
+        rt_exit_critical();
+
+        /* 设置TestCase状态 */
+        tc_done(TC_STAT_PASSED);
+    }
+
+    int _tc_semaphore_static()
+    {
+        /* 设置TestCase清理回调函数 */
+        tc_cleanup(_tc_cleanup);
+        semaphore_static_init();
+
+        /* 返回TestCase运行的最长时间 */
+        return 100;
+    }
+    /* 输出函数命令到finsh shell中 */
+    FINSH_FUNCTION_EXPORT(_tc_semaphore_static, a static semaphore example);
+    #else
+    /* 用户应用入口 */
+    int rt_application_init()
+    {
+        thread_static_init();
+
+        return 0;
+    }
+    #endif
+
+
+	
 ~~~
 
 #### 脱离信号量 ####
@@ -521,12 +616,12 @@ sem – 信号量对象的句柄；
 		rt_kprintf("the consumer[%d] exit!\n");
 	}
 
-	int rt_application_init(void)
+	int semaphore_producer_consumer_init()
 	{
 		/* 初始化3个信号量 */
-		rt_sem_init(&sem_lock , "lock",     1,      RT_IPC_FLAG_FIFO);
-		rt_sem_init(&sem_empty, "empty",    MAXSEM, RT_IPC_FLAG_FIFO);
-		rt_sem_init(&sem_full , "full",     0,      RT_IPC_FLAG_FIFO);
+		rt_sem_init(&sem_lock ,  "lock",      1, RT_IPC_FLAG_FIFO);
+		rt_sem_init(&sem_empty, "empty", MAXSEM, RT_IPC_FLAG_FIFO);
+		rt_sem_init(&sem_full ,  "full",      0, RT_IPC_FLAG_FIFO);
 
 		/* 创建线程1 */
 		producer_tid = rt_thread_create("producer",
@@ -536,20 +631,61 @@ sem – 信号量对象的句柄；
 		if (producer_tid != RT_NULL)
 			rt_thread_startup(producer_tid);
 		else
-			return -1;
+			tc_stat(TC_STAT_END | TC_STAT_FAILED);
 
 		/* 创建线程2 */
 		consumer_tid = rt_thread_create("consumer",
-			consumer_thread_entry, /* 线程入口是consumer_thread_entry */
+		   consumer_thread_entry,/* 线程入口是consumer_thread_entry */
 			RT_NULL, /* 入口参数是RT_NULL */
 			THREAD_STACK_SIZE, THREAD_PRIORITY + 1, THREAD_TIMESLICE);
 		if (consumer_tid != RT_NULL)
 			rt_thread_startup(consumer_tid);
 		else
-			return -1;
+			tc_stat(TC_STAT_END | TC_STAT_FAILED);
 
 		return 0;
 	}
+
+	#ifdef RT_USING_TC
+	static void _tc_cleanup()
+	{
+		/* 调度器上锁，上锁后，将不再切换到其他线程，仅响应中断 */
+		rt_enter_critical();
+
+		/* 删除线程 */
+		if (producer_tid != RT_NULL && producer_tid->stat != RT_THREAD_CLOSE)
+			rt_thread_delete(producer_tid);
+		if (consumer_tid != RT_NULL && consumer_tid->stat != RT_THREAD_CLOSE)
+			rt_thread_delete(consumer_tid);
+
+		/* 调度器解锁 */
+		rt_exit_critical();
+
+		/* 设置TestCase状态 */
+		tc_done(TC_STAT_PASSED);
+	}
+
+	int _tc_semaphore_producer_consumer()
+	{
+		/* 设置TestCase清理回调函数 */
+		tc_cleanup(_tc_cleanup);
+		semaphore_producer_consumer_init();
+
+		/* 返回TestCase运行的最长时间 */
+		return 100;
+	}
+	/* 输出函数命令到finsh shell中 */
+	FINSH_FUNCTION_EXPORT(_tc_semaphore_producer_consumer, producer and consumer example);
+	#else
+	/* 用户应用入口 */
+	int rt_application_init()
+	{
+		semaphore_producer_consumer_init();
+
+		return 0;
+	}
+	#endif
+
 ~~~
 
 在这个例子中，semaphore是作为一种锁的形式存在，当要访问临界资源：ring buffer时，通过持有semaphore 的形式阻止其他线程进入（如果其他线程也打算进入，将在这里被挂起）。
@@ -568,12 +704,16 @@ sem – 信号量对象的句柄；
 
 锁，单一的锁常应用于多个线程间对同一临界区的访问。信号量在作为锁来使用时，通常应将信号量资源实例初始化成1，代表系统默认有一个资源可用。当线程需要访问临界资源时，它需要先获得这个锁资源。当这个线程成功获得资源锁时，其他打算访问临界区的线程将被挂起在该信号量上，这是因为其他线程在试图获取这个锁时，这个锁已经被锁上（信号量值是0）。当获得信号量的线程处理完毕，退出临界区时，它将会释放信号量并把锁解开，而挂起在锁上的第一个等待线程将被唤醒从而获得临界区的访问权。
 
-因为信号量的值始终在1和0之间变动，所以这类锁也叫做二值信号量，如图6-3所示：
+因为信号量的值始终在1和0之间变动，所以这类锁也叫做二值信号量，如图 ***锁*** 所示：
+
+![锁](figures/rt_binary_semaphore.png)
  
 #### 中断与线程的同步 ####
 
 信号量也能够方便的应用于中断与线程间的同步，例如一个中断触发，中断服务例程需要通知线程进行相应的数据处理。这个时候可以设置信号量的初始值是0，线程在试图持有这个信号量时，由于信号量的初始值是0，线程直接在这个信号量上挂起直到信号量被释放。
-当中断触发时，先进行与硬件相关的动作，例如从硬件的I/O口中读取相应的数据，并确认中断以清除中断源，而后释放一个信号量来唤醒相应的线程以做后续的数据处理。例如finsh shell线程的处理方式，如图6-4所示：
+当中断触发时，先进行与硬件相关的动作，例如从硬件的I/O口中读取相应的数据，并确认中断以清除中断源，而后释放一个信号量来唤醒相应的线程以做后续的数据处理。例如finsh shell线程的处理方式，如图 ***finsh shell的中断、线程间同步*** 所示：
+
+![finsh shell的中断线程间同步](figures/sem_shell.png)
  
 semaphore先初始为0，而后shell线程试图取得信号量，因为信号量值是0，所以它会被挂起。当console设备有数据输入时，将产生中断而进入中断服务例程。在中断服务例程中，它会读取console设备的数据，并把读得的数据放入uart buffer中进行缓冲，而后释放信号量，释放信号量的操作将唤醒shell线程。在中断服务例程运行完毕后，如果系统中没有比shell线程优先级更高的就绪线程存在时，shell线程将持有信号量并运行，从uart buffer缓冲区中获取输入的数据。
 
@@ -586,7 +726,9 @@ semaphore先初始为0，而后shell线程试图取得信号量，因为信号�
 
 ## 互斥量 ##
 
-互斥量又叫相互排斥的信号量，是一种特殊的二值性信号量。它和信号量不同的是，它支持互斥量所有权、递归访问以及防止优先级翻转的特性。互斥量工作示意图如图6-5所示。
+互斥量又叫相互排斥的信号量，是一种特殊的二值性信号量。它和信号量不同的是，它支持互斥量所有权、递归访问以及防止优先级翻转的特性。互斥量工作示意图如图 ***互斥量的工作示意图*** 所示。
+
+![互斥量的工作示意图](figures/rt_mutex_semaphore.png)
  
 互斥量的状态只有两种，开锁或闭锁（两种状态值）。当有线程持有它时，互斥量处于闭锁状态，由这个线程获得它的所有权。相反，当这个线程释放它时，将对互斥量进行开锁，失去它的所有权。当一个线程持有互斥量时，其他线程将不能够对它进行开锁或持有它，持有该互斥量的线程也能够再次获得这个锁而不被挂起。这个特性与一般的二值信号量有很大的不同，在信号量中因为已经不存在实例，线程递归持有会发生主动挂起（最终形成死锁）。
 
@@ -630,8 +772,11 @@ rt_mutex对象从rt_ipc_object中派生，由IPC容器管理。
 参数：
 name 	– 互斥量的名称；
 flag 	– 互斥量标志，可以取如下类型的数值：
+
+~~~{.c}
 #define RT_IPC_FLAG_FIFO 0x00 /* IPC参数采用FIFO先进先出方式*/
 #define RT_IPC_FLAG_PRIO 0x01 /* IPC参数采用优先级方式*/
+~~~
 
 返回值：
 创建成功返回指向互斥量的互斥量句柄；否则返回RT_NULL。
@@ -681,7 +826,7 @@ RT_EOK
 参数：
 mutex 	– 互斥量对象的句柄；
 返回值：
-    RT_EOK
+RT_EOK
 
 #### 获取互斥量 ####
 
@@ -798,7 +943,7 @@ static void thread3_entry(void* parameter)
     }
 }
 
-int rt_application_init()
+int mutex_simple_init()
 {
     /* 创建互斥锁 */
     mutex = rt_mutex_create("mutex", RT_IPC_FLAG_FIFO);
@@ -840,6 +985,53 @@ int rt_application_init()
 
     return 0;
 }
+
+#ifdef RT_USING_TC
+static void _tc_cleanup()
+{
+    /* 调度器上锁，上锁后，将不再切换到其他线程，仅响应中断 */
+    rt_enter_critical();
+
+    /* 删除线程 */
+    if (tid1 != RT_NULL && tid1->stat != RT_THREAD_CLOSE)
+        rt_thread_delete(tid1);
+    if (tid2 != RT_NULL && tid2->stat != RT_THREAD_CLOSE)
+        rt_thread_delete(tid2);
+    if (tid3 != RT_NULL && tid3->stat != RT_THREAD_CLOSE)
+        rt_thread_delete(tid3);
+
+    if (mutex != RT_NULL)
+    {
+        rt_mutex_delete(mutex);
+    }
+
+    /* 调度器解锁 */
+    rt_exit_critical();
+
+    /* 设置TestCase状态 */
+    tc_done(TC_STAT_PASSED);
+}
+
+int _tc_mutex_simple()
+{
+    /* 设置TestCase清理回调函数 */
+    tc_cleanup(_tc_cleanup);
+    mutex_simple_init();
+
+    /* 返回TestCase运行的最长时间 */
+    return 100;
+}
+/* 输出函数命令到finsh shell中 */
+FINSH_FUNCTION_EXPORT(_tc_mutex_simple, sime mutex example);
+#else
+/* 用户应用入口 */
+int rt_application_init()
+{
+    mutex_simple_init();
+
+    return 0;
+}
+#endif
 ~~~
 
 ### 使用场合 ###
@@ -863,8 +1055,10 @@ RT-Thread定义的事件有以下特点：
 * 事件无排队性，即多次向线程发送同一事件(如果线程还未来得及读走)，其效果等同于只发送一次。
 
 在RT-Thread实现中，每个线程都拥有一个事件信息标记，它有三个属性，分别是RT_EVENT_FLAG_AND(逻辑与)，RT_EVENT_FLAG_OR(逻辑或）以及RT_EVENT_FLAG_CLEAR (清除标记）。当线程等待事件同步时，可以通过32个事件标志和这个事件信息标记来判断当前接收的事件是否满足同步条件。
+
+![事件工作示意图](figures/rt_event.png)
  
-如图6-6所示，线程1的事件标志中第2位和第29位被置位，如果事件信息标记位设为逻辑与，则表示线程#1只有在事件1和事件29都发生以后才会被触发唤醒，如果事件信息标记位设为逻辑或，则事件1或事件29中的任意一个发生都会触发唤醒线程#1。如果信息标记同时设置了清除标记位，则当线程#1唤醒后将主动把事件1和事件29清为零，否则事件标志将依然存在（即置1）。
+如图 ***事件工作示意图*** 所示，线程1的事件标志中第2位和第29位被置位，如果事件信息标记位设为逻辑与，则表示线程#1只有在事件1和事件29都发生以后才会被触发唤醒，如果事件信息标记位设为逻辑或，则事件1或事件29中的任意一个发生都会触发唤醒线程#1。如果信息标记同时设置了清除标记位，则当线程#1唤醒后将主动把事件1和事件29清为零，否则事件标志将依然存在（即置1）。
 
 ### 事件控制块 ###
 
@@ -893,8 +1087,11 @@ rt_event对象从rt_ipc_object 中派生，由IPC容器管理。
 参数：
 name 	– 事件的名称；
 flag 	– 事件的标志，可以使用如下的数值：
+
+~~~{.c}
 #define RT_IPC_FLAG_FIFO 0x00 /* IPC参数采用FIFO方式*/
 #define RT_IPC_FLAG_PRIO 0x01 /* IPC参数采用优先级方式*/
+~~~
 
 返回值：
     创建成功返回事件对象的句柄；创建失败返回RT_NULL。
@@ -1054,7 +1251,7 @@ static void thread3_entry(void *param)
     }
 }
 
-int rt_application_init()
+int event_simple_init()
 {
     /* 初始化事件对象 */
     rt_event_init(&event, "event", RT_IPC_FLAG_FIFO);
@@ -1091,20 +1288,68 @@ int rt_application_init()
 
     return 0;
 }
+
+#ifdef RT_USING_TC
+static void _tc_cleanup()
+{
+    /* 调度器上锁，上锁后，将不再切换到其他线程，仅响应中断 */
+    rt_enter_critical();
+
+    /* 删除线程 */
+    if (tid1 != RT_NULL && tid1->stat != RT_THREAD_CLOSE)
+        rt_thread_delete(tid1);
+    if (tid2 != RT_NULL && tid2->stat != RT_THREAD_CLOSE)
+        rt_thread_delete(tid2);
+    if (tid3 != RT_NULL && tid3->stat != RT_THREAD_CLOSE)
+        rt_thread_delete(tid3);
+
+    /* 执行事件对象脱离 */
+    rt_event_detach(&event);
+
+    /* 调度器解锁 */
+    rt_exit_critical();
+
+    /* 设置TestCase状态 */
+    tc_done(TC_STAT_PASSED);
+}
+
+int _tc_event_simple()
+{
+    /* 设置TestCase清理回调函数 */
+    tc_cleanup(_tc_cleanup);
+    event_simple_init();
+
+    /* 返回TestCase运行的最长时间 */
+    return 100;
+}
+/* 输出函数命令到finsh shell中 */
+FINSH_FUNCTION_EXPORT(_tc_event_simple, a simple event example);
+#else
+/* 用户应用入口 */
+int rt_application_init()
+{
+    event_simple_init();
+
+    return 0;
+}
+#endif
 ~~~
 
 ### 使用场合 ###
 
 事件可使用于多种场合，它能够在一定程度上替代信号量，用于线程间同步。一个线程或中断服务例程发送一个事件给事件对象，而后等待的线程被唤醒并对相应的事件进行处理。但是它与信号量不同的是，事件的发送操作在事件未清除前，是不可累计的，而信号量的释放动作是累计的。
 事件另外一个特性是，接收线程可等待多种事件，即多个事件对应一个线程或多个线程。同时按照线程等待的参数，可选择是“逻辑或”触发还是“逻辑与”触发。这个特性也是信号量等所不具备的，信号量只能识别单一的释放动作，而不能同时等待多种类型的释放。
-如图6-7所示：
- 
-图6-7 多事件接收
+如图 ***多事件接收*** 所示：
+
+![多事件接收](figures/rt_multi_event.png)
+
 各个事件类型可分别发送或一起发送给事件对象，而事件对象可以等待多个线程，它们仅对它们感兴趣的事件进行关注。当有它们感兴趣的事件发生时，线程就将被唤醒并进行后续的处理动作。
 
 ## 邮箱 ##
 
 邮箱服务是实时操作系统中一种典型的任务间通信方法，特点是开销比较低，效率较高。邮箱中的每一封邮件只能容纳固定的4字节内容（针对32位处理系统，指针的大小即为4个字节，所以一封邮件恰好能够容纳一个指针）。典型的邮箱也称作交换消息，如图6-8所示，线程或中断服务例程把一封4字节长度的邮件发送到邮箱中。而一个或多个线程可以从邮箱中接收这些邮件进行处理。
+
+![邮箱工作示意图](figures/rt_mailbox.png)
  
 RT-Thread操作系统采用的邮箱通信机制有点类似于传统意义上的管道，用于线程间通讯。非阻塞方式的邮件发送过程能够安全的应用于中断服务中，是线程，中断服务，定时器向线程发送消息的有效手段。通常来说，邮件收取过程可能是阻塞的，这取决于邮箱中是否有邮件，以及收取邮件时设置的超时时间。当邮箱中不存在邮件且超时时间不为0时，邮件收取过程将变成阻塞方式。所以在这类情况下，只能由线程进行邮件的收取。
 
@@ -1324,37 +1569,80 @@ static void thread2_entry(void* parameter)
 	}
 }
 
-int rt_application_init(void)
+int mbox_simple_init()
 {
-	/* 初始化一个mailbox */
-	rt_mb_init(&mb,
-		"mbt",             /* 名称是mbt */
-		&mb_pool[0],       /* 邮箱用到的内存池是mb_pool */
-		sizeof(mb_pool)/4, /* 大小是mb_pool/4，因为每封邮件的大小是4字节 */
-		RT_IPC_FLAG_FIFO); /* 采用FIFO方式进行线程等待 */
+    /* 初始化一个mailbox */
+    rt_mb_init(&mb,
+        "mbt",             /* 名称是mbt */
+        &mb_pool[0],       /* 邮箱用到的内存池是mb_pool */
+        sizeof(mb_pool)/4, /* 大小是mb_pool/4，因为每封邮件的大小是4字节 */
+        RT_IPC_FLAG_FIFO); /* 采用FIFO方式进行线程等待 */
 
-	/* 创建线程1 */
-	tid1 = rt_thread_create("t1",
-		thread1_entry,	/* 线程入口是thread1_entry */
-		RT_NULL, 		/* 入口参数是RT_NULL */
-		THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
-	if (tid1 != RT_NULL)
-		rt_thread_startup(tid1);
-	else
-		tc_stat(TC_STAT_END | TC_STAT_FAILED);
+    /* 创建线程1 */
+    tid1 = rt_thread_create("t1",
+        thread1_entry,    /* 线程入口是thread1_entry */
+        RT_NULL,         /* 入口参数是RT_NULL */
+        THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
+    if (tid1 != RT_NULL)
+        rt_thread_startup(tid1);
+    else
+        tc_stat(TC_STAT_END | TC_STAT_FAILED);
 
-	/* 创建线程2 */
-	tid2 = rt_thread_create("t2",
-		thread2_entry, 	/* 线程入口是thread2_entry */
-		RT_NULL, 		/* 入口参数是RT_NULL */
-		THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
-	if (tid2 != RT_NULL)
-		rt_thread_startup(tid2);
-	else
-		tc_stat(TC_STAT_END | TC_STAT_FAILED);
+    /* 创建线程2 */
+    tid2 = rt_thread_create("t2",
+        thread2_entry,     /* 线程入口是thread2_entry */
+        RT_NULL,         /* 入口参数是RT_NULL */
+        THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
+    if (tid2 != RT_NULL)
+        rt_thread_startup(tid2);
+    else
+        tc_stat(TC_STAT_END | TC_STAT_FAILED);
 
-	return 0;
+    return 0;
 }
+
+#ifdef RT_USING_TC
+static void _tc_cleanup()
+{
+    /* 调度器上锁，上锁后，将不再切换到其他线程，仅响应中断 */
+    rt_enter_critical();
+
+    /* 删除线程 */
+    if (tid1 != RT_NULL && tid1->stat != RT_THREAD_CLOSE)
+        rt_thread_delete(tid1);
+    if (tid2 != RT_NULL && tid2->stat != RT_THREAD_CLOSE)
+        rt_thread_delete(tid2);
+
+    /* 执行邮箱对象脱离 */
+    rt_mb_detach(&mb);
+
+    /* 调度器解锁 */
+    rt_exit_critical();
+
+    /* 设置TestCase状态 */
+    tc_done(TC_STAT_PASSED);
+}
+
+int _tc_mbox_simple()
+{
+    /* 设置TestCase清理回调函数 */
+    tc_cleanup(_tc_cleanup);
+    mbox_simple_init();
+
+    /* 返回TestCase运行的最长时间 */
+    return 100;
+}
+/* 输出函数命令到finsh shell中 */
+FINSH_FUNCTION_EXPORT(_tc_mbox_simple, a simple mailbox example);
+#else
+/* 用户应用入口 */
+int rt_application_init()
+{
+    mbox_simple_init();
+
+    return 0;
+}
+#endif
 ~~~
 
 ### 使用场合 ###
@@ -1397,9 +1685,9 @@ if (rt_mb_recv(mb, (rt_uint32_t*)&msg_ptr) == RT_EOK)
 
 消息队列是另一种常用的线程间通讯方式，它能够接收来自线程或中断服务例程中不固定长度的消息，并把消息缓存在自己的内存空间中。其他线程也能够从消息队列中读取相应的消息，而当消息队列是空的时候，可以挂起读取线程。当有新的消息到达时，挂起的线程将被唤醒以接收并处理消息。消息队列是一种异步的通信方式。
 
-如图6-9所示，通过消息队列服务，线程或中断服务例程可以将一条或多条消息放入消息队列中。同样，一个或多个线程可以从消息队列中获得消息。当有多个消息发送到消息队列时，通常应将先进入消息队列的消息先传给线程，也就是说，线程先得到的是最先进入消息队列的消息，即先进先出原则(FIFO)。
+如图 ***消息队列的工作示意图*** 所示，通过消息队列服务，线程或中断服务例程可以将一条或多条消息放入消息队列中。同样，一个或多个线程可以从消息队列中获得消息。当有多个消息发送到消息队列时，通常应将先进入消息队列的消息先传给线程，也就是说，线程先得到的是最先进入消息队列的消息，即先进先出原则(FIFO)。
  
-图6-9 消息队列的工作示意图
+![消息队列的工作示意图](figures/rt_message_queue)
 
 RT-Thread操作系统的消息队列对象由多个元素组成，当消息队列被创建时，它就被分配了消息队列控制块：消息队列名称、内存缓冲区、消息大小以及队列长度等。同时每个消息队列对象中包含着多个消息框，每个消息框可以存放一条消息；消息队列中的第一个和最后一个消息框被分别称为消息链表头和消息链表尾，对应于消息队列控制块中的msg_queue_head和msg_queue_tail；有些消息框可能是空的，它们通过msg_queue_free形成一个空闲消息框链表。所有消息队列中的消息框总数即是消息队列的长度，这个长度可在消息队列创建时指定。
 
@@ -1635,47 +1923,92 @@ static void thread3_entry(void* parameter)
 	}
 }
 
-int rt_application_init(void)
+int messageq_simple_init()
 {
-	/* 初始化消息队列 */
-	rt_mq_init(&mq, "mqt", 
-		&msg_pool[0], /* 内存池指向msg_pool */
-		128 - sizeof(void*), /* 每个消息的大小是 128 - void* */
-		sizeof(msg_pool),  /* 内存池的大小是msg_pool的大小 */
-		RT_IPC_FLAG_FIFO); /* 如果有多个线程等待，按照FIFO的方法分配消息 */
+    /* 初始化消息队列 */
+    rt_mq_init(&mq, "mqt", 
+        &msg_pool[0], /* 内存池指向msg_pool */
+        128 - sizeof(void*), /* 每个消息的大小是 128 - void* */
+        sizeof(msg_pool),  /* 内存池的大小是msg_pool的大小 */
+        RT_IPC_FLAG_FIFO); /* 如果有多个线程等待，按照FIFO的方法分配消息 */
 
-	/* 创建线程1 */
-	tid1 = rt_thread_create("t1",
-		thread1_entry, /* 线程入口是thread1_entry */
-		RT_NULL,       /* 入口参数是RT_NULL */
-		THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
-	if (tid1 != RT_NULL)
-		rt_thread_startup(tid1);
-	else
-		tc_stat(TC_STAT_END | TC_STAT_FAILED);
+    /* 创建线程1 */
+    tid1 = rt_thread_create("t1",
+        thread1_entry, /* 线程入口是thread1_entry */
+        RT_NULL,       /* 入口参数是RT_NULL */
+        THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
+    if (tid1 != RT_NULL)
+        rt_thread_startup(tid1);
+    else
+        tc_stat(TC_STAT_END | TC_STAT_FAILED);
 
-	/* 创建线程2 */
-	tid2 = rt_thread_create("t2",
-		thread2_entry, /* 线程入口是thread2_entry */
-		RT_NULL,       /* 入口参数是RT_NULL */
-		THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
-	if (tid2 != RT_NULL)
-		rt_thread_startup(tid2);
-	else
-		tc_stat(TC_STAT_END | TC_STAT_FAILED);
+    /* 创建线程2 */
+    tid2 = rt_thread_create("t2",
+        thread2_entry, /* 线程入口是thread2_entry */
+        RT_NULL,       /* 入口参数是RT_NULL */
+        THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
+    if (tid2 != RT_NULL)
+        rt_thread_startup(tid2);
+    else
+        tc_stat(TC_STAT_END | TC_STAT_FAILED);
 
-	/* 创建线程3 */
-	tid3 = rt_thread_create("t3",
-		thread3_entry, /* 线程入口是thread3_entry */
-		RT_NULL,       /* 入口参数是RT_NULL */
-		THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
-	if (tid3 != RT_NULL)
-		rt_thread_startup(tid3);
-	else
-		tc_stat(TC_STAT_END | TC_STAT_FAILED);
+    /* 创建线程3 */
+    tid3 = rt_thread_create("t3",
+        thread3_entry, /* 线程入口是thread3_entry */
+        RT_NULL,       /* 入口参数是RT_NULL */
+        THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
+    if (tid3 != RT_NULL)
+        rt_thread_startup(tid3);
+    else
+        tc_stat(TC_STAT_END | TC_STAT_FAILED);
 
-	return 0;
+    return 0;
 }
+
+#ifdef RT_USING_TC
+static void _tc_cleanup()
+{
+    /* 调度器上锁，上锁后，将不再切换到其他线程，仅响应中断 */
+    rt_enter_critical();
+
+    /* 删除线程 */
+    if (tid1 != RT_NULL && tid1->stat != RT_THREAD_CLOSE)
+        rt_thread_delete(tid1);
+    if (tid2 != RT_NULL && tid2->stat != RT_THREAD_CLOSE)
+        rt_thread_delete(tid2);
+    if (tid3 != RT_NULL && tid3->stat != RT_THREAD_CLOSE)
+        rt_thread_delete(tid3);
+
+    /* 执行消息队列对象脱离 */
+    rt_mq_detach(&mq);
+
+    /* 调度器解锁 */
+    rt_exit_critical();
+
+    /* 设置TestCase状态 */
+    tc_done(TC_STAT_PASSED);
+}
+
+int _tc_messageq_simple()
+{
+    /* 设置TestCase清理回调函数 */
+    tc_cleanup(_tc_cleanup);
+    messageq_simple_init();
+
+    /* 返回TestCase运行的最长时间 */
+    return 100;
+}
+/* 输出函数命令到finsh shell中 */
+FINSH_FUNCTION_EXPORT(_tc_messageq_simple, a message queue example);
+#else
+/* 用户应用入口 */
+int rt_application_init()
+{
+    messageq_simple_init();
+
+    return 0;
+}
+#endif
 ~~~
 
 ### 使用场合 ###
@@ -1730,9 +2063,10 @@ int rt_application_init(void)
 #### 同步消息 ####
 
 在一般的系统设计中会经常遇到要发送同步消息的问题，这个时候就可以根据当时的状态选择相应的实现：两个线程间可以采用一个[消息队列+ 信号量]或邮箱的形式实现。
-发送线程通过消息发送的形式发送相应的消息给消息队列，发送完毕后希望获得接收线程的收到确认，工作示意图如图6-10所示：
- 
-图6-10 同步消息发送
+发送线程通过消息发送的形式发送相应的消息给消息队列，发送完毕后希望获得接收线程的收到确认，工作示意图如图 ***同步消息发送*** 所示：
+
+![同步消息发送](figures/rt_synchronous_message.png)
+
 根据消息确认的不同，可以把消息结构体定义成：
 
 ~~~{.c}
