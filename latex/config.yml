@@ -19,7 +19,7 @@ zh:
   title: RT-Thread Programming Manual
   langrule: "\\XeTeXlinebreakskip=0em plus 0.1em minus 0.01em\n\\XeTeXlinebreakpenalty=0"
   font: WenQuanYi Micro Hei
-  bold: Microsoft YaHei
+  bold: WenQuanYi Micro Hei
   mono: WenQuanYi Zen Hei Mono
   # AR is 文鼎字体，中文缺省 http://www.arphic.com/cn/home.html
   # http://www.debian.org/international/Chinese/software
