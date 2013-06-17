@@ -34,9 +34,9 @@ RT-Thread内核中也允许创建相同优先级的线程。相同优先级的�
 
 线程控制块是操作系统用于控制线程的一个数据结构，它会存放线程的一些信息，例如优先级，线程名称等，也包含线程与线程之间连接用的链表结构，线程等待事件集合等。
 
-在RT-Thread实时操作系统中，线程控制块由结构体struct rt_thread表示。另外一种C表达方式rt_thread_t，表示的是线程的句柄，在C语言中的实现是指向线程控制块的指针，详细定义情况见代码2-1:
+在RT-Thread实时操作系统中，线程控制块由结构体struct rt_thread表示。另外一种C表达方式rt_thread_t，表示的是线程的句柄，在C语言中的实现是指向线程控制块的指针，详细定义情况见以下代码:
 
-代码2-1：线程控制块结构
+线程控制块结构如下所示
 
 ~~~{.c}
 /* rt_thread_t线程句柄，指向线程控制块的指针 */
@@ -48,50 +48,50 @@ typedef struct rt_thread* rt_thread_t;
 struct rt_thread
 {
     /* RT-Thread根对象定义 */
-    char  		name[RT_NAME_MAX];  	/* 对象的名称       			*/
-    rt_uint8_t		type;                	/* 对象的类型       			*/
-rt_uint8_t		flags;               	/* 对象的参数       			*/
+    char name[RT_NAME_MAX];  	/* 对象的名称*/
+    rt_uint8_t type;            /* 对象的类型*/
+    rt_uint8_t flags;           /* 对象的参数*/
 #ifdef RT_USING_MODULE
-	void     		*module_id;            /* 线程所在的模块ID         */
+    void *module_id;            /* 线程所在的模块ID*/
 #endif
-    rt_list_t		list;                 	/* 对象链表         			*/
+    rt_list_t list;             /* 对象链表*/
 
-    rt_list_t		tlist;               	/* 线程链表        	 		*/
+    rt_list_t tlist;            /* 线程链表*/
 
     /* 栈指针及入口 */
-    void*    		sp;                    	/* 线程的栈指针     			*/
-    void*    		entry;                	/* 线程入口         			*/
-    void*    		parameter;           	/* 线程入口参数     			*/
-    void*    		stack_addr;          	/* 线程栈地址       			*/
-    rt_uint16_t 	stack_size;         	/* 线程栈大小       			*/
+    void* sp;                   /* 线程的栈指针*/
+    void* entry;                /* 线程入口*/
+    void* parameter;           	/* 线程入口参数*/
+    void* stack_addr;          	/* 线程栈地址*/
+    rt_uint16_t stack_size; /* 线程栈大小*/
 
-    rt_err_t 		error;                	/* 线程错误号      	 		*/
+    rt_err_t error;      /* 线程错误号*/
 
-    rt_uint8_t  	stat;                 	/* 线程状态         			*/
+    rt_uint8_t stat;       /* 线程状态 */
 
     /* 优先级相关域 */
-    rt_uint8_t		current_priority;   	/* 当前优先级       			*/
-    rt_uint8_t		init_priority;       	/* 初始线程优先级   			*/
+    rt_uint8_t current_priority;   	/* 当前优先级*/
+    rt_uint8_t init_priority;       	/* 初始线程优先级*/
 #if RT_THREAD_PRIORITY_MAX > 32
-    rt_uint8_t		number;
-    rt_uint8_t		high_mask;
+    rt_uint8_t number;
+    rt_uint8_t high_mask;
 #endif
-    rt_uint32_t 	number_mask;
+    rt_uint32_t number_mask;
 
 #if defined(RT_USING_EVENT)
     /* 事件相关域 */
-    rt_uint32_t 	event_set;
-    rt_uint8_t  	event_info;
+    rt_uint32_t event_set;
+    rt_uint8_t event_info;
 #endif
 
-    rt_ubase_t  	init_tick;        	/* 线程初始tick     		*/
-    rt_ubase_t  	remaining_tick;     /* 线程当次运行剩余tick 	*/
+    rt_ubase_t init_tick;        	/* 线程初始tick*/
+    rt_ubase_t remaining_tick;     /* 线程当次运行剩余tick */
 
-	struct rt_timer thread_timer;  		/* 线程定时器       		*/
+    struct rt_timer thread_timer;  /* 线程定时器*/
 
-	/* 当线程退出时，需要执行的清理函数 */
-	void 			(*cleanup)(struct rt_thread *tid);
-    rt_uint32_t 	user_data;          /* 用户数据         		*/
+    /* 当线程退出时，需要执行的清理函数 */
+    void (*cleanup)(struct rt_thread *tid);
+    rt_uint32_t user_data;          /* 用户数据*/
 };
 ~~~
 
@@ -225,7 +225,7 @@ RT-Thread实时操作系统为空闲线程提供了钩子函数（钩子函数�
 无
 
 
-注：	在中断服务例程中也可以调用这个函数，如果满足任务切换的条件，它会记录下中断前的线程及需要切换到的更高优先级线程，在中断服务例程处理完毕后执行真正的线程上下文切换（即中断中的线程上下文切换），最终切换到目标线程去。
+* 注：在中断服务例程中也可以调用这个函数，如果满足任务切换的条件，它会记录下中断前的线程及需要切换到的更高优先级线程，在中断服务例程处理完毕后执行真正的线程上下文切换（即中断中的线程上下文切换），最终切换到目标线程去。
 
 ### 设置调度器钩子 ###
 
@@ -234,6 +234,25 @@ RT-Thread实时操作系统为空闲线程提供了钩子函数（钩子函数�
     void rt_scheduler_sethook(void (*hook)(struct rt_thread* from, struct rt_thread* to));
 
 这个函数用于把用户提供的hook函数设置到系统调度器钩子中，当系统进行上下文切换时，这个hook函数将会被系统调用。
+
+**线程安全**
+
+安全
+
+
+**中断例程**
+
+可调用
+
+**函数参数**
+
+
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+          hook  表示系统所要切入的线程的控制块指针；
+-----------------------------------------------------------------------
+
 
 这个hook函数的声明如下：
 
@@ -265,7 +284,7 @@ RT-Thread实时操作系统为空闲线程提供了钩子函数（钩子函数�
 
 无
 
-注：	请仔细编写你的钩子函数，如有不甚将很可能导致整个系统运行不正常（在这个钩子函数中，基本上不允许调用系统API，更不应该导致当前运行的上下文挂起）。
+* 注：请仔细编写你的钩子函数，如有不甚将很可能导致整个系统运行不正常（在这个钩子函数中，基本上不允许调用系统API，更不应该导致当前运行的上下文挂起）。
 
 ## 线程相关接口 ##
 
@@ -274,9 +293,9 @@ RT-Thread实时操作系统为空闲线程提供了钩子函数（钩子函数�
 一个线程要成为可执行的对象就必须由操作系统的内核来为它创建（初始化）一个线程句柄。可以通过如下的函数接口来创建一个线程。
 
     rt_thread_t rt_thread_create(const char* name,
-      void (*entry)(void* parameter), void* parameter,
-      rt_uint32_t stack_size,
-      rt_uint8_t priority, rt_uint32_t tick);
+                                 void (*entry)(void* parameter), void* parameter,
+                                 rt_uint32_t stack_size,
+                                 rt_uint8_t priority, rt_uint32_t tick);
 
 调用这个函数时，系统会从动态堆内存中分配一个线程句柄（即TCB，线程控制块）以及按照参数中指定的栈大小从动态堆内存中分配相应的空间。分配出来的栈空间是按照rtconfig.h中配置的RT_ALIGN_SIZE方式对齐。
 
@@ -316,7 +335,7 @@ RT-Thread实时操作系统为空闲线程提供了钩子函数（钩子函数�
 
 创建成功返回线程句柄；否则返回RT_NULL。
 
-注：	确定一个线程的栈空间大小，是一件令人头痛的事情。在RT-Thread中，可以先指定一个稍微大的栈空间，例如指定大小为1024或2048，然后在FinSH shell中通过list_thread()命令查看线程运行的过程中线程所使用的栈的大小，通过此命令，能够看到从线程启动运行时，到当前时刻点，线程使用的最大栈深度，从而可以确定栈空间的大小并加以修改)。
+* 注：确定一个线程的栈空间大小，是一件令人头痛的事情。在RT-Thread中，可以先指定一个稍微大的栈空间，例如指定大小为1024或2048，然后在FinSH shell中通过list_thread()命令查看线程运行的过程中线程所使用的栈的大小，通过此命令，能够看到从线程启动运行时，到当前时刻点，线程使用的最大栈深度，从而可以确定栈空间的大小并加以修改)。
 
 下面举例创建一个线程加以说明：
 
@@ -411,7 +430,7 @@ int rt_application_init()
 
 返回RT_EOK
 
-注：	在线程运行完成，自动结束的情况下，系统会自动删除线程，不需要再调用rt_thread_delete()函数接口。这个接口不应由线程本身来调用以删除线程自身，一般只能由其他线程调用或在定时器超时函数中调用。
+* 注：在线程运行完成，自动结束的情况下，系统会自动删除线程，不需要再调用rt_thread_delete()函数接口。这个接口不应由线程本身来调用以删除线程自身，一般只能由其他线程调用或在定时器超时函数中调用。
 
 这个函数仅在使能了系统动态堆时才有效（即RT_USING_HEAP宏定义已经定义了）。
 
@@ -650,7 +669,7 @@ int rt_application_init()
 
 返回RT_EOK
 
-注：	这个函数接口是和rt_thread_delete()函数相对应的， rt_thread_delete()函数操作的对象是rt_thread_create()创建的句柄，而rt_thread_detach()函数操作的对象是使用rt_thread_init()函数初始化的线程控制块。同样，线程本身不应调用这个接口脱离线程本身。
+* 注：这个函数接口是和rt_thread_delete()函数相对应的， rt_thread_delete()函数操作的对象是rt_thread_create()创建的句柄，而rt_thread_detach()函数操作的对象是使用rt_thread_init()函数初始化的线程控制块。同样，线程本身不应调用这个接口脱离线程本身。
 
 线程脱离的例子如下所示：
 
@@ -845,7 +864,7 @@ int rt_application_init()
 
 返回当前运行的线程句柄。如果调度器还未启动，将返回RT_NULL。
 
-注：	请不要在中断服务程序中调用此函数，因为它并不能准确获得当前的执行线程。当调度器未启动时，这个接口返回RT_NULL 。
+* 注：请不要在中断服务程序中调用此函数，因为它并不能准确获得当前的执行线程。当调度器未启动时，这个接口返回RT_NULL 。
 
 ### 线程让出处理器 ###
 
@@ -872,7 +891,7 @@ int rt_application_init()
 
 **函数返回**
 
-返回RT_EOK
+无
 
 线程让出处理器代码的例子如下示：
 
@@ -985,7 +1004,7 @@ int rt_application_init()
 
 ~~~
 
-注：	rt_thread_yield()函数和rt_schedule()函数比较相像，但在有相同优先级的其他就绪态线程存在时，系统的行为是完全不一样的。执行rt_thread_yield()函数后，当前线程被换出，相同优先级的下一个就绪线程将被执行。而执行rt_schedule()函数后，当前线程并不一定被换出，即使被换出，也不会被放到绪线程链表的尾部，而是在系统中选取就绪的优先级最高的线程执行（如果系统中没有比当前线程优先级更高的线程存在，那么执行完rt_schedule()函数后，系统将继续执行当前线程）。
+* 注：rt_thread_yield()函数和rt_schedule()函数比较相像，但在有相同优先级的其他就绪态线程存在时，系统的行为是完全不一样的。执行rt_thread_yield()函数后，当前线程被换出，相同优先级的下一个就绪线程将被执行。而执行rt_schedule()函数后，当前线程并不一定被换出，即使被换出，也不会被放到绪线程链表的尾部，而是在系统中选取就绪的优先级最高的线程执行（如果系统中没有比当前线程优先级更高的线程存在，那么执行完rt_schedule()函数后，系统将继续执行当前线程）。
 
 ### 线程睡眠 ###
 
@@ -1055,7 +1074,7 @@ int rt_application_init()
 
 如果这个线程的状态并不是就绪状态，将返回-RT_ERROR，否则返回RT_EOK
 
-注：	通常不应该使用这个函数来挂起线程本身，如果确实需要采用rt_thread_suspend函数挂起当前任务，需要在调用rt_thread_suspend()函数后立刻调用rt_schedule()函数进行手动的线程上下文切换。
+* 注：通常不应该使用这个函数来挂起线程本身，如果确实需要采用rt_thread_suspend函数挂起当前任务，需要在调用rt_thread_suspend()函数后立刻调用rt_schedule()函数进行手动的线程上下文切换。
 
 线程挂起的例子如下：
 
