@@ -17,33 +17,43 @@
 * 关闭中断
 
 
-    rt_base_t rt_hw_interrupt_disable(void);
+	rt_base_t rt_hw_interrupt_disable(void);
+
 
 这个函数用于关闭中断并返回关闭中断前的中断状态。
 
-参数：
-
-+ 无
-
-返回值：
-
-+ 返回调用这个函数前的中断状态。
-
-* 恢复中断
-
-  void rt_hw_interrupt_enable(rt_base_t level);
-
-这个函数“使能”中断，它采用恢复调用rt_hw_interrupt_disable()函数前的中断状态，进行“使能”中断状态，如果调用rt_hw_interrupt_disable() 函数前是关中断状态，那么调用此函数后依然是关中断状态。level参数是上一次调用rt_hw_interrupt_ disable()时的返回值。
-
-参数：
-
-+ level 	- 前一次rt_hw_interrupt_disable返回的中断状态。
-
-返回值：
+**函数参数**
 
 无
 
-使用开关中断进行线程间同步的例子代码如例6-1代码所示：
+**函数返回**
+
+返回调用这个函数前的中断状态。
+
+* 恢复中断
+
+
+    void rt_hw_interrupt_enable(rt_base_t level);
+
+
+这个函数“使能”中断，它采用恢复调用rt_hw_interrupt_disable()函数前的中断状态，进行“使能”中断状态，如果调用rt_hw_interrupt_disable() 函数前是关中断状态，那么调用此函数后依然是关中断状态。level参数是上一次调用rt_hw_interrupt_ disable()时的返回值。
+
+**函数参数**
+
+
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+         level  前一次rt_hw_interrupt_disable返回的中断状态。
+-----------------------------------------------------------------------
+
+
+**函数返回**
+
+无
+
+
+使用开关中断进行线程间同步的例子代码如下例代码所示：
 
 ~~~{.c}
 /* 代码清单：关闭中断进行全局变量的访问 */
@@ -85,9 +95,12 @@ void rt_application_init()
         512, 20, 5);
     if (thread != RT_NULL) rt_thread_startup(thread);
 }
+
+
 ~~~
 
-警告: 	由于关闭中断会导致整个系统不能响应外部中断，所以在使用关闭中断做为互斥访问临界区的手段时，首先必须需要保证关闭中断的时间非常短，例如数条机器指令。
+* 警告: 
+由于关闭中断会导致整个系统不能响应外部中断，所以在使用关闭中断做为互斥访问临界区的手段时，首先必须需要保证关闭中断的时间非常短，例如数条机器指令。
 
 ### 使用场合 ###
 
@@ -119,23 +132,32 @@ void rt_application_init()
 
 同中断锁一样把调度器锁住也能让当前运行的任务不被换出，直到调度器解锁。但和中断锁有一点不相同的是，对调度器上锁，系统依然能响应外部中断，中断服务例程依然能进行相应的响应。所以在使用调度器上锁的方式进行任务同步时，需要考虑好任务访问的临界资源是否会被中断服务例程所修改，如果可能会被修改，那么将不适合采用此种方式进行同步。RT-Thread提供的调度锁操作API为：
 
-	void rt_enter_critical(void); /* 进入临界区*/
+    void rt_enter_critical(void); /* 进入临界区*/
 
-参数： 无
+**函数参数**
 
-返回值：无
+无
+
+**函数返回**
+
+无
 
 调用这个函数后，调度器将被上锁。在系统锁住调度器的期间，系统依然响应中断，如果中断唤醒了的更高优先级线程，调度器并不会立刻执行它，直到调用解锁调度器函数才尝试进行下一次调度。
 
 	void rt_exit_critical(void); /* 退出临界区*/
 
-参数：无
+**函数参数**
 
-返回值：无
+无
+
+**函数返回**
+
+无
 
 当系统退出临界区的时候，系统会计算当前是否有更高优先级的线程就绪，如果有比当前线程更高优先级的线程就绪，将切换到这个高优先级线程中执行；如果无更高优先级线程就绪，将继续执行当前任务。
 
-注：	rt_enter_critical/rt_exit_critical 可以多次嵌套调用，但每调用一次rt_enter_critical就必须相对应地调用一次rt_exit_critical退出操作，嵌套的最大深度是65535。
+* 注：
+rt_enter_critical/rt_exit_critical可以多次嵌套调用，但每调用一次rt_enter_critical就必须相对应地调用一次rt_exit_critical退出操作，嵌套的最大深度是65535。
 
 ### 使用场合 ###
 
@@ -152,13 +174,15 @@ void rt_application_init()
 ### 信号量控制块 ###
 
 ~~~{.c}
-	struct rt_semaphore
-	{
-		struct rt_ipc_object parent; /* 继承自ipc_object类 */
-		rt_uint16_t value;			 /* 信号量的值             */
-	};
-	/* rt_sem_t是指向semaphore结构体的指针类型 */
-	typedef struct rt_semaphore* rt_sem_t;
+struct rt_semaphore
+{
+   struct rt_ipc_object parent;/*继承自ipc_object类*/
+   rt_uint16_t value;   /* 信号量的值  */
+};
+/* rt_sem_t是指向semaphore结构体的指针类型 */
+typedef struct rt_semaphore* rt_sem_t;
+
+
 ~~~
 
 rt_semaphore对象从rt_ipc_object中派生，由IPC容器所管理。信号量的最大值是65535。
@@ -168,17 +192,22 @@ rt_semaphore对象从rt_ipc_object中派生，由IPC容器所管理。信号量�
 创建信号量
 当创建一个信号量时，内核首先创建一个信号量控制块，然后对该控制块进行基本的初始化工作，创建信号量使用下面的函数接口：
 
-	rt_sem_t rt_sem_create (const char* name, rt_uint32_t value, rt_uint8_t flag);
+    rt_sem_t rt_sem_create (const char* name, rt_uint32_t value, rt_uint8_t flag);
 
 当调用这个函数时，系统将先分配一个semaphore对象，并初始化这个对象，然后初始化IPC对象以及与semaphore相关的部分。在创建信号量指定的参数中，信号量标志参数决定了当信号量不可用时，多个线程等待的排队方式。当选择FIFO方式时，那么等待线程队列将按照先进先出的方式排队，先进入的线程将先获得等待的信号量；当选择PRIO（优先级等待）方式时，等待线程队列将按照优先级进行排队，优先级高的等待线程将先获得等待的信号量。
 
-参数：
+**函数参数**
 
-+ name 	– 信号量名称；
 
-+ value 	– 信号量初始值；
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+          name  信号量名称；
 
-+ flag 	– 信号量标志，取值可以使用如下类型：
+         value  信号量初始值；
+
+          flag  信号量标志，取值可以使用如下类型：
+-----------------------------------------------------------------------
 
 
 ~~~{.c}
@@ -186,78 +215,81 @@ rt_semaphore对象从rt_ipc_object中派生，由IPC容器所管理。信号量�
 #define RT_IPC_FLAG_PRIO 0x01 /* IPC参数采用优先级方式*/
 ~~~
 
-返回值：
+**函数返回**
 
-+ 创建成功返回创建的信号量控制块指针；否则返回RT_NULL。
+创建成功返回创建的信号量控制块指针；否则返回RT_NULL。
 
-创建信号量的例程如例6-2所示：
+
+
+
+创建信号量的例程如下例所示：
 
 ~~~{.c}
-     /*
-	 * 程序清单：动态信号量
-	 *
-	 * 这个例子中将创建一个动态信号量(初始值为0)及一个动态线程，在这个动态线程中
-	 * 将试图采用超时方式去持有信号量，应该超时返回。然后这个线程释放一次信号量，
-	 * 并在后面继续采用永久等待方式去持有信号量， 成功获得信号量后返回。
-	 */
-	#include <rtthread.h>
-	#include "tc_comm.h"
+/*
+* 程序清单：动态信号量
+*
+* 这个例子中将创建一个动态信号量(初始值为0)及一个动态线程，在这个动态线程中
+* 将试图采用超时方式去持有信号量，应该超时返回。然后这个线程释放一次信号量，
+* 并在后面继续采用永久等待方式去持有信号量， 成功获得信号量后返回。
+*/
+#include <rtthread.h>
+#include "tc_comm.h"
 
-	/* 指向线程控制块的指针 */
-	static rt_thread_t tid = RT_NULL;
-	/* 指向信号量的指针 */
-	static rt_sem_t sem = RT_NULL;
-	/* 线程入口 */
-	static void thread_entry(void* parameter)
-	{
-		rt_err_t result;
-		rt_tick_t tick;
+/* 指向线程控制块的指针 */
+static rt_thread_t tid = RT_NULL;
+/* 指向信号量的指针 */
+static rt_sem_t sem = RT_NULL;
+/* 线程入口 */
+static void thread_entry(void* parameter)
+{
+    rt_err_t result;
+    rt_tick_t tick;
 
-		/* 获得当前的OS Tick */
-		tick = rt_tick_get();
+    /* 获得当前的OS Tick */
+    tick = rt_tick_get();
 
-		/* 试图持有一个信号量，如果10个OS Tick依然没拿到，则超时返回 */
-		result = rt_sem_take(sem, 10);
-		if (result == -RT_ETIMEOUT)
-		{
-			/* 判断是否刚好过去10个OS Tick */
-			if (rt_tick_get() - tick != 10)
-			{
-				/* 如果失败，则测试失败 */
-				tc_done(TC_STAT_FAILED);
-				rt_sem_delete(sem);
-				return;
-			}
-			rt_kprintf("take semaphore timeout\n");
-		}
-		else
-		{
-			/* 因为并没释放信号量，应该是超时返回，否则测试失败 */
-			tc_done(TC_STAT_FAILED);
-			rt_sem_delete(sem);
-			return;
-		}
+    /* 试图持有一个信号量，如果10个OS Tick依然没拿到，则超时返回 */
+    result = rt_sem_take(sem, 10);
+    if (result == -RT_ETIMEOUT)
+    {
+        /* 判断是否刚好过去10个OS Tick */
+        if (rt_tick_get() - tick != 10)
+        {
+            /* 如果失败，则测试失败 */
+            tc_done(TC_STAT_FAILED);
+            rt_sem_delete(sem);
+            return;
+        }
+        rt_kprintf("take semaphore timeout\n");
+    }
+    else
+    {
+        /* 因为并没释放信号量，应该是超时返回，否则测试失败 */
+        tc_done(TC_STAT_FAILED);
+        rt_sem_delete(sem);
+        return;
+    }
 
-		/* 释放一次信号量 */
-		rt_sem_release(sem);
+    /* 释放一次信号量 */
+    rt_sem_release(sem);
 
-		/* 继续持有信号量，并永远等待直到持有到信号量 */
-		result = rt_sem_take(sem, RT_WAITING_FOREVER);
-		if (result != RT_EOK)
-		{
-			/* 返回不正确，测试失败 */
-			tc_done(TC_STAT_FAILED);
-			rt_sem_delete(sem);
-			return;
-		}
+    /* 继续持有信号量，并永远等待直到持有到信号量 */
+    result = rt_sem_take(sem, RT_WAITING_FOREVER);
+    if (result != RT_EOK)
+    {
+        /* 返回不正确，测试失败 */
+        tc_done(TC_STAT_FAILED);
+        rt_sem_delete(sem);
+        return;
+    }
 
-		/* 测试成功 */
-		tc_done(TC_STAT_PASSED);
-		/* 删除信号量 */
-		rt_sem_delete(sem);
-	}
+    /* 测试成功 */
+    tc_done(TC_STAT_PASSED);
+    /* 删除信号量 */
+    rt_sem_delete(sem);
+}
 
-	int rt_application_init()
+    int rt_application_init()
     {
         /* 创建一个信号量，初始值是0 */
         sem = rt_sem_create("sem", 0, RT_IPC_FLAG_FIFO);
@@ -321,6 +353,7 @@ rt_semaphore对象从rt_ipc_object中派生，由IPC容器所管理。信号量�
         return 0;
     }
     #endif
+
 ~~~
 
 #### 删除信号量 ####
@@ -331,11 +364,14 @@ rt_semaphore对象从rt_ipc_object中派生，由IPC容器所管理。信号量�
 
 调用这个函数时，系统将删除这个信号量。如果删除该信号量时，有线程正在等待该信号量，那么删除操作会先唤醒等待在该信号量上的线程（等待线程的返回值是-RT_ERROR），然后再释放信号量的内存资源。
 
-参数：
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+           sem  rt_sem_create创建处理的信号量对象。
+-----------------------------------------------------------------------
 
-+ sem – rt_sem_create创建处理的信号量对象。
 
-返回值：
+**函数返回**
 
 RT_EOK
 
@@ -347,94 +383,98 @@ RT_EOK
 
 当调用这个函数时，系统将对这个semaphore对象进行初始化，然后初始化IPC对象以及与semaphore相关的部分。在初始化信号量指定的参数中，信号量标志参数决定了当信号量不可用时，多个线程等待的方式。当选择FIFO方式时，那么等待线程队列将按照先进先出的方式排队，先进入的线程将先获得等待的信号量；当选择PRIO（优先级等待）方式时，等待线程队列将按照优先级进行排队，优先级高的等待线程将先获得等待的信号量。
 
-参数：
+**函数参数**
 
-+ sem 	– 信号量对象的句柄；
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+           sem  信号量对象的句柄；
 
-+ name 	– 信号量名称；
+          name  信号量名称；
 
-+ value 	– 信号量初始值；
+         value  信号量初始值；
 
-+ flag 	– 信号量标志。
+          flag  信号量标志。
+-----------------------------------------------------------------------
 
 ~~~{.c}
 #define RT_IPC_FLAG_FIFO 0x00 /* IPC参数采用FIFO方式*/
 #define RT_IPC_FLAG_PRIO 0x01 /* IPC参数采用优先级方式*/
 ~~~
 
-返回值：
+**函数返回**
 
 RT_EOK
 
-初始化信号量的例程如例6-3所示：
+初始化信号量的例程如下例所示：
 
 ~~~{.c}
-     /*
-	 * 程序清单：静态信号量
-	 *
-	 * 这个例子中将创建一个静态信号量（初始值为0 ）及一个静态线程，在这个静态线程中
-	 * 将试图采用超时方式去获取信号量，应该超时返回。然后这个线程释放一次信号量，并
-	 * 在后面继续采用永久等待方式去获取信号量， 成功获得信号量后返回。
-	 */
-	#include <rtthread.h>
-	#include "tc_comm.h"
+/*
+* 程序清单：静态信号量
+*
+* 这个例子中将创建一个静态信号量（初始值为0 ）及一个静态线程，在这个静态线程中
+* 将试图采用超时方式去获取信号量，应该超时返回。然后这个线程释放一次信号量，并
+* 在后面继续采用永久等待方式去获取信号量， 成功获得信号量后返回。
+*/
+    #include <rtthread.h>
+    #include "tc_comm.h"
 
-	/* 线程控制块及栈 */
-	static struct rt_thread thread;
-	static rt_uint8_t thread_stack[THREAD_STACK_SIZE];
-	/* 信号量控制块 */
-	static struct rt_semaphore sem;
+    /* 线程控制块及栈 */
+    static struct rt_thread thread;
+    static rt_uint8_t thread_stack[THREAD_STACK_SIZE];
+    /* 信号量控制块 */
+    static struct rt_semaphore sem;
 
-	/* 线程入口 */
-	static void thread_entry(void* parameter)
-	{
-		rt_err_t result;
-		rt_tick_t tick;
+    /* 线程入口 */
+    static void thread_entry(void* parameter)
+    {
+        rt_err_t result;
+        rt_tick_t tick;
 
-		/* 获得当前的OS Tick */
-		tick = rt_tick_get();
+        /* 获得当前的OS Tick */
+        tick = rt_tick_get();
 
-		/* 试图持有信号量，最大等待10个OS Tick后返回 */
-		result = rt_sem_take(&sem, 10);
-		if (result == -RT_ETIMEOUT)
-		{
-			/* 超时后判断是否刚好是10个OS Tick */
-			if (rt_tick_get() - tick != 10)
-			{
-				tc_done(TC_STAT_FAILED);
-				rt_sem_detach(&sem);
-				return;
-			}
-			rt_kprintf("take semaphore timeout\n");
-		}
-		else
-		{
-			/* 因为没有其他地方是否信号量，所以不应该成功持有信号量，否则测试失败 */
-			tc_done(TC_STAT_FAILED);
-			rt_sem_detach(&sem);
-			return;
-		}
+        /* 试图持有信号量，最大等待10个OS Tick后返回 */
+        result = rt_sem_take(&sem, 10);
+        if (result == -RT_ETIMEOUT)
+        {
+            /* 超时后判断是否刚好是10个OS Tick */
+            if (rt_tick_get() - tick != 10)
+            {
+                tc_done(TC_STAT_FAILED);
+                rt_sem_detach(&sem);
+                return;
+            }
+            rt_kprintf("take semaphore timeout\n");
+        }
+        else
+        {
+            /* 因为没有其他地方是否信号量，所以不应该成功持有信号量，否则测试失败 */
+            tc_done(TC_STAT_FAILED);
+            rt_sem_detach(&sem);
+            return;
+        }
 
-		/* 释放一次信号量 */
-		rt_sem_release(&sem);
+        /* 释放一次信号量 */
+        rt_sem_release(&sem);
 
-		/* 永久等待方式持有信号量 */
-		result = rt_sem_take(&sem, RT_WAITING_FOREVER);
-		if (result != RT_EOK)
-		{
-			/* 不成功则测试失败 */
-			tc_done(TC_STAT_FAILED);
-			rt_sem_detach(&sem);
-			return;
-		}
+        /* 永久等待方式持有信号量 */
+        result = rt_sem_take(&sem, RT_WAITING_FOREVER);
+        if (result != RT_EOK)
+        {
+            /* 不成功则测试失败 */
+            tc_done(TC_STAT_FAILED);
+            rt_sem_detach(&sem);
+            return;
+        }
 
-		/* 测试通过 */
-		tc_done(TC_STAT_PASSED);
-		/* 脱离信号量对象 */
-		rt_sem_detach(&sem);
-	}
-	
-	int semaphore_static_init()
+        /* 测试通过 */
+        tc_done(TC_STAT_PASSED);
+        /* 脱离信号量对象 */
+        rt_sem_detach(&sem);
+    }
+
+    int semaphore_static_init()
     {
         rt_err_t result;
 
@@ -501,6 +541,8 @@ RT_EOK
         return 0;
     }
     #endif
+
+
 ~~~
 
 #### 脱离信号量 ####
@@ -511,12 +553,17 @@ RT_EOK
 
 使用该函数后，内核先唤醒所有挂在该信号量等待队列上的线程，然后将该信号量从内核对象管理器中删除。原来挂起在信号量上的等待线程将获得-RT_ERROR 的返回值。
 
-参数：
 
-+ sem – 信号量对象的句柄。
-返回值：
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+           sem  信号量对象的句柄。
+-----------------------------------------------------------------------
 
-+ RT_EOK。
+
+**函数返回**
+
+RT_EOK
 
 #### 获取信号量 ####
 
@@ -526,15 +573,22 @@ RT_EOK
 
 在调用这个函数时，如果信号量的值等于零，那么说明当前信号量资源实例不可用，申请该信号量的线程将根据time参数的情况选择直接返回、或挂起等待一段时间、或永久等待，直到其他线程或中断释放该信号量。如果在参数time指定的时间内依然得不到信号量，线程将超时返回，返回值是-RT_ETIMEOUT。
 
-参数：
+**函数参数**
 
-+ sem 	– 信号量对象的句柄；
 
-+ time 	– 指定的等待时间，单位是操作系统时钟节拍（OS Tick）。
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+           sem  信号量对象的句柄；
 
-返回值：
+          time  指定的等待时间，单位是操作系统时钟节拍（OS　Tick）。
+-----------------------------------------------------------------------
 
-+ 成功获得信号量返回RT_EOK；超时依然为获得信号量返回-RT_ETIMEOUT；其他错误返回-RT_ERROR。
+
+**函数返回**
+
+成功获得信号量返回RT_EOK；超时依然为获得信号量返回-RT_ETIMEOUT；其他错误返回-RT_ERROR。
+
 
 #### 无等待获取信号量 ####
 
@@ -544,12 +598,19 @@ RT_EOK
 
 这个函数与rt_sem_take(sem, 0) 的作用相同，即当线程申请的信号量资源实例不可用的时候，它不会等待在该信号量上，而是直接返回-RT_ETIMEOUT。
 
-参数：
+**函数参数**
 
-+ sem – 信号量对象的句柄；
-返回值：
 
-+ 成功获取信号量返回RT_EOK；否则返回-RT_ETIMEOUT。
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+           sem  信号量对象的句柄。
+-----------------------------------------------------------------------
+
+
+**函数返回**
+
+成功获取信号量返回RT_EOK；否则返回RT_ETIMEOUT。
 
 #### 释放信号量 ####
 
@@ -559,173 +620,183 @@ RT_EOK
 
 当信号量的值等于零时，并且有线程等待这个信号量时，将唤醒等待在该信号量线程队列中的第一个线程，由它获取信号量。否则将把信号量的值加一。
 
-参数：
+**函数参数**
 
-+ sem – 信号量对象的句柄；
-返回值：
 
-+ RT_EOK
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+           sem  信号量对象的句柄。
+-----------------------------------------------------------------------
 
-    下面是一个使用信号量的例程，如例6-4所示：
+
+**函数返回**
+
+RT_EOK
+
+
+下面是一个使用信号量的例程，如下例所示：
 
 ~~~{.c}
-	/*
-	 * 程序清单：生产者消费者例子
-	 *
-	 * 这个例子中将创建两个线程用于实现生产者消费者问题
-	 */
-	#include <rtthread.h>
-	#include "tc_comm.h"
+/*
+* 程序清单：生产者消费者例子
+*
+* 这个例子中将创建两个线程用于实现生产者消费者问题
+*/
+#include <rtthread.h>
+#include "tc_comm.h"
 
-	/* 定义最大5个元素能够被产生 */
-	#define MAXSEM 	5
+/* 定义最大5个元素能够被产生 */
+#define MAXSEM     5
 
-	/* 用于放置生产的整数数组 */
-	rt_uint32_t array[MAXSEM];
-	/* 指向生产者、消费者在array数组中的读写位置 */
-	static rt_uint32_t set, get;
+/* 用于放置生产的整数数组 */
+rt_uint32_t array[MAXSEM];
+/* 指向生产者、消费者在array数组中的读写位置 */
+static rt_uint32_t set, get;
 
-	/* 指向线程控制块的指针 */
-	static rt_thread_t producer_tid = RT_NULL;
-	static rt_thread_t consumer_tid = RT_NULL;
+/* 指向线程控制块的指针 */
+static rt_thread_t producer_tid = RT_NULL;
+static rt_thread_t consumer_tid = RT_NULL;
 
-	struct rt_semaphore sem_lock;
-	struct rt_semaphore sem_empty, sem_full;
+struct rt_semaphore sem_lock;
+struct rt_semaphore sem_empty, sem_full;
 
-	/* 生成者线程入口 */
-	void producer_thread_entry(void* parameter)
-	{
-		rt_int32_t cnt = 0;
+/* 生成者线程入口 */
+void producer_thread_entry(void* parameter)
+{
+    rt_int32_t cnt = 0;
 
-		/* 运行100次 */
-		while( cnt < 100)
-		{
-			/* 获取一个空位 */
-			rt_sem_take(&sem_empty, RT_WAITING_FOREVER);
+    /* 运行100次 */
+    while( cnt < 100)
+    {
+        /* 获取一个空位 */
+        rt_sem_take(&sem_empty, RT_WAITING_FOREVER);
 
-			/* 修改array内容，上锁 */
-			rt_sem_take(&sem_lock, RT_WAITING_FOREVER);
-			array[set%MAXSEM] = cnt + 1;
-			rt_kprintf("the producer generates a number: %d\n", 
-				array[set%MAXSEM]);
-			set++;
-			rt_sem_release(&sem_lock);
+        /* 修改array内容，上锁 */
+        rt_sem_take(&sem_lock, RT_WAITING_FOREVER);
+        array[set%MAXSEM] = cnt + 1;
+        rt_kprintf("the producer generates a number: %d\n", 
+            array[set%MAXSEM]);
+        set++;
+        rt_sem_release(&sem_lock);
 
-			/* 发布一个满位 */
-			rt_sem_release(&sem_full);
-			cnt++;
+        /* 发布一个满位 */
+        rt_sem_release(&sem_full);
+        cnt++;
 
-			/* 暂停一段时间 */
-			rt_thread_delay(50);
-		}
+        /* 暂停一段时间 */
+        rt_thread_delay(50);
+    }
 
-		rt_kprintf("the producer exit!\n");
-	}
+    rt_kprintf("the producer exit!\n");
+}
 
-	/* 消费者线程入口 */
-	void consumer_thread_entry(void* parameter)
-	{
-		rt_uint32_t no;
-		rt_uint32_t sum;
+/* 消费者线程入口 */
+void consumer_thread_entry(void* parameter)
+{
+    rt_uint32_t no;
+    rt_uint32_t sum;
 
-		/* 第n个线程，由入口参数传进来 */
-		no = (rt_uint32_t)parameter;
+    /* 第n个线程，由入口参数传进来 */
+    no = (rt_uint32_t)parameter;
 
-		while(1)
-		{
-			/* 获取一个满位 */
-			rt_sem_take(&sem_full, RT_WAITING_FOREVER);
+    while(1)
+    {
+        /* 获取一个满位 */
+        rt_sem_take(&sem_full, RT_WAITING_FOREVER);
 
-			/* 临界区，上锁进行操作 */
-			rt_sem_take(&sem_lock, RT_WAITING_FOREVER);
-			sum += array[get%MAXSEM];
-			rt_kprintf("the consumer[%d] get a number:%d\n", no, array[get%MAXSEM]);
-			get++;
-			rt_sem_release(&sem_lock);
+        /* 临界区，上锁进行操作 */
+        rt_sem_take(&sem_lock, RT_WAITING_FOREVER);
+        sum += array[get%MAXSEM];
+        rt_kprintf("the consumer[%d] get a number:%d\n", 
+no, array[get%MAXSEM]);
+        get++;
+        rt_sem_release(&sem_lock);
 
-			/* 释放一个空位 */
-			rt_sem_release(&sem_empty);
+        /* 释放一个空位 */
+        rt_sem_release(&sem_empty);
 
-			/* 生产者生产到100个数目，停止，消费者线程相应停止 */
-			if (get == 100) break;
+        /* 生产者生产到100个数目，停止，消费者线程相应停止 */
+        if (get == 100) break;
 
-			/* 暂停一小会时间 */
-			rt_thread_delay(10);
-		}
+        /* 暂停一小会时间 */
+        rt_thread_delay(10);
+    }
 
-		rt_kprintf("the consumer[%d] sum is %d \n ", no, sum);
-		rt_kprintf("the consumer[%d] exit!\n");
-	}
+    rt_kprintf("the consumer[%d] sum is %d \n ", no, sum);
+    rt_kprintf("the consumer[%d] exit!\n");
+}
 
-	int semaphore_producer_consumer_init()
-	{
-		/* 初始化3个信号量 */
-		rt_sem_init(&sem_lock ,  "lock",      1, RT_IPC_FLAG_FIFO);
-		rt_sem_init(&sem_empty, "empty", MAXSEM, RT_IPC_FLAG_FIFO);
-		rt_sem_init(&sem_full ,  "full",      0, RT_IPC_FLAG_FIFO);
+int semaphore_producer_consumer_init()
+{
+    /* 初始化3个信号量 */
+    rt_sem_init(&sem_lock , "lock",   1,    RT_IPC_FLAG_FIFO);
+    rt_sem_init(&sem_empty,"empty", MAXSEM, RT_IPC_FLAG_FIFO);
+    rt_sem_init(&sem_full , "full",   0,   RT_IPC_FLAG_FIFO);
 
-		/* 创建线程1 */
-		producer_tid = rt_thread_create("producer",
-			producer_thread_entry, /* 线程入口是producer_thread_entry */
-			RT_NULL, /* 入口参数是RT_NULL */
-			THREAD_STACK_SIZE, THREAD_PRIORITY - 1, THREAD_TIMESLICE);
-		if (producer_tid != RT_NULL)
-			rt_thread_startup(producer_tid);
-		else
-			tc_stat(TC_STAT_END | TC_STAT_FAILED);
+    /* 创建线程1 */
+    producer_tid = rt_thread_create("producer",
+        producer_thread_entry, /* 线程入口是producer_thread_entry */
+        RT_NULL, /* 入口参数是RT_NULL */
+        THREAD_STACK_SIZE, THREAD_PRIORITY - 1, THREAD_TIMESLICE);
+    if (producer_tid != RT_NULL)
+        rt_thread_startup(producer_tid);
+    else
+        tc_stat(TC_STAT_END | TC_STAT_FAILED);
 
-		/* 创建线程2 */
-		consumer_tid = rt_thread_create("consumer",
-		   consumer_thread_entry,/* 线程入口是consumer_thread_entry */
-			RT_NULL, /* 入口参数是RT_NULL */
-			THREAD_STACK_SIZE, THREAD_PRIORITY + 1, THREAD_TIMESLICE);
-		if (consumer_tid != RT_NULL)
-			rt_thread_startup(consumer_tid);
-		else
-			tc_stat(TC_STAT_END | TC_STAT_FAILED);
+    /* 创建线程2 */
+    consumer_tid = rt_thread_create("consumer",
+       consumer_thread_entry,/* 线程入口是consumer_thread_entry */
+        RT_NULL, /* 入口参数是RT_NULL */
+        THREAD_STACK_SIZE, THREAD_PRIORITY + 1, THREAD_TIMESLICE);
+    if (consumer_tid != RT_NULL)
+        rt_thread_startup(consumer_tid);
+    else
+        tc_stat(TC_STAT_END | TC_STAT_FAILED);
 
-		return 0;
-	}
+    return 0;
+}
 
-	#ifdef RT_USING_TC
-	static void _tc_cleanup()
-	{
-		/* 调度器上锁，上锁后，将不再切换到其他线程，仅响应中断 */
-		rt_enter_critical();
+#ifdef RT_USING_TC
+static void _tc_cleanup()
+{
+    /* 调度器上锁，上锁后，将不再切换到其他线程，仅响应中断 */
+    rt_enter_critical();
 
-		/* 删除线程 */
-		if (producer_tid != RT_NULL && producer_tid->stat != RT_THREAD_CLOSE)
-			rt_thread_delete(producer_tid);
-		if (consumer_tid != RT_NULL && consumer_tid->stat != RT_THREAD_CLOSE)
-			rt_thread_delete(consumer_tid);
+    /* 删除线程 */
+    if (producer_tid != RT_NULL && producer_tid->stat != RT_THREAD_CLOSE)
+        rt_thread_delete(producer_tid);
+    if (consumer_tid != RT_NULL && consumer_tid->stat != RT_THREAD_CLOSE)
+        rt_thread_delete(consumer_tid);
 
-		/* 调度器解锁 */
-		rt_exit_critical();
+    /* 调度器解锁 */
+    rt_exit_critical();
 
-		/* 设置TestCase状态 */
-		tc_done(TC_STAT_PASSED);
-	}
+    /* 设置TestCase状态 */
+    tc_done(TC_STAT_PASSED);
+}
 
-	int _tc_semaphore_producer_consumer()
-	{
-		/* 设置TestCase清理回调函数 */
-		tc_cleanup(_tc_cleanup);
-		semaphore_producer_consumer_init();
+int _tc_semaphore_producer_consumer()
+{
+    /* 设置TestCase清理回调函数 */
+    tc_cleanup(_tc_cleanup);
+    semaphore_producer_consumer_init();
 
-		/* 返回TestCase运行的最长时间 */
-		return 100;
-	}
-	/* 输出函数命令到finsh shell中 */
-	FINSH_FUNCTION_EXPORT(_tc_semaphore_producer_consumer, producer and consumer example);
-	#else
-	/* 用户应用入口 */
-	int rt_application_init()
-	{
-		semaphore_producer_consumer_init();
+    /* 返回TestCase运行的最长时间 */
+    return 100;
+}
+/* 输出函数命令到finsh shell中 */
+FINSH_FUNCTION_EXPORT(_tc_semaphore_producer_consumer, producer and consumer example);
+#else
+/* 用户应用入口 */
+int rt_application_init()
+{
+    semaphore_producer_consumer_init();
 
-		return 0;
-	}
-	#endif
+    return 0;
+}
+#endif
+
 
 ~~~
 
@@ -758,12 +829,15 @@ RT_EOK
  
 semaphore先初始为0，而后shell线程试图取得信号量，因为信号量值是0，所以它会被挂起。当console设备有数据输入时，将产生中断而进入中断服务例程。在中断服务例程中，它会读取console设备的数据，并把读得的数据放入uart buffer中进行缓冲，而后释放信号量，释放信号量的操作将唤醒shell线程。在中断服务例程运行完毕后，如果系统中没有比shell线程优先级更高的就绪线程存在时，shell线程将持有信号量并运行，从uart buffer缓冲区中获取输入的数据。
 
-警告：	中断与线程间的互斥不能采用信号量（锁）的方式，而应采用中断锁。
+* 警告：
+中断与线程间的互斥不能采用信号量（锁）的方式，而应采用中断锁。
 
 #### 资源计数 ####
 
 资源计数适合于线程间速度不匹配的场合，这个时候信号量可以做为前一线程工作完成的计数，而当调度到后一线程时，它可以以一种连续的方式一次处理数个事件。例如，生产者与消费者问题中，生产者可以对信号进行多次释放，而后消费者被调度到时能够一次处理多个资源。
-注：	一般资源计数类型多是混合方式的线程间同步，因为对于单个的资源处理依然存在线程的多重访问，这就需要对一个单独的资源进行访问、处理，并进行锁方式的互斥操作。
+
+* 注：
+一般资源计数类型多是混合方式的线程间同步，因为对于单个的资源处理依然存在线程的多重访问，这就需要对一个单独的资源进行访问、处理，并进行锁方式的互斥操作。
 
 ## 互斥量 ##
 
@@ -777,7 +851,8 @@ semaphore先初始为0，而后shell线程试图取得信号量，因为信号�
 
 在RT-Thread操作系统中实现的是优先级继承算法。优先级继承是通过在线程A被阻塞的期间内，将线程C的优先级提升到线程A的优先级别，从而解决优先级翻转引起的问题。这样能够防止C（间接地防止A）被B抢占。优先级继承协议是指，提高某个占有某种资源的低优先级线程的优先级，使之与所有等待该资源的线程中优先级最高的那个线程的优先级相等，然后执行，而当这个低优先级线程释放该资源时，优先级重新回到初始设定。因此，继承优先级的线程避免了系统资源被任何中间优先级的线程抢占。
 
-警告：	在获得互斥量后，请尽快释放互斥量，并且在持有互斥量的过程中，不得再行更改持有互斥量线程的优先级。
+* 警告：
+在获得互斥量后，请尽快释放互斥量，并且在持有互斥量的过程中，不得再行更改持有互斥量线程的优先级。
 
 ### 互斥量控制块 ###
 
@@ -810,20 +885,26 @@ rt_mutex对象从rt_ipc_object中派生，由IPC容器管理。
 可以调用rt_mutex_create函数创建一个互斥量，它的名字有name所指定。创建的互斥量由于指定的flag不同，而有不同的意义：
 使用PRIO优先级flag创建的IPC对象，在多个线程等待资源时，将由优先级高的线程优先获得资源。而使用FIFO先进先出flag创建的IPC对象，在多个线程等待资源时，将按照先来先得的顺序获得资源。
 
-参数：
+**函数参数**
 
-+ name 	– 互斥量的名称；
 
-+ flag 	– 互斥量标志，可以取如下类型的数值：
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+          name  互斥量的名称；
+
+          flag  互斥量标志，可以取如下类型的数值：
+-----------------------------------------------------------------------
+
 
 ~~~{.c}
 #define RT_IPC_FLAG_FIFO 0x00 /* IPC参数采用FIFO先进先出方式*/
 #define RT_IPC_FLAG_PRIO 0x01 /* IPC参数采用优先级方式*/
 ~~~
 
-返回值：
+**函数返回**
 
-+ 创建成功返回指向互斥量的互斥量句柄；否则返回RT_NULL。
+创建成功返回指向互斥量的互斥量句柄；否则返回RT_NULL。
 
 #### 删除互斥量 ####
 
@@ -833,13 +914,19 @@ rt_mutex对象从rt_ipc_object中派生，由IPC容器管理。
 
 当删除一个互斥量时，所有等待此互斥量的线程都将被唤醒，等待线程获得的返回值是-RT_ERROR。然后系统将该互斥量从内核对象管理器链表中删除并释放互斥量占用的内存空间。
 
-参数：
+**函数参数**
 
-+ mutex 	– 互斥量对象的句柄；
 
-返回值：
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+         mutex  互斥量对象的句柄；
+-----------------------------------------------------------------------
 
-+ RT_EOK
+
+**函数返回**
+
+RT_EOK
 
 #### 初始化互斥量 ###
 
@@ -849,22 +936,27 @@ rt_mutex对象从rt_ipc_object中派生，由IPC容器管理。
 
    使用该函数接口时，需指定互斥量对象的句柄（即指向互斥量控制块的指针），互斥量名称以及互斥量标志。互斥量标志可用上面创建互斥量函数里提到的标志。
 
-参数：
+**函数参数**
 
-+ mutex 	– 互斥量对象的句柄，它由用户提供，并指向互斥量对象的内存块；
 
-+ name 	– 互斥量名称；
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+         mutex  互斥量对象的句柄，它由用户提供，并指向互斥量对象的内存块；
 
-+ flag 	– 互斥量标志，可以取如下类型的数值：
+          name  互斥量名称；
+
+          flag  互斥量标志，可以取如下类型的数值：
+-----------------------------------------------------------------------
 
 ~~~{.c}
 #define RT_IPC_FLAG_FIFO 0x00 /* IPC参数采用FIFO先进先出方式*/
 #define RT_IPC_FLAG_PRIO 0x01 /* IPC参数采用优先级方式*/
 ~~~
 
-返回值：
+**函数返回**
 
-+ RT_EOK
+RT_EOK
 
 #### 脱离互斥量 ####
 
@@ -874,13 +966,19 @@ rt_mutex对象从rt_ipc_object中派生，由IPC容器管理。
 
 使用该函数接口后，内核先唤醒所有挂在该互斥量上的线程（线程的返回值是-RT_ERROR），然后系统将该互斥量从内核对象管理器链表中删除。
 
-参数：
+**函数参数**
 
-+ mutex 	– 互斥量对象的句柄；
 
-返回值：
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+         mutex  互斥量对象的句柄；
+-----------------------------------------------------------------------
 
-+ RT_EOK
+
+**函数返回**
+
+RT_EOK
 
 #### 获取互斥量 ####
 
@@ -890,15 +988,21 @@ rt_mutex对象从rt_ipc_object中派生，由IPC容器管理。
 
 如果互斥量没有被其他线程控制，那么申请该互斥量的线程将成功获得该互斥量。如果互斥量已经被当前线程线程控制，则该互斥量的持有计数加1，当前线程也不会挂起等待。如果互斥量已经被其他线程占有，则当前线程在该互斥量上挂起等待，直到其他线程释放它或者等待时间超过指定的超时时间。
 
-参数：
+**函数参数**
 
-+ mutex 	– 互斥量对象的句柄；
 
-+ time 	– 指定等待的时间。
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+         mutex  互斥量对象的句柄；
 
-返回值：
+          time  指定等待的时间。
+-----------------------------------------------------------------------
 
-+ 成功获得互斥量返回RT_EOK；超时返回-RT_ETIMEOUT；其他返回-RT_ERROR。
+
+**函数返回**
+
+成功获得互斥量返回RT_EOK；超时返回-RT_ETIMEOUT；其他返回-RT_ERROR。
 
 #### 释放互斥量 ####
 
@@ -908,18 +1012,24 @@ rt_mutex对象从rt_ipc_object中派生，由IPC容器管理。
 
 使用该函数接口时，只有已经拥有互斥量控制权的线程才能释放它，每释放一次该互斥量，它的持有计数就减1。当该互斥量的持有计数为零时（即持有线程已经释放所有的持有操作），它变为可用，等待在该信号量上的线程将被唤醒。如果线程的运行优先级被互斥量提升，那么当互斥量被释放后，线程恢复为持有互斥量前的优先级。
 
-参数：
+**函数参数**
 
-+ mutex 	– 互斥量对象的句柄。
 
-返回值：
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+         mutex  互斥量对象的句柄；
+-----------------------------------------------------------------------
 
-+ RT_EOK
 
-使用互斥量的例程如例6-5所示：
+**函数返回**
+
+RT_EOK
+
+使用互斥量的例程如下例所示：
 
 ~~~{.c}
- /*
+/*
  * 程序清单：互斥量使用例程
  *
  * 这个例子将创建3个动态线程以检查持有互斥量时，持有的线程优先级是否
@@ -1093,6 +1203,8 @@ int rt_application_init()
     return 0;
 }
 #endif
+
+
 ~~~
 
 ### 使用场合 ###
@@ -1145,20 +1257,25 @@ rt_event对象从rt_ipc_object 中派生，由IPC容器管理。
 
 调用该函数接口时，系统会从动态内存堆中分配事件对象，然后进行对象的初始化，IPC对象初始化，并把set设置成0。
 
-参数：
+**函数参数**
 
-+ name 	– 事件的名称；
 
-+ flag 	– 事件的标志，可以使用如下的数值：
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+          name  事件的名称；
+
+          flag  事件的标志，可以使用如下的数值：
+-----------------------------------------------------------------------
 
 ~~~{.c}
 #define RT_IPC_FLAG_FIFO 0x00 /* IPC参数采用FIFO方式*/
 #define RT_IPC_FLAG_PRIO 0x01 /* IPC参数采用优先级方式*/
 ~~~
 
-返回值：
+**函数返回**
 
-+ 创建成功返回事件对象的句柄；创建失败返回RT_NULL。
+创建成功返回事件对象的句柄；创建失败返回RT_NULL。
 
 #### 删除事件 ####
 
@@ -1168,36 +1285,48 @@ rt_event对象从rt_ipc_object 中派生，由IPC容器管理。
 
 在调用rt_event_delete函数删除一个事件对象时，应该确保该事件不再被使用。在删除前会唤醒所有挂起在该事件上的线程（线程的返回值是-RT_ERROR），然后释放事件对象占用的内存块。
 
-参数：
+**函数参数**
 
-+ event – 事件对象的句柄。
 
-返回值：
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+         event  事件对象的句柄。
+-----------------------------------------------------------------------
 
-+ RT_EOK
+
+**函数返回**
+
+RT_EOK
 
 初始化事件
 静态事件对象的内存是在系统编译时由编译器分配的，一般放于数据段或ZI段中。在使用静态事件对象前，需要先行对它进行初始化操作。初始化事件使用下面的函数接口：
-rt_err_t rt_event_init(rt_event_t event, const char* name, rt_uint8_t flag);
+
+    rt_err_t rt_event_init(rt_event_t event, const char* name, rt_uint8_t flag);
 
 调用该接口时，需指定静态事件对象的句柄（即指向事件控制块的指针），然后系统会初始化事件对象，并加入到系统对象容器中进行管理。
 
-参数：
+**函数参数**
 
-+ event 	– 事件对象的句柄。
 
-+ name 	– 事件名称；
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+         event  事件对象的句柄。
 
-+ flag 	– 事件的标志，可以使用如下的数值：
+          name  事件名称；
+
+          flag  事件的标志，可以使用如下的数值：
+-----------------------------------------------------------------------
 
 ~~~{.c}
 #define RT_IPC_FLAG_FIFO 0x00 /* IPC参数采用FIFO方式*/
 #define RT_IPC_FLAG_PRIO 0x01 /* IPC参数采用优先级方式*/
 ~~~
 
-返回值：
+**函数返回**
 
-+ RT_EOK
+RT_EOK
 
 #### 脱离事件 ####
 
@@ -1207,38 +1336,50 @@ rt_err_t rt_event_init(rt_event_t event, const char* name, rt_uint8_t flag);
 
 用户调用这个函数时，系统首先唤醒所有挂在该事件等待队列上的线程（线程的返回值是- RT_ERROR ），然后将该事件从内核对象管理器中删除。
 
-参数：
+**函数参数**
 
-+ event 	– 事件对象的句柄。
 
-返回值：
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+         event  事件对象的句柄。
+-----------------------------------------------------------------------
 
-+ RT_EOK
+
+**函数返回**
+
+RT_EOK
 
 #### 接收事件 ####
 
 内核使用32位的无符号整型数来标识事件，它的每一位代表一个事件，因此一个事件对象可同时等待接收32个事件，内核可以通过指定选择参数“逻辑与”或“逻辑或”来选择如何激活线程，使用“逻辑与”参数表示只有当所有等待的事件都发生时才激活线程，而使用“逻辑或”参数则表示只要有一个等待的事件发生就激活线程。接收事件使用下面的函数接口：
 
-	rt_err_t rt_event_recv(rt_event_t event, rt_uint32_t set, rt_uint8_t option, rt_int32_t timeout, rt_uint32_t* recved);
+    rt_err_t rt_event_recv(rt_event_t event, rt_uint32_t set, rt_uint8_t option, rt_int32_t timeout, rt_uint32_t* recved);
 
 当用户调用这个接口时，系统首先根据set参数和接收选项来判断它要接收的事件是否发生，如果已经发生，则根据参数option上是否设置有RT_EVENT_FLAG_CLEAR来决定是否重置事件的相应标志位，然后返回（其中recved参数返回收到的事件）；
 如果没有发生，则把等待的set和option参数填入线程本身的结构中，然后把线程挂起在此事件对象上，直到其等待的事件满足条件或等待时间超过指定的超时时间。如果超时时间设置为零，则表示当线程要接受的事件没有满足其要求时就不等待，而直接返回-RT_TIMEOUT。
 
-参数：
+**函数参数**
 
-+ event 	– 事件对象的句柄。
 
-+ set 	– 接收线程感兴趣的事件；
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+         event  事件对象的句柄。
 
-+ option 	– 接收选项；
+           set  接收线程感兴趣的事件；
 
-+ timeout – 指定超时时间；
+        option  接收选项；
 
-+ recved 	– 指向收到的事件；
+       timeout  指定超时时间；
 
-返回值：
+        recved  指向收到的事件；
+-----------------------------------------------------------------------
 
-+ 正确接收返回RT_EOK，超时返回-RT_TIMEOUT，其他返回-RT_ERROR。
+
+**函数返回**
+
+正确接收返回RT_EOK，超时返回-RT_TIMEOUT，其他返回-RT_ERROR。
 
 #### 发送事件 ####
 
@@ -1248,17 +1389,23 @@ rt_err_t rt_event_init(rt_event_t event, const char* name, rt_uint8_t flag);
 
 使用该函数接口时，通过参数set指定的事件标志来设定event对象的事件标志值，然后遍历等待在event事件对象上的等待线程链表，判断是否有线程的事件激活要求与当前event对象事件标志值匹配，如果有，则唤醒该线程。
 
-参数：
+**函数参数**
 
-+ event 	– 事件对象的句柄。
 
-+ set 	– 发送的事件集；
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+         event  事件对象的句柄。
 
-返回值：
+           set  发送的事件集；
+-----------------------------------------------------------------------
 
-+ RT_EOK
 
-使用事件的例程如例6-6所示：
+**函数返回**
+
+RT_EOK
+
+使用事件的例程如下例所示：
 
 ~~~{.c}
 /*
@@ -1418,6 +1565,7 @@ int rt_application_init()
     return 0;
 }
 #endif
+
 ~~~
 
 ### 使用场合 ###
@@ -1473,38 +1621,49 @@ rt_mailbox对象从rt_ipc_object中派生，由IPC容器管理。
 
 创建邮箱对象时会先创建一个邮箱对象控制块，然后给邮箱分配一块内存空间用来存放邮件，这块内存的大小等于邮件大小（4字节）与邮箱容量的乘积，接着初始化接收邮件和发送邮件在邮箱中的偏移量。
 
-参数：
+**函数参数**
 
-+ name	– 邮箱名称；
 
-+ size	– 邮箱容量；
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+          name  邮箱名称；
 
-+ flag	– 邮箱标志，它可以取如下数值：
+          size  邮箱容量；
+
+          flag  邮箱标志，它可以取如下数值：
+-----------------------------------------------------------------------
 
 ~~~{.c}
 #define RT_IPC_FLAG_FIFO 0x00 /* IPC参数采用FIFO方式*/
 #define RT_IPC_FLAG_PRIO 0x01 /* IPC参数采用优先级方式*/
 ~~~
 
-返回值：
+**函数返回**
 
-+ 创建成功返回邮箱对象的句柄；否则返回-RT_ERROR。
+创建成功返回邮箱对象的句柄；否则返回-RT_ERROR。
 
 #### 删除邮箱 ####
 
 当邮箱不再被使用时，应该删除它来释放相应的系统资源，一旦操作完成，邮箱将被永久性的删除。删除邮箱的函数接口如下：
 
-	rt_err_t rt_mb_delete (rt_mailbox_t mb);
+    rt_err_t rt_mb_delete (rt_mailbox_t mb);
 
 删除邮箱时，如果有线程被挂起在该邮箱对象上，内核先唤醒挂起在该邮箱上的所有线程（线程获得返回值是-RT_ERROR），然后再释放邮箱使用的内存，最后删除邮箱对象。
 
-参数：
+**函数参数**
 
-+ mb 		– 邮箱对象的句柄。
 
-返回值：
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+            mb  邮箱对象的句柄。
+-----------------------------------------------------------------------
 
-+ RT_EOK
+
+**函数返回**
+
+RT_EOK
 
 #### 初始化邮箱 ####
 
@@ -1515,28 +1674,34 @@ rt_mailbox对象从rt_ipc_object中派生，由IPC容器管理。
 
 初始化邮箱时，该函数接口需要获得用户已经申请获得的邮箱对象控制块，缓冲区的指针，以及邮箱名称和邮箱容量。
 
-参数：
+**函数参数**
 
-+ mb 		– 邮箱对象的句柄；
 
-+ name 	– 邮箱名称；
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+            mb  邮箱对象的句柄；
 
-+ msgpool – 缓冲区指针；
+          name  邮箱名称；
 
-+ size 	– 邮箱容量；
+       msgpool  缓冲区指针；
 
-+ flag	– 邮箱标志，它可以取如下数值：
+          size  邮箱容量；
+
+          flag  邮箱标志，它可以取如下数值：
+-----------------------------------------------------------------------
 
 ~~~{.c}
 #define RT_IPC_FLAG_FIFO 0x00 /* IPC参数采用FIFO方式*/
 #define RT_IPC_FLAG_PRIO 0x01 /* IPC参数采用优先级方式*/
 ~~~
 
-返回值：
+**函数返回**
 
-+ RT_EOK
+RT_EOK
 
-注：	这里的size参数指定的是邮箱的容量，即如果msgpool的字节数是N，那么邮箱容量应该是N/4。
+* 注：
+这里的size参数指定的是邮箱的容量，即如果msgpool的字节数是N，那么邮箱容量应该是N/4。
 
 #### 脱离邮箱 ####
 
@@ -1546,13 +1711,19 @@ rt_mailbox对象从rt_ipc_object中派生，由IPC容器管理。
 
 使用该函数接口后，内核先唤醒所有挂在该邮箱上的线程（线程获得返回值是- RT_ERROR ），然后将该邮箱对象从内核对象管理器中删除。
 
-参数：
+**函数参数**
 
-+ mb 		– 邮箱对象的句柄。
 
-返回值：
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+            mb  邮箱对象的句柄。
+-----------------------------------------------------------------------
 
-+ RT_EOK
+
+**函数返回**
+
+RT_EOK
 
 #### 发送邮件 ####
 
@@ -1562,15 +1733,21 @@ rt_mailbox对象从rt_ipc_object中派生，由IPC容器管理。
 
 发送的邮件可以是32位任意格式的数据，一个整型值或者一个指向缓冲区的指针。当邮箱中的邮件已经满时，发送邮件的线程或者中断程序会收到-RT_EFULL 的返回值。
 
-参数：
+**函数参数**
 
-+ mb 		– 邮箱对象的句柄；
 
-+ value 	– 邮件内容。
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+            mb  邮箱对象的句柄；
 
-返回值：
+         value  邮件内容。
+-----------------------------------------------------------------------
 
-+ 发送成功返回RT_EOK；如果邮箱已经满了，返回-RT_EFULL。
+
+**函数返回**
+
+发送成功返回RT_EOK；如果邮箱已经满了，返回-RT_EFULL。
 
 #### 等待方式发送邮件 ####
 
@@ -1580,17 +1757,23 @@ rt_mailbox对象从rt_ipc_object中派生，由IPC容器管理。
 
 rt_mb_send_wait与rt_mb_send的区别在于，如果邮箱已经满了，那么发送线程将根据设定的timeout参数等待邮箱中因为收取邮件而空出空间。如果设置的超时时间到达依然没有空出空间，这是发送线程将被唤醒返回错误码。
 
-参数：
+**函数参数**
 
-+ mb 		– 邮箱对象的句柄；
 
-+ value 	– 邮件内容；
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+            mb  邮箱对象的句柄；
 
-+ timeout	– 超时时间。
+         value  邮件内容；
 
-返回值： 
+       timeout  超时时间。
+-----------------------------------------------------------------------
 
-+ 发送成功返回RT_EOK；如果设置的时间超时依然未发送成功，返回-RT_ETIMEOUT，其他情况返回-RT_ERROR。
+
+**函数返回**
+
+发送成功返回RT_EOK；如果设置的时间超时依然未发送成功，返回-RT_ETIMEOUT，其他情况返回-RT_ERROR。
 
 #### 接收邮件 ####
 
@@ -1600,18 +1783,25 @@ rt_mb_send_wait与rt_mb_send的区别在于，如果邮箱已经满了，那么�
 
 接收邮件时，接收者需指定接收邮件的邮箱句柄，并指定接收到的邮件存放位置以及最多能够等待的超时时间。如果接收时设定了超时，当指定的时间内依然未收到邮件时，将返回-RT_ETIMEOUT。
 
-参数：
+**函数参数**
 
-+ mb 		– 邮箱对象的句柄；
 
-+ value 	– 邮件内容；
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+            mb  邮箱对象的句柄；
 
-+ timeout – 指定超时时间。
-返回值：
+         value  邮件内容；
 
-+ 成功收到返回RT_EOK，超时返回-RT_ETIMEOUT，其他返回-RT_ERROR。
+       timeout  超时时间。
+-----------------------------------------------------------------------
 
-    使用邮箱的例程如例6-7所示：
+
+**函数返回**
+
+成功收到返回RT_EOK，超时返回-RT_ETIMEOUT，其他返回-RT_ERROR。
+
+使用邮箱的例程如下例所示：
 
 ~~~{.c}
 /*
@@ -1638,48 +1828,48 @@ static char mb_str2[] = "this is another mail!";
 /* 线程1入口 */
 static void thread1_entry(void* parameter)
 {
-	unsigned char* str;
+    unsigned char* str;
 
-	while (1)
-	{
-		rt_kprintf("thread1: try to recv a mail\n");
+    while (1)
+    {
+        rt_kprintf("thread1: try to recv a mail\n");
 
-		/* 从邮箱中收取邮件 */
-		if (rt_mb_recv(&mb, (rt_uint32_t*)&str, RT_WAITING_FOREVER)
-				== RT_EOK)
-		{
-			/* 显示邮箱内容 */
-			rt_kprintf("thread1: get a mail, the content:%s\n", str);
+        /* 从邮箱中收取邮件 */
+        if (rt_mb_recv(&mb, (rt_uint32_t*)&str, RT_WAITING_FOREVER)
+                == RT_EOK)
+        {
+            /* 显示邮箱内容 */
+            rt_kprintf("thread1: get a mail, the content:%s\n", str);
 
-			/* 延时10个OS Tick */
-			rt_thread_delay(10);
-		}
-	}
+            /* 延时10个OS Tick */
+            rt_thread_delay(10);
+        }
+    }
 }
 
 /* 线程2入口 */
 static void thread2_entry(void* parameter)
 {
-	rt_uint8_t count;
+    rt_uint8_t count;
 
-	count = 0;
-	while (1)
-	{
-		count ++;
-		if (count & 0x1)
-		{
-			/* 发送mb_str1地址到邮箱中 */
-			rt_mb_send(&mb, (rt_uint32_t)&mb_str1[0]);
-		}
-		else
-		{
-			/* 发送mb_str2地址到邮箱中 */
-			rt_mb_send(&mb, (rt_uint32_t)&mb_str2[0]);
-		}
+    count = 0;
+    while (1)
+    {
+        count ++;
+        if (count & 0x1)
+        {
+            /* 发送mb_str1地址到邮箱中 */
+            rt_mb_send(&mb, (rt_uint32_t)&mb_str1[0]);
+        }
+        else
+        {
+            /* 发送mb_str2地址到邮箱中 */
+            rt_mb_send(&mb, (rt_uint32_t)&mb_str2[0]);
+        }
 
-		/* 延时20个OS Tick */
-		rt_thread_delay(20);
-	}
+        /* 延时20个OS Tick */
+        rt_thread_delay(20);
+    }
 }
 
 int mbox_simple_init()
@@ -1756,6 +1946,7 @@ int rt_application_init()
     return 0;
 }
 #endif
+
 ~~~
 
 ### 使用场合 ###
@@ -1807,22 +1998,22 @@ RT-Thread操作系统的消息队列对象由多个元素组成，当消息队�
 ### 消息队列控制块 ###
 
 ~~~{.c}
-	struct rt_messagequeue
-	{
-		struct rt_ipc_object parent;
+struct rt_messagequeue
+{
+    struct rt_ipc_object parent;
 
-		void* msg_pool;			/* 存放消息的消息池开始地址 */
+    void* msg_pool;			/* 存放消息的消息池开始地址 */
 
-		rt_uint16_t msg_size;	/* 每个消息的长度*/
-		rt_uint16_t max_msgs;	/* 最大能够容纳的消息数*/
+    rt_uint16_t msg_size;	/* 每个消息的长度*/
+    rt_uint16_t max_msgs;	/* 最大能够容纳的消息数*/
 
-		rt_uint16_t entry;		/* 队列中已有的消息数*/
+    rt_uint16_t entry;		/* 队列中已有的消息数*/
 
-		void* msg_queue_head;	/* 消息链表头*/
-		void* msg_queue_tail;	/* 消息链表尾*/
-		void* msg_queue_free;	/* 空闲消息链表*/
-	};
-	typedef struct rt_messagequeue* rt_mq_t;
+    void* msg_queue_head;	/* 消息链表头*/
+    void* msg_queue_tail;	/* 消息链表尾*/
+    void* msg_queue_free;	/* 空闲消息链表*/
+};
+typedef struct rt_messagequeue* rt_mq_t;
 ~~~
 
 rt_messagequeue对象从rt_ipc_object中派生，由IPC容器管理。
@@ -1837,24 +2028,28 @@ rt_messagequeue对象从rt_ipc_object中派生，由IPC容器管理。
 
 创建消息队列时先创建一个消息队列对象控制块，然后给消息队列分配一块内存空间，组织成空闲消息链表，这块内存的大小等于[消息大小+消息头（用于链表连接）]与消息队列容量的乘积，接着再初始化消息队列，此时消息队列为空。
 
-参数：
+**函数参数**
 
-+ name 		– 消息队列的名称；
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+          name  消息队列的名称；
 
-+ msg_size 	– 消息队列中一条消息的最大长度；
+      msg_size  消息队列中一条消息的最大长度；
 
-+ max_msgs 	– 消息队列的最大容量；
+      max_msgs  消息队列的最大容量；
 
-+ flag 		– 消息队列采用的等待方式，可以取值：
+          flag  消息队列采用的等待方式，可以取值：
+-----------------------------------------------------------------------
 
 ~~~{.c}
 #define RT_IPC_FLAG_FIFO 0x00 /* IPC参数采用FIFO方式*/
 #define RT_IPC_FLAG_PRIO 0x01 /* IPC参数采用优先级方式*/
 ~~~
 
-返回值：
+**函数返回**
 
-+ 成功创建返回消息队列对象的句柄；否则返回-RT_ERROR。
+成功创建返回消息队列对象的句柄；否则返回-RT_ERROR。
 
 #### 删除消息队列 ####
 
@@ -1864,13 +2059,19 @@ rt_messagequeue对象从rt_ipc_object中派生，由IPC容器管理。
 
 删除消息队列时，如果有线程被挂起在该消息队列等待队列上，则内核先唤醒挂起在该消息等待队列上的所有线程（返回值是 -RT_ERROR），然后再释放消息队列使用的内存，最后删除消息队列对象。
 
-参数：
+**函数参数**
 
-+ mq 			– 消息队列对象的句柄；
 
-返回值：
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+            mq  消息队列对象的句柄；
+-----------------------------------------------------------------------
 
-+ RT_EOK
+
+**函数返回**
+
+RT_EOK
 
 #### 初始化消息队列 ####
 
@@ -1880,28 +2081,34 @@ rt_messagequeue对象从rt_ipc_object中派生，由IPC容器管理。
 
 初始化消息队列时，该接口需要获得消息队列对象的句柄（即指向消息队列对象控制块的指针）、消息队列名、消息缓冲区指针、消息大小以及消息队列容量。如图6-9所示，消息队列初始化后所有消息都挂在空闲消息列表上，消息队列为空。
 
-参数：
+**函数参数**
 
-+ mq 			– 指向静态消息队列对象的句柄；
 
-+ name 		– 消息队列的名称；
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+            mq  指向静态消息队列对象的句柄；
 
-+ msgpool 	– 用于存放消息的缓冲区；
+          name  消息队列的名称；
 
-+ msg_size 	– 消息队列中一条消息的最大长度；
+       msgpool  用于存放消息的缓冲区；
 
-+ pool_size 	– 存放消息的缓冲区大小；
+      msg_size  消息队列中一条消息的最大长度；
 
-+ flag 		– 消息队列采用的等待方式，可以取值：
+     pool_size  存放消息的缓冲区大小；
+
+          flag  消息队列采用的等待方式，可以取值：
+-----------------------------------------------------------------------
+
 
 ~~~{.c}
 #define RT_IPC_FLAG_FIFO 0x00 /* IPC参数采用FIFO方式*/
 #define RT_IPC_FLAG_PRIO 0x01 /* IPC参数采用优先级方式*/
 ~~~
 
-返回值：
+**函数返回**
 
-+ RT_EOK
+RT_EOK
 
 #### 脱离消息队列 ####
 
@@ -1911,12 +2118,19 @@ rt_messagequeue对象从rt_ipc_object中派生，由IPC容器管理。
 
 使用该函数接口后，内核先唤醒所有挂在该消息等待队列对象上的线程（返回值是- RT_ERROR ），然后将该消息队列对象从内核对象管理器中删除。
 
-参数：
+**函数参数**
 
-+ mq 			– 指向静态消息队列对象的句柄；
-返回值：
 
-+ RT_EOK
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+            mq  指向静态消息队列对象的句柄；
+-----------------------------------------------------------------------
+
+
+**函数返回**
+
+RT_EOK
 
 ### 发送消息 ###
 
@@ -1926,16 +2140,23 @@ rt_messagequeue对象从rt_ipc_object中派生，由IPC容器管理。
 
 发送消息时，发送者需指定发送到的消息队列的对象句柄（即指向消息队列控制块的指针），并且指定发送的消息内容以及消息大小。如图6-9所示，在发送一个普通消息之后，空闲消息链表上的队首消息被转移到了消息队列尾。
 
-参数：
+**函数参数**
 
-+ mq 			– 消息队列对象的句柄；
 
-+ buffer 		– 指向发送消息数据内容的指针；
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+            mq  消息队列对象的句柄；
 
-+ size 		– 消息大小。
-返回值：
+        buffer  邮件内容；
 
-+ 发送成功返回RT_EOK，如果消息队列已满返回-RT_EFULL。
+          size  消息大小。
+-----------------------------------------------------------------------
+
+
+**函数返回**
+
+发送成功返回RT_EOK，如果消息队列已满返回-RT_EFULL。
 
 #### 发送紧急消息 ####
 
@@ -1945,14 +2166,23 @@ rt_messagequeue对象从rt_ipc_object中派生，由IPC容器管理。
 
 参数：
 
-+ mq 			– 消息队列对象的句柄；
+**函数参数**
 
-+ buffer 		– 指向发送消息数据内容的指针；
 
-+ size 		– 消息大小。
-返回值：
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+            mq  消息队列对象的句柄；
 
-+ 发送成功返回RT_EOK，如果消息队列已满返回-RT_EFULL。
+        buffer  邮件内容；
+
+          size  消息大小。
+-----------------------------------------------------------------------
+
+
+**函数返回**
+
+发送成功返回RT_EOK，如果消息队列已满返回-RT_EFULL。
 
 #### 接收消息 ####
 
@@ -1962,21 +2192,26 @@ rt_messagequeue对象从rt_ipc_object中派生，由IPC容器管理。
 
 接收消息时，接收者需指定存储消息的消息队列对象句柄，并且指定一个内存缓冲区，接收到的消息内容将被复制到该缓冲区里。此外，还需指定未能及时取到消息时的超时时间。如图6-9所示，接收一个消息后消息队列上的队首消息被转移到了空闲消息链表的尾部。
 
-参数：
+**函数参数**
 
-+ mq 			– 消息队列对象的句柄；
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+            mq  消息队列对象的句柄；
 
-+ buffer 		– 用于接收消息的数据块；
+        buffer  用于接收消息的数据块；
 
-+ size 		– 消息大小。
+          size  消息大小。
 
-+ timeout 	– 指定的超时时间。
+       timeout  指定的超时时间。
+-----------------------------------------------------------------------
 
-返回值：
 
-+ 成功收到返回RT_EOK，超时返回-RT_ETIMEOUT，其他返回-RT_ERROR。
+**函数返回**
 
-使用消息队列的例程如例6-8所示：
+成功收到返回RT_EOK，超时返回-RT_ETIMEOUT，其他返回-RT_ERROR。
+
+使用消息队列的例程如下例所示：
 
 ~~~{.c}
 /*
@@ -2003,68 +2238,68 @@ static char msg_pool[2048];
 /* 线程1入口函数 */
 static void thread1_entry(void* parameter)
 {
-	char buf[128];
+    char buf[128];
 
-	while (1)
-	{
-		rt_memset(&buf[0], 0, sizeof(buf));
+    while (1)
+    {
+        rt_memset(&buf[0], 0, sizeof(buf));
 
-		/* 从消息队列中接收消息 */
-		if (rt_mq_recv(&mq, &buf[0], sizeof(buf), RT_WAITING_FOREVER)
-				== RT_EOK)
-		{
-			/* 输出内容 */
-			rt_kprintf("thread1: recv a msg, the content:%s\n", buf);
-		}
+        /* 从消息队列中接收消息 */
+        if (rt_mq_recv(&mq, &buf[0], sizeof(buf), RT_WAITING_FOREVER)
+                == RT_EOK)
+        {
+            /* 输出内容 */
+            rt_kprintf("thread1: recv a msg, the content:%s\n", buf);
+        }
 
-		/* 延迟10个OS Tick */
-		rt_thread_delay(10);
-	}
+        /* 延迟10个OS Tick */
+        rt_thread_delay(10);
+    }
 }
 
 /* 线程2入口函数 */
 static void thread2_entry(void* parameter)
 {
-	int i, result;
-	char buf[] = "this is message No.x";
+    int i, result;
+    char buf[] = "this is message No.x";
 
-	while (1)
-	{
-		for (i = 0; i < 10; i++)
-		{
-			buf[sizeof(buf) - 2] = '0' + i;
+    while (1)
+    {
+        for (i = 0; i < 10; i++)
+        {
+            buf[sizeof(buf) - 2] = '0' + i;
 
-			rt_kprintf("thread2: send message - %s\n", buf);
-			/* 发送消息到消息队列中 */
-			result = rt_mq_send(&mq, &buf[0], sizeof(buf));
-			if ( result == -RT_EFULL)
-			{
-				/* 消息队列满， 延迟1s时间 */
-				rt_kprintf("message queue full, delay 1s\n");
-				rt_thread_delay(100);
-			}
-		}
+            rt_kprintf("thread2: send message - %s\n", buf);
+            /* 发送消息到消息队列中 */
+            result = rt_mq_send(&mq, &buf[0], sizeof(buf));
+            if ( result == -RT_EFULL)
+            {
+                /* 消息队列满， 延迟1s时间 */
+                rt_kprintf("message queue full, delay 1s\n");
+                rt_thread_delay(100);
+            }
+        }
 
-		/* 延时10个OS Tick */
-		rt_thread_delay(10);
-	}
+        /* 延时10个OS Tick */
+        rt_thread_delay(10);
+    }
 }
 
 /* 线程3入口函数 */
 static void thread3_entry(void* parameter)
 {
-	char buf[] = "this is an urgent message!";
+    char buf[] = "this is an urgent message!";
 
-	while (1)
-	{
-		rt_kprintf("thread3: send an urgent message\n");
+    while (1)
+    {
+        rt_kprintf("thread3: send an urgent message\n");
 
-		/* 发送紧急消息到消息队列中 */
-		rt_mq_urgent(&mq, &buf[0], sizeof(buf));
+        /* 发送紧急消息到消息队列中 */
+        rt_mq_urgent(&mq, &buf[0], sizeof(buf));
 
-		/* 延时25个OS Tick */
-		rt_thread_delay(25);
-	}
+        /* 延时25个OS Tick */
+        rt_thread_delay(25);
+    }
 }
 
 int messageq_simple_init()
@@ -2153,6 +2388,8 @@ int rt_application_init()
     return 0;
 }
 #endif
+
+
 ~~~
 
 ### 使用场合 ###
@@ -2165,41 +2402,41 @@ int rt_application_init()
 这个不限定长度的消息，也及时的反应到了代码编写的场合上，同样是类似邮箱的代码：
 
 ~~~{.c}
-	struct msg
-	{
-		rt_uint8_t *data_ptr;	/* 数据块首地址 */
-		rt_uint32_t data_size;	/* 数据块大小      */
-	};
+struct msg
+{
+    rt_uint8_t *data_ptr;	/* 数据块首地址 */
+    rt_uint32_t data_size;	/* 数据块大小      */
+};
 ~~~
 
 和邮箱例子相同的消息结构定义，假设依然需要发送这么一个消息给接收线程。在邮箱例子中，这个结构只能够发送指向这个结构的指针（在函数指针被发送过去后，接收线程能够正确的访问指向这个地址的内容，通常这块数据需要留给接收线程来释放）。而使用消息队列的方式则大不相同：
 
 ~~~{.c}
-    void send_op(void *data, rt_size_t length)
-    {
-        struct msg msg_ptr;
+void send_op(void *data, rt_size_t length)
+{
+    struct msg msg_ptr;
 
-        msg_ptr.data_ptr = data;  /* 指向相应的数据块地址 */
-        msg_ptr.data_size = length; /* 数据块的长度 */
+    msg_ptr.data_ptr = data;  /* 指向相应的数据块地址 */
+    msg_ptr.data_size = length; /* 数据块的长度 */
 
-        /* 发送这个消息指针给mq消息队列 */
-        rt_mq_send(mq, (void*)&msg_ptr, sizeof(struct msg));
-    }
+    /* 发送这个消息指针给mq消息队列 */
+    rt_mq_send(mq, (void*)&msg_ptr, sizeof(struct msg));
+}
 ~~~
 
 注意，上面的代码中，是把一个局部变量的数据内容发送到了消息队列中。在接收线程中，同样也采用局部变量进行消息接收的结构体：
 
 ~~~{.c}
-    void message_handler()
-    {
-		struct msg msg_ptr; /* 用于放置消息的局部变量 */
+void message_handler()
+{
+    struct msg msg_ptr; /* 用于放置消息的局部变量 */
 
-		/* 从消息队列中接收消息到msg_ptr中 */
-		if (rt_mq_recv(mq, (void*)&msg_ptr, sizeof(struct msg)) == RT_EOK)
-		{
-			/* 成功接收到消息，进行相应的数据处理 */
-		}
+    /* 从消息队列中接收消息到msg_ptr中 */
+    if (rt_mq_recv(mq, (void*)&msg_ptr, sizeof(struct msg)) == RT_EOK)
+    {
+        /* 成功接收到消息，进行相应的数据处理 */
     }
+}
 ~~~
 
 因为消息队列是直接的数据内容复制，所以在上面的例子中，都采用了局部变量的方式保存消息结构体，这样也就免去动态内存分配的烦恼了（也就不用担心，接收线程在接收到消息时，消息内存空间已经被释放）。
@@ -2214,17 +2451,17 @@ int rt_application_init()
 根据消息确认的不同，可以把消息结构体定义成：
 
 ~~~{.c}
-    struct msg
-    {
-        /* 消息结构其他成员 */
-        struct rt_mailbox ack;
-    };
-    /* 或者 */
-    struct msg
-    {
-        /* 消息结构其他成员 */
-        struct rt_semaphore ack;
-    };
+struct msg
+{
+    /* 消息结构其他成员 */
+    struct rt_mailbox ack;
+};
+/* 或者 */
+struct msg
+{
+    /* 消息结构其他成员 */
+    struct rt_semaphore ack;
+};
 ~~~
 
 第一种类型的消息使用了邮箱来作为确认标志，而第二种类型的消息采用了信号量来作为确认标志。邮箱做为确认标志，代表着接收线程能够通知一些状态值给发送线程；而信号量作为确认标志只能够单一的通知发送线程，消息已经确认接收。
