@@ -211,7 +211,7 @@ int rt_application_init(void)
 ----------------------------------  ----------------------------------------------------------
                   rt_timer_t timer  定时器句柄，指向要初始化的定时器控制块。
 
-				  const char* name  定时器的名称；
+                  const char* name  定时器的名称；
 
   void (*timeout)(void* parameter)  定时器超时函数指针（当定时器超时时，系统会调用这个函数）；
 
@@ -224,8 +224,8 @@ int rt_application_init(void)
 ----------------------------------------------------------------------------------------------
 
 ~~~{.c}
-#define RT_TIMER_FLAG_ONE_SHOT      0x0     /* 单次定时		*/
-#define RT_TIMER_FLAG_PERIODIC      0x2     /* 周期定时		*/
+#define RT_TIMER_FLAG_ONE_SHOT      0x0     /* 单次定时	    */
+#define RT_TIMER_FLAG_PERIODIC      0x2     /* 周期定时	    */
 #define RT_TIMER_FLAG_HARD_TIMER    0x0     /* 硬件定时器   */
 #define RT_TIMER_FLAG_SOFT_TIMER    0x4     /* 软件定时器   */
 ~~~
