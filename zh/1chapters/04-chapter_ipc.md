@@ -14,10 +14,9 @@
 
 关闭、打开中断接口由两个函数完成：
 
-* 关闭中断
+* 关闭中断 
 
-
-	rt_base_t rt_hw_interrupt_disable(void);
+    rt_base_t rt_hw_interrupt_disable(void);
 
 
 这个函数用于关闭中断并返回关闭中断前的中断状态。
@@ -30,7 +29,7 @@
 
 返回调用这个函数前的中断状态。
 
-* 恢复中断
+* 恢复中断 
 
 
     void rt_hw_interrupt_enable(rt_base_t level);
@@ -1299,7 +1298,8 @@ rt_event对象从rt_ipc_object 中派生，由IPC容器管理。
 
 RT_EOK
 
-初始化事件
+#### 初始化事件 ####
+
 静态事件对象的内存是在系统编译时由编译器分配的，一般放于数据段或ZI段中。在使用静态事件对象前，需要先行对它进行初始化操作。初始化事件使用下面的函数接口：
 
     rt_err_t rt_event_init(rt_event_t event, const char* name, rt_uint8_t flag);
@@ -1345,7 +1345,6 @@ RT_EOK
          event  事件对象的句柄。
 -----------------------------------------------------------------------
 
-
 **函数返回**
 
 RT_EOK
@@ -1354,7 +1353,8 @@ RT_EOK
 
 内核使用32位的无符号整型数来标识事件，它的每一位代表一个事件，因此一个事件对象可同时等待接收32个事件，内核可以通过指定选择参数“逻辑与”或“逻辑或”来选择如何激活线程，使用“逻辑与”参数表示只有当所有等待的事件都发生时才激活线程，而使用“逻辑或”参数则表示只要有一个等待的事件发生就激活线程。接收事件使用下面的函数接口：
 
-    rt_err_t rt_event_recv(rt_event_t event, rt_uint32_t set, rt_uint8_t option, rt_int32_t timeout, rt_uint32_t* recved);
+    rt_err_t rt_event_recv(rt_event_t event, rt_uint32_t set, rt_uint8_t option,
+                           rt_int32_t timeout, rt_uint32_t* recved);
 
 当用户调用这个接口时，系统首先根据set参数和接收选项来判断它要接收的事件是否发生，如果已经发生，则根据参数option上是否设置有RT_EVENT_FLAG_CLEAR来决定是否重置事件的相应标志位，然后返回（其中recved参数返回收到的事件）；
 如果没有发生，则把等待的set和option参数填入线程本身的结构中，然后把线程挂起在此事件对象上，直到其等待的事件满足条件或等待时间超过指定的超时时间。如果超时时间设置为零，则表示当线程要接受的事件没有满足其要求时就不等待，而直接返回-RT_TIMEOUT。
