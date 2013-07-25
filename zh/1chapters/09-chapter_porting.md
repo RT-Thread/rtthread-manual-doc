@@ -84,9 +84,9 @@
 
 Select Folder for Objects目录选择到bsp\\your_board\\build，Name of Executable为rtthread-stm32
  
-同样Select Folder for Listings选择stm32radio\examples\project\objs目录，如下图所示：
+同样Select Folder for Listings选择stm32radio\\examples\\project\\objs目录，如下图所示：
  
-C/C++编译选项标签页中，因为在项目中使用了ST的STM32固件库，需要在Define中添加STM32F10X_HD, USE_STDPERIPH_DRIVER的定义；在Include Paths（头文件搜索路径） 中添加上..\..\STM32F10x_Libraries\STM32F10x_StdPeriph_Driver\inc;..\..\STM32F10x_Libraries\CMSIS\CM3\CoreSupport;..\..\STM32F10x_Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x的路径包含；以及RT-Thread的头文件路径和STM32移植目录的路径：..\..\rt-thread\include;..\..\rt-thread\stm32目录，如下图所示：
+C/C++编译选项标签页中，因为在项目中使用了ST的STM32固件库，需要在Define中添加STM32F10X_HD, USE_STDPERIPH_DRIVER的定义；在Include Paths（头文件搜索路径） 中添加上..\\..\\STM32F10x_Libraries\\STM32F10x_StdPeriph_Driver\\inc;..\\..\\STM32F10x_Libraries\\CMSIS\\CM3\\CoreSupport;..\\..\\STM32F10x_Libraries\\CMSIS\\CM3\\DeviceSupport\\ST\\STM32F10x的路径包含；以及RT-Thread的头文件路径和STM32移植目录的路径：..\\..\\rt-thread\\include;..\\..\\rt-thread\\stm32目录，如下图所示：
  
 Asm，Linker，Debug和Utilities选项使用初始配置即可。
 
@@ -94,16 +94,16 @@ Asm，Linker，Debug和Utilities选项使用初始配置即可。
 
 * 添加STM32固件库源文件
 
-新添加Group：STM32_StdPeriph，然后把stm32radio\STM32F10x_Libraries\CMSIS和stm32radio\STM32F10x_Libraries\STM32F10x_StdPeriph_Driver\src目录中的所有C源文件都添加到Group中。
+新添加Group：STM32_StdPeriph，然后把stm32radio\\STM32F10x_Libraries\\CMSIS和stm32radio\\STM32F10x_Libraries\\STM32F10x_StdPeriph_Driver\\src目录中的所有C源文件都添加到Group中。
 
 * 添加RT-Thread相关源文件
 
-对工程中初始添加的Source Group1改名为Startup，并添加Kernel，STM32的Group，开始建立工程时产生的STM32F10x.s重命名为start_rvds.s并放到stm32radio\rt-thread\libcpu\arm\ stm32目录中。
-Kernel Group中添加所有stm32radio\rt-thread\kernel下的C源文件； Startup Group中添加startup.c，board.c文件（放于stm32radio\examples\project目录中）； STM32中添加context_rvds.s，start_rvds.s，fault_rvds.s，cpu.c,fault.c, interrupt.c, serial.c, stack.c等文件（放于stm32radio\rt-thread\stm32目录中）；
+对工程中初始添加的Source Group1改名为Startup，并添加Kernel，STM32的Group，开始建立工程时产生的STM32F10x.s重命名为start_rvds.s并放到stm32radio\\rt-thread\\libcpu\\arm\\ stm32目录中。
+Kernel Group中添加所有stm32radio\\rt-thread\\kernel下的C源文件； Startup Group中添加startup.c，board.c文件（放于stm32radio\\examples\\project目录中）； STM32中添加context_rvds.s，start_rvds.s，fault_rvds.s，cpu.c,fault.c, interrupt.c, serial.c, stack.c等文件（放于stm32radio\\rt-thread\\stm32目录中）；
 
 * 添加RT-Thread配置头文件
 
-在stm32radio\examples\project目录中添加rtconfig.h文件，内容如下：
+在stm32radio\\examples\\project目录中添加rtconfig.h文件，内容如下：
 
 ~~~{.c}
 /* RT-Thread配置文件 */
@@ -179,7 +179,7 @@ HardFault异常直接保留代码也没关系，只是当系统出现了fault异
 
 OS时钟在Cortex-M3中使用了统一的中断方式：SysTick。需要把它指向RT-Thread中正确的时钟中断处理函数：rt_hw_timer_handler。
 
-相应的更改如下：（rt-thread\libcpu\arm\stm32\start_rvds.S更改部分代码清单）
+相应的更改如下：（rt-thread\\libcpu\\arm\\stm32\\start_rvds.S更改部分代码清单）
 
 ~~~{.c}
     IMPORT  rt_hw_hard_fault
@@ -214,7 +214,7 @@ __Vectors     DCD     __initial_sp                  ; Top of Stack
 
 栈的初始化代码用于创建线程或初始化线程，“手工”的构造一份线程运行栈，相当于在线程栈上保留了一份线程从初始位置运行的上下文信息。在Cortex-M3体系结构中，当系统进入异常时，CPU Core会自动进行R0 – R3以及R12、psr、pc、lr等压栈，所以手工构造这个初始化栈时，也相应的把这些寄存器初始值放置到正确的位置。
 
-rt-thread\libcpu\arm\stm32\stack.c程序清单：
+rt-thread\\libcpu\\arm\\stm32\\stack.c程序清单：
 
 ~~~{.c}
 #include <rtthread.h>
@@ -269,7 +269,7 @@ rt_uint8_t *rt_hw_stack_init(void *tentry, void *parameter,
 
 * 上下文切换代码
 
-代码清单rt-thread\libcpu\arm\stm32\context_rvds.S：
+代码清单rt-thread\\libcpu\\arm\\stm32\\context_rvds.S：
 在RT-Thread中，中断锁是完全有芯片移植来实现的，参见 线程间同步与通信章节。以下是Cortex-M3上的开关中断实现，它是使用CPSID指令来实现的。
 
 ~~~{.c}
@@ -413,7 +413,7 @@ rt_hw_context_switch_to    PROC
 在最后一个中断服务例程结束时，Cortex M3将去处理PendSV异常，因为PendSV异常的优先级是最低的，所以只要触发过PendSV异常，它将总是在最后得到处理。
 Fault处理代码
 Fault处理代码并不是必须的，为了系统的完整性，实现fault处理代码无疑对系统出错时定位问题提供非常有利的帮助。
-rt-thread\libcpu\arm\stm32\fault.S代码清单：
+rt-thread\\libcpu\\arm\\stm32\\fault.S代码清单：
 
 ~~~{.c}
     AREA |.text|, CODE, READONLY, ALIGN=2
@@ -439,7 +439,7 @@ rt_hw_hard_fault    PROC
     END
 ~~~
 
-rt-thread\libcpu\arm\stm32\fautl.c代码清单：
+rt-thread\\libcpu\\arm\\stm32\\fautl.c代码清单：
 
 ~~~{.c}
 #include <rtthread.h>
