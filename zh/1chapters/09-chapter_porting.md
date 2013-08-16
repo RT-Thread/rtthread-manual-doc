@@ -70,24 +70,36 @@
     # prepare building environment
     objs = PrepareBuilding(env, RTT_ROOT, has_libcpu=True)
 
-这样后续不管是使用scons进行编译或者使用scons生成工程文件去编译，都将不会在rt-thread\\libcpu中芯片相关的这部分代码。
+这样后续不管是使用scons进行编译或者使用scons生成工程文件去编译，都将不会使用在rt-thread\\libcpu中芯片相关的这部分代码。
 
 ## RT-Thread在ARM Cortex M3上的移植 ##
 
 ### 建立RealView MDK工程 ###
 
-在bsp目录下新建project目录。在RealView MDK中新建立一个工程文件（用菜单创建），名称为project，保存在bsp\\your_board目录下。创建工程时一次的选项如下： CPU选择STMicroelectronics的STM32F103ZE：
+在bsp目录下新建project目录。在RealView MDK中新建立一个工程文件（用菜单创建），名称为project，保存在bsp\\your_board目录下。创建工程时一次的选项如 ***MDK CPU 选择示意图***： CPU选择STMicroelectronics的STM32F103ZE：
+
+![MDK CPU 选择示意图](figures/port_mdk_cpu.png)
  
 提问复制STM32的启动代码到工程目录，确认Yes
- 
-然后选择工程的属性，如下图
+
+![MDK增加启动代码](figures/port_mdk_startup.png)
+
+然后选择工程的属性，如 ***MDK工程Target设置图***
+
+![MDK工程Target设置图](figures/port_mdk_target.png)
 
 Select Folder for Objects目录选择到bsp\\your_board\\build，Name of Executable为rtthread-stm32
+
+![MDK工程OutPut设置图](figures/port_mdk_output.png)
  
-同样Select Folder for Listings选择stm32radio\\examples\\project\\objs目录，如下图所示：
+同样Select Folder for Listings选择stm32radio\\examples\\project\\objs目录，如 ***MDK工程Listing设置图*** 所示：
+
+![MDK工程Listing设置图](figures/port_mdk_listing.png)
  
-C/C++编译选项标签页中，因为在项目中使用了ST的STM32固件库，需要在Define中添加STM32F10X_HD, USE_STDPERIPH_DRIVER的定义；在Include Paths（头文件搜索路径） 中添加上..\\..\\STM32F10x_Libraries\\STM32F10x_StdPeriph_Driver\\inc;..\\..\\STM32F10x_Libraries\\CMSIS\\CM3\\CoreSupport;..\\..\\STM32F10x_Libraries\\CMSIS\\CM3\\DeviceSupport\\ST\\STM32F10x的路径包含；以及RT-Thread的头文件路径和STM32移植目录的路径：..\\..\\rt-thread\\include;..\\..\\rt-thread\\stm32目录，如下图所示：
- 
+C/C++编译选项标签页中，因为在项目中使用了ST的STM32固件库，需要在Define中添加STM32F10X_HD, USE_STDPERIPH_DRIVER的定义；在Include Paths（头文件搜索路径） 中添加上..\\..\\STM32F10x_Libraries\\STM32F10x_StdPeriph_Driver\\inc;..\\..\\STM32F10x_Libraries\\CMSIS\\CM3\\CoreSupport;..\\..\\STM32F10x_Libraries\\CMSIS\\CM3\\DeviceSupport\\ST\\STM32F10x的路径包含；以及RT-Thread的头文件路径和STM32移植目录的路径：..\\..\\rt-thread\\include;..\\..\\rt-thread\\stm32目录，如 ***MDK工程编译设置图*** 所示：
+
+![MDK工程编译设置图](figures/port_mdk_c.png)
+
 Asm，Linker，Debug和Utilities选项使用初始配置即可。
 
 ### 添加源文件 ###
@@ -237,35 +249,41 @@ rt-thread\\libcpu\\arm\\stm32\\stack.c程序清单：
 rt_uint8_t *rt_hw_stack_init(void *tentry, void *parameter,
     rt_uint8_t *stack_addr, void *texit)
 {
-    unsigned long *stk;
+    struct stack_frame *stack_frame;
+    rt_uint8_t         *stk;
+    unsigned long       i;
 
-    stk      = (unsigned long *)stack_addr;
-    *(stk)   = 0x01000000L;                     /* PSR */
-    *(--stk) = (unsigned long)tentry;           /* pc : 函数入口 */
-    *(--stk) = (unsigned long)texit;            /* lr : 线程退出时运行位置 */
-    *(--stk) = 0;                               /* r12 */
-    *(--stk) = 0;                               /* r3 */
-    *(--stk) = 0;                               /* r2 */
-    *(--stk) = 0;                               /* r1 */
-    *(--stk) = (unsigned long)parameter;        /* r0 : 入口参数 */
+    stk  = stack_addr + sizeof(rt_uint32_t);
+    stk  = (rt_uint8_t *)RT_ALIGN_DOWN((rt_uint32_t)stk, 8);
+    stk -= sizeof(struct stack_frame);
 
-    *(--stk) = 0;                               /* r11 */
-    *(--stk) = 0;                               /* r10 */
-    *(--stk) = 0;                               /* r9 */
-    *(--stk) = 0;                               /* r8 */
-    *(--stk) = 0;                               /* r7 */
-    *(--stk) = 0;                               /* r6 */
-    *(--stk) = 0;                               /* r5 */
-    *(--stk) = 0;                               /* r4 */
+    stack_frame = (struct stack_frame *)stk;
 
-    /* 返回栈初始位置 */
-    return (rt_uint8_t *)stk;
+    /* init all register */
+    for (i = 0; i < sizeof(struct stack_frame) / sizeof(rt_uint32_t); i ++)
+    {
+        ((rt_uint32_t *)stack_frame)[i] = 0xdeadbeef;
+    }
+
+    stack_frame->exception_stack_frame.r0  = (unsigned long)parameter; /* r0 : argument */
+    stack_frame->exception_stack_frame.r1  = 0;                        /* r1 */
+    stack_frame->exception_stack_frame.r2  = 0;                        /* r2 */
+    stack_frame->exception_stack_frame.r3  = 0;                        /* r3 */
+    stack_frame->exception_stack_frame.r12 = 0;                        /* r12 */
+    stack_frame->exception_stack_frame.lr  = (unsigned long)texit;     /* lr */
+    stack_frame->exception_stack_frame.pc  = (unsigned long)tentry;    /* entry point, pc */
+    stack_frame->exception_stack_frame.psr = 0x01000000L;              /* PSR */
+
+    /* return task's current stack address */
+    return stk;
 }
 
 /*@}*/
 ~~~
 
-最终形成的线程栈情况如下：
+最终形成的线程栈情况如 ***堆栈压入情况图*** ：
+
+![堆栈压入情况图](figures/port_stack_init.png)
 
 * 上下文切换代码
 
@@ -388,9 +406,17 @@ rt_hw_context_switch_to    PROC
         MOV     r0, #0x0
         STR     r0, [r1]
 
-        LDR     r0, =NVIC_SYSPRI2               ; 设置优先级
-        LDR     r1, =NVIC_PENDSV_PRI
-        STR     r1, [r0]
+		; set interrupt flag to 1
+		LDR     r1, =rt_thread_switch_interrupt_flag
+		MOV     r0, #1
+		STR     r0, [r1]
+		
+		; set the PendSV exception priority
+		LDR     r0, =NVIC_SYSPRI2
+		LDR     r1, =NVIC_PENDSV_PRI
+		LDR.W   r2, [r0,#0x00]       ; read
+		ORR     r1,r1,r2             ; modify
+		STR     r1, [r0]             ; write-back
 
         LDR     r0, =NVIC_INT_CTRL
         LDR     r1, =NVIC_PENDSVSET
@@ -400,11 +426,15 @@ rt_hw_context_switch_to    PROC
         ENDP
 ~~~
 
-正常模式下的线程上下文切换的过程可以用下图来表示：
+正常模式下的线程上下文切换的过程可以用下 ***正常模式上下文切换图*** 示：
+
+![正常模式上下文切换图](figures/port_thread_switch.png)
  
 当要进行切换时（假设从Thread from 切换到Thread to），通过rt_hw_context_switch()函数触发一个PenSV异常。异常产生时，Cortex M3会把PSR，PC，LR，R0 – R3，R12自动压入当前线程的栈中，然后切换到PenSV异常处理。到PenSV异常后，Cortex M3工作模式（从Thread模式）切换到Handler模式，由函数rt_hw_pend_sv进行处理。rt_hw_pend_sv函数会载入切换出线程（Thread from）和切换到线程（Thread to）的栈指针，如果切换出线程的栈指针是0那么表示这是系统启动时的第一次线程上下文切换，不需要对切换出线程做压栈动作。如果切换出线程栈指针非零，则把剩余未压栈的R4 – R11寄存器依次压栈；然后从切换到线程栈中恢复R4 – R11寄存器。当从PendSV异常返回时，PSR，PC，LR，R0 – R3，R12等寄存器由Cortex M3自动恢复。
 
-因为中断而导致的线程切换可用下图表示：
+因为中断而导致的线程切换可用 ***中断模式上下文切换图*** 表示：
+
+![中断模式上下文切换图](figures/port_int_thread.png)
 
 当中断达到时，当前线程会被中断并把PC，PSR，R0 – R3，R12等压到当前线程栈中，工作模式（从Thread模式）切换到Handler模式。
 
@@ -426,10 +456,19 @@ rt-thread\\libcpu\\arm\\stm32\\fault.S代码清单：
 rt_hw_hard_fault    PROC
     EXPORT rt_hw_hard_fault
 
-    ; 获得线程栈上压入的上下文，并赋值到R0
-    MRS     r0, psp
-    PUSH    {lr}                        ; 压入LR寄存器
-    BL      rt_hw_hard_fault_exception  ; 调用fault处理的C函数
+    ; get current context
+    TST     lr, #0x04               ; if(!EXC_RETURN[2])
+    MRSNE   r0, msp                 ; get fault context from handler.
+    MRSEQ   r0, psp                 ; get fault context from thread.
+
+    STMFD   r0!, {r4 - r11}         ; push r4 - r11 register
+    STMFD   r0!, {lr}               ; push exec_return register
+
+    MSRNE   msp, r0                 ; update stack pointer to MSP.
+    MSREQ   psp, r0                 ; update stack pointer to PSP.
+
+    PUSH    {lr}
+    BL      rt_hw_hard_fault_exception
     POP     {lr}
 
     ORR     lr, lr, #0x04               ; 从fault中返回
@@ -445,7 +484,7 @@ rt-thread\\libcpu\\arm\\stm32\\fautl.c代码清单：
 #include <rtthread.h>
 
 /* CM3硬件压栈时的寄存器结构 */
-struct stack_contex
+struct exception_stack_frame
 {
     rt_uint32_t r0;
     rt_uint32_t r1;
@@ -457,27 +496,55 @@ struct stack_contex
     rt_uint32_t psr;
 };
 
-extern void list_thread(void);
-extern rt_thread_t rt_current_thread;
-void rt_hw_hard_fault_exception(struct stack_contex* contex)
+void rt_hw_hard_fault_exception(struct exception_info * exception_info)
 {
-    /* 输出出错时的寄存器情况，PC、LR、PSR应重点关注  */
-    rt_kprintf("psr: 0x%08x\n", contex->psr);
-    rt_kprintf(" pc: 0x%08x\n", contex->pc);
-    rt_kprintf(" lr: 0x%08x\n", contex->lr);
-    rt_kprintf("r12: 0x%08x\n", contex->r12);
-    rt_kprintf("r03: 0x%08x\n", contex->r3);
-    rt_kprintf("r02: 0x%08x\n", contex->r2);
-    rt_kprintf("r01: 0x%08x\n", contex->r1);
-    rt_kprintf("r00: 0x%08x\n", contex->r0);
+    extern long list_thread(void);
+    struct stack_frame* context = &exception_info->stack_frame;
 
-    /* 输出当前线程的名称 */
-    rt_kprintf("hard fault on thread: %s\n", rt_current_thread->name);
+    if (rt_exception_hook != RT_NULL)
+    {
+        rt_err_t result;
+
+        result = rt_exception_hook(exception_info);
+        if (result == RT_EOK)
+            return;
+    }
+
+    rt_kprintf("psr: 0x%08x\n", context->exception_stack_frame.psr);
+
+    rt_kprintf("r00: 0x%08x\n", context->exception_stack_frame.r0);
+    rt_kprintf("r01: 0x%08x\n", context->exception_stack_frame.r1);
+    rt_kprintf("r02: 0x%08x\n", context->exception_stack_frame.r2);
+    rt_kprintf("r03: 0x%08x\n", context->exception_stack_frame.r3);
+    rt_kprintf("r04: 0x%08x\n", context->r4);
+    rt_kprintf("r05: 0x%08x\n", context->r5);
+    rt_kprintf("r06: 0x%08x\n", context->r6);
+    rt_kprintf("r07: 0x%08x\n", context->r7);
+    rt_kprintf("r08: 0x%08x\n", context->r8);
+    rt_kprintf("r09: 0x%08x\n", context->r9);
+    rt_kprintf("r10: 0x%08x\n", context->r10);
+    rt_kprintf("r11: 0x%08x\n", context->r11);
+    rt_kprintf("r12: 0x%08x\n", context->exception_stack_frame.r12);
+    rt_kprintf(" lr: 0x%08x\n", context->exception_stack_frame.lr);
+    rt_kprintf(" pc: 0x%08x\n", context->exception_stack_frame.pc);
+
+    if(exception_info->exc_return & (1 << 2) )
+    {
+        rt_kprintf("hard fault on thread: %s\r\n\r\n", rt_thread_self()->name);
+
 #ifdef RT_USING_FINSH
-    /* 列表系统中的线程情况 */
-    list_thread();
-#endif
-    /* 进入死循环，如果去掉while(1)，那么系统将能够从fault中返回 */
+        list_thread();
+#endif /* RT_USING_FINSH */
+    }
+    else
+    {
+        rt_kprintf("hard fault on handler\r\n\r\n");
+    }
+
+#ifdef RT_USING_FINSH
+    hard_fault_track();
+#endif /* RT_USING_FINSH */
+
     while (1);
 }
 ~~~
@@ -502,3 +569,209 @@ void rt_hw_interrupt_xx_handler(void)
 ~~~
 
 rt_interrupt_enter()函数会通知OS进入到中断处理模式（相应的线程切换行为会有些变化）；rt_interrupt_leave()函数会通知OS离开了中断处理模式。
+
+## RT-Thread在ARM Cortex M4上的移植 ##
+
+RT-thread支持SCONS工具,可以简单的创建工程文件,编译,下面将以移植MK60开发板为目标讲解
+
+SCONS创建MDK工程是以给定的Keil工程的模板为基础,通过SCONS把一些配置信息,文件,包含目录等加入到最后生成的工程中.
+
+必要的,首先需要创建一个模板工程,就像创建普通MDK工程那样,但是一定要命名为 `template.uvproj` ,作为基础模板
+
+### 生成MDK工程模板 ###
+
+同移植Cortex-M3的一些基本步骤,同样创建MDK工程,CPU选择 `freescale Semiconductor`  中的 `MK60FN1M0xxx12`  ,询问是否添加启动代码 `startup_MK60F12.s`   时选择No,因为所有文件的加入,头文件的Include这些都是根据SCONS来加入的,不用MDK模板操心,所以,启动文件也应该由我们自己掌控.
+
+![K60 CPU 选择示意图](figures/port_mk60_cpu.png)
+
+在 `Output` 选项卡中,选择工程的属性,Select Folder for Objects目录选择到 `bsp\your_board\build` ，`Name of Executable` 为rtthread-mk60f120m
+
+在 `Output` 选项卡中,可以勾选 `Browse Information` 这样可以支持右键函数,宏定义跳转.
+
+![K60 Output 选项卡示意图](figures/port_mk60_output.png)
+
+在 `Listing` 选项卡中,同样 `Select Folder for Listings` 选择 `bsp\your_board\build` 目录.
+
+![K60 Listing 选项卡示意图](figures/port_mk60_listing.png)
+
+在 `Debug` 和 `Utilities` 选项卡中选择K60相应的 `pemicro_OSJtag` 
+
+![K60 Debug 选项卡示意图](figures/port_mk60_debug.png)
+
+![K60 Utilities 选项卡示意图](figures/port_mk60_utilities.png)
+
+Asm，Linker,选项使用初始配置即可.
+
+删除project目录下所有文件与文件夹,保证所有的文件结构增加由SCONS管理,保存此模板,确认名称为`template.uvproj`
+
+![K60项目文件示意图](figures/port_mk60_file.png)
+
+### 仿照并修改SCONS相关文件 ###
+
+有了MDK的模板,那生成MDK工程文件的基石就有了,接下来需要SCONS的相关脚本文件来完成工程的生成.
+
+由于是Cortex-M4内核,所以可以直接从相同内核的bsp中拷贝以下这几个文件来使的SCONS能够生成MDK工程,比如,从 `bsp\stm32f40x` 中拷贝:
+
+- rtconfig.py
+- SConscript
+- SConstruct
+
+相关文件的具体意义和作用可以参考[这篇文章](http://www.rt-thread.org/dokuwiki/doku.php?id=rt-thread%E4%B8%AD%E7%9A%84scons%E4%BD%BF%E7%94%A8%E8%AF%A6%E8%A7%A3 "RT-Thread中的SCons使用详解")
+
+直接修改 `rtconfig.py` 中相关段落,本次移植主要关注MDK上的移植,可以直接忽略gcc和iar部分,与MDK相关的重点如下:
+
+- 确认如下字段
+
+~~~{.c}
+# toolchains options
+ARCH='arm'
+CPU='cortex-m4'
+CROSS_TOOL='keil'	/* 使用keil */	
+~~~
+
+- 设置Keil路径
+
+~~~{.c}
+elif CROSS_TOOL == 'keil':
+	PLATFORM 	= 'armcc'
+	EXEC_PATH 	= 'C:/Keil'
+~~~
+
+- 修改map文件名
+
+~~~{.c}
+LFLAGS = DEVICE + ' --info sizes --info totals --info unused --info veneers 
+		--list rtthread-k60.map --scatter k60_rom.sct'
+~~~
+
+其中,CPU类型告诉RT-Thread会去采用哪种CPU类型去加入libcpu中的文件,CROSS_TOOL则指定了编译工具链
+
+### 添加其他相关文件 ###
+
+添加rtconfig.h到bsp目录下,SCONS会根据rtconfig.h中的宏定义来加载相关 `.h` 和 `.c` 文件,具体可以参考 `RT-Thread在ARM Cortex M3上的移植` 中的 `添加RT-Thread配置头文件` 部分的注释,只是使用的话可以直接参考类似架构的MCU,进行小部分修改即可,比如,与MK60同是Cortex-M4内核的STM32F4等bsp的文件,然后根据自己的需要进行更改.
+
+在工程目录下增加启动文件(K60的启动文件 `startup_MK60F12.s` 可以在 `Keil\ARM\Startup\Freescale\Kinetis` 中找到,)
+
+在工程文件夹下新建drivers文件夹,用于存放bsp的相关驱动,并且在drivers目录下新建SConscript脚本,使得SCONS能够自动加载drivers中的文件到MDK工程中,同样可以拷贝stm32f40x/drivers中的SConscript:
+
+~~~{.c}
+Import('RTT_ROOT')
+Import('rtconfig')
+from building import *
+		
+cwd     = os.path.join(str(Dir('#')), 'drivers')
+src	= Glob('*.c')	/* 将.c文件加入工程 */
+src	+= Glob('*.s')	/* 将.s文件加入工程,启动脚本也放在了drivers中 */
+CPPPATH = [cwd]
+
+/* 在MDK工程中加入Drivers文件夹 */	
+group = DefineGroup('Drivers', src, depend = [''], CPPPATH = CPPPATH)
+
+Return('group')
+~~~
+
+在drivers目录下,新建 `board.h` 和 `board.c` 文件, `board.h` 里需要有bsp的相关定义和相关特性定义;而 `board.c` 中需要提供系统时钟,NVIC等bsp基本硬件初始化,一般还会提供 `rt_hw_board_init()` 完成所有板级基本硬件初始化,和 `SysTick_Handler()` 系统tick时钟ISR(板级相关)
+
+在工程文件夹下新建applications文件夹,拷贝SConscript脚本,创建 `startup.c` ,其中应该有main(startup汇编文件中定义的入口),这部分可以参考其他bsp步骤来完成(包括application.c的实现)
+
+**注意:**
+
+- 板级相关的宏定义等应该在 `board.h` 中,而不是 `rtconfig.h` 中, `rtconfig.h` 中的宏定义是OS层使用的,所以所有的bsp相关定义应当与 `rtconfig.h` 去相关.
+- 由于属于通用Cortex-M4,所以MCU内核部分可以不用过多的关心,对于任何一款Cortex-M4/M3的MCU,只需要处理系统时钟初始化(主要是systick初始化),NVIC基础配置,并且完成systick中断的ISR即可,相关部分的[代码](https://github.com/RT-Thread/rt-thread/tree/master/libcpu/arm/cortex-m4 "Cortex-M4内核部分代码分析")会在下节中分析.在Cortex-M3移植中谈到的 `PendSV_Handler()`  `PenSV()`  `HardFault_Handler()` 已经被 `\libcpu\arm\cortex-m4\context_rvds.S` 中 `PendSV_Handler   PROC` 所接管(只要在startup文件中相关ISR名字正确)
+- 对于 `systick` 中断,RT-Thread已经有相关的中断处理函数,对于不同的bsp,只需要在bsp中相关 `SysTick_Handler()` 调用即可,相对是很固定的模式,就像9.4 RT-Thread/STM32其他部分说明中的模板那样:
+
+~~~{.c}
+void SysTick_Handler(void)
+{
+    /* enter interrupt */
+    rt_interrupt_enter();
+		
+    rt_tick_increase();
+		
+    /* leave interrupt */
+    rt_interrupt_leave();
+}
+~~~
+
+- 对于Systick Timer和NVIC的配置,可以使用ARM标准CMSIS库中的函数进行配置,相关函数和帮助可以参考 `Keil\ARM\CMSIS\index.html` 
+- 需要根据不同的MCU检查堆栈的配置,在 `rt_system_heap_init(...);` 时给出正确的地址RAM段范围.
+
+
+这样,基本的模板就已经实现了,可以在命令行中执行 `scons --target=mdk4 -S` ,得到项目文件.
+
+### Cortex-M4中的内核相关代码分析 ###
+
+下面将以MDK环境为主,分析RT-Thread与Cortex-M4相关的主要的代码(context_rvds.S)
+
+context_rvds.S中主要包括了一下几个部分
+
+- 中断控制系列(中断开关)
+- 上下文切换系列
+
+    void rt_hw_context_switch(rt_uint32 from, rt_uint32 to);
+    void rt_hw_context_switch_to(rt_uint32 to);
+
+- Handler系列( `PendSV_Handler` , `HardFault_Handler` )
+
+与Cortex-M3一样,Cortex-M4的开关中断同样是使用CPSID指令来实现的,参考本文Cortex-M3分析部分
+
+与Cortex-M3不同,上下文切换部分和pendSV部分的代码多了诸如 `IF {FPU} != "SoftVFP"` 这样的代码段,这是在MDK编译选项中使用不同FPU类型产生的.
+
+打开Target Options-Target选项卡,其中Code Generation中有Floating Point Hardware选项,如 ***MDK中FPU设置图*** 所示
+
+![MDK中FPU设置图](figures/port_FPU_Options.png)
+
+有如下2个选项:Not Used和Use FPU选项
+
+- Not Used 会在C/C++选项卡,编译控制中产生--cpu Cortex-M4,即使用Cortex-M4编译
+- Use FPU在C/C++选项卡,编译控制中产生--cpu Cortex-M4.fp
+
+FPU是Cortex-M4浮点运算的可选单元。它是一个专用于浮点任务的单元。这个单元通过硬件提升性能，能处理单精度浮点运算，并与IEEE 754标准 兼容.当选择了Not Used时,即不使用硬件FPU,编译时FPU就等于SoftVFP;而选择USE FPU时,cpu变为了Cortex-M4.fp,此时,会默认按照 `--fpu=vfpv4-spvfpv4_sp_d16` 来进行编译,即使用了硬件FPU,此时,FPU!="SoftVFP",于是IF语句块成立.
+
+
+	关于更多fpu编译的信息可以参考MDK的帮助文件:
+	
+	ARM Compiler toolchain v5.02 for µVision Using the Compiler
+	
+	Home > Compiler Coding Practices > Processors and their implicit Floating-Point Units (FPUs) 
+
+PendSV_Handler中增量代码分析:
+
+~~~{.c}
+	
+IF      {FPU} != "SoftVFP"
+TST     lr, #0x10               ; 判断EXC_RETURN[4]是否置位
+VSTMFDEQ  r1!, {d8 - d15}       ; EXC_RETURN[4]置位则push{d8~d15},!表示自增,STMFD=STMDB
+ENDIF
+~~~
+
+当系统产生异常(中断)时,首先会自动进行硬件入栈行为,对于Cortex-M3,会入栈xPSR,PC,LR,R12,R3~R0,这些寄存器被称为basic frame(参考ARMv7-M Architecture Reference Manual第648页),与于Cortex-M4,在入栈basic frame之前,还会入栈extended frame,即,把d0~d8入栈,然后入栈xPSR,PC,LR,R12,R3~R0,所以,如果要完整的保护上下文切换的状态,还需要入栈d8~d15,如 ***启用FPU后自动入栈顺序图*** 所示
+
+![启用FPU后自动入栈顺序图](figures/port_FPU_push_stack.png)
+
+并且对于FPU需要使用V指令(参考 `ARM Cortex-M4 Processor Technical Reference Manual` 第69页7.2.3 FPU instruction set)
+
+~~~{.c}
+;以下代码为了保存CONTROL.FPCA
+IF      {FPU} != "SoftVFP"
+MOV     r4, #0x00               ; 先r4清零
+	
+TST     lr, #0x10               ; if(!EXC_RETURN[4])
+MOVEQ   r4, #0x01               ; CONTROL.FPCA=1的话,r4=1
+	
+STMFD   r1!, {r4}               ; push CONTROL.FPCA
+ENDIF
+~~~
+
+有了保存现场,那么当切回时应该还原:
+
+~~~{.c}
+;还原CONTROL.FPCA
+IF      {FPU} != "SoftVFP"
+LDMFD   r1!, {r3}               ; pop flag
+ENDIF
+~~~
+
+其他部分代码与Cortex-M3几乎一样,请参考Cortex-M3移植分析部分.
+
+至此RT-Thread在MK60上的内核移植完成.
