@@ -20,21 +20,27 @@
 在移植之前，应该对RT-Thread的目录结构有一定的了解：
 
     RT-Thread
-    +---bsp
+    +---bsp					/* 板级支持包,所有支持的芯片可以在这里面找到 */
     |   \--- stm32f40x
-    +---components
+	|   \--- simulator
+	|   \--- stm32f0x
+	|   \--- stm32f107
+    +---components			/* RT-Thread支持的组件文件夹 */
     +---include
-    +---libcpu
+    +---libcpu				/* CPU内核的代码 */
     |   \---arm
     |       \---cortex-m4
-    +---src
-    \---tools
+    |       \---cortex-m3
+    +---src					/* RT-Thread内核代码 */
+    +---tools				/* 工具脚本文件夹 */
 
-其中，include和src目录用于放置RT-Thread的实时核心；components目录用于放置各类组件；tools是用于放置RT-Thread的构建环境scons的一些扩展脚本；bsp和libcpu则是移植相关的部分。
+其中，include和src目录用于放置RT-Thread的实时核心代码文件；components目录用于放置各类组件；tools是用于放置RT-Thread的构建环境scons的一些扩展脚本；bsp和libcpu则是移植相关的部分。
 
 **注**
 
-通常来说，对于一个移植除了bsp、libcpu目录以外，其他的目录和文件不应该被修改。只有在你需要支持一种新的编译器，才可能修改到include\\rtdef.h和finsh等相关的代码。当要支持一种新的编译器，同时希望包括在开发分支内时，请联系内核的维护人以解决相关的问题，或给与适当的指导。
+通常来说，对于一个移植除了bsp、libcpu目录以外，其他的目录和文件不应该被修改,而且对于一种已知完成移植的内核(比如Cortex-M3,Cortex-M4等),其libcpu部分也已经存在,完全没有重写的必要,只要完成相关bsp移植部分即可。
+
+只有在你需要支持一种新的编译器，才可能修改到include\\rtdef.h和finsh等相关的代码。当要支持一种新的编译器，同时希望包括在开发分支内时，请联系内核的维护人以解决相关的问题，或给与适当的指导。
 
 在了解了RT-Thread的目录，以及知道自己应该修改哪里的代码后，应该了解RT-Thread移植的两种模式：
 
@@ -43,7 +49,7 @@
 
 对于第二种情况，可以按照如下的方式组织自己的移植：
 
-    YourProject
+    your_board
     +---applications
     +---components
     +---cpu
@@ -74,13 +80,15 @@
 
 ## RT-Thread在ARM Cortex M3上的移植 ##
 
+下面将以RT-Thread在STM32F103ZE为例,介绍纯手工,利用现有框架在Keil MDK上移植RT-Thread的过程,当然,如果觉得许多配置等麻烦,可以参考 ` RT-Thread在ARM Cortex M4上的移植 ` 里面介绍了基于模板的自动配置工程方法.
+
 ### 建立RealView MDK工程 ###
 
 在bsp目录下新建project目录。在RealView MDK中新建立一个工程文件（用菜单创建），名称为project，保存在bsp\\your_board目录下。创建工程时一次的选项如 ***MDK CPU 选择示意图***： CPU选择STMicroelectronics的STM32F103ZE：
 
 ![MDK CPU 选择示意图](figures/port_mdk_cpu.png)
  
-提问复制STM32的启动代码到工程目录，确认Yes
+提问复制STM32的启动代码到工程目录，选择No，我们需要使用库中的启动文件
 
 ![MDK增加启动代码](figures/port_mdk_startup.png)
 
@@ -92,11 +100,27 @@ Select Folder for Objects目录选择到bsp\\your_board\\build，Name of Executa
 
 ![MDK工程OutPut设置图](figures/port_mdk_output.png)
  
-同样Select Folder for Listings选择stm32radio\\examples\\project\\objs目录，如 ***MDK工程Listing设置图*** 所示：
+同样Select Folder for Listings选择bsp\\your_board\\objs目录，如 ***MDK工程Listing设置图*** 所示：
 
 ![MDK工程Listing设置图](figures/port_mdk_listing.png)
+
+如 ***MDK工程编译设置图*** 所示：
  
-C/C++编译选项标签页中，因为在项目中使用了ST的STM32固件库，需要在Define中添加STM32F10X_HD, USE_STDPERIPH_DRIVER的定义；在Include Paths（头文件搜索路径） 中添加上..\\..\\STM32F10x_Libraries\\STM32F10x_StdPeriph_Driver\\inc;..\\..\\STM32F10x_Libraries\\CMSIS\\CM3\\CoreSupport;..\\..\\STM32F10x_Libraries\\CMSIS\\CM3\\DeviceSupport\\ST\\STM32F10x的路径包含；以及RT-Thread的头文件路径和STM32移植目录的路径：..\\..\\rt-thread\\include;..\\..\\rt-thread\\stm32目录，如 ***MDK工程编译设置图*** 所示：
+C/C++编译选项标签页中，因为在项目中使用了ST的STM32固件库，需要在Define中添加如下2个定义
+
+* STM32F10X_HD
+* USE_STDPERIPH_DRIVER
+
+在Include Paths（头文件搜索路径）中添加上ST固件库中需要Include的目录:
+
+* Libraries\\STM32F10x_StdPeriph_Driver\\inc;
+* Libraries\\CMSIS\\CM3\\CoreSupport;
+* Libraries\\CMSIS\\CM3\\DeviceSupport\\ST\\STM32F10x
+
+以及RT-Thread的头文件路径和STM32移植目录的路径：
+
+* ..\\..\\include;
+* ..\\..\\libcpu\\arm\\cortex-m3，
 
 ![MDK工程编译设置图](figures/port_mdk_c.png)
 
@@ -104,18 +128,26 @@ Asm，Linker，Debug和Utilities选项使用初始配置即可。
 
 ### 添加源文件 ###
 
-* 添加STM32固件库源文件
+* 添加STM32固件库源文件,新添加Group：STM32_StdPeriph，然后把以下2个目录中的所有C源文件都添加到Group中
 
-新添加Group：STM32_StdPeriph，然后把stm32radio\\STM32F10x_Libraries\\CMSIS和stm32radio\\STM32F10x_Libraries\\STM32F10x_StdPeriph_Driver\\src目录中的所有C源文件都添加到Group中。
+1.bsp\\your_board\\Libraries\\CMSIS
+2.bsp\\your_board\\Libraries\\STM32F10x_StdPeriph_Driver\\src
+3.bsp\\your_board\\Libraries\\CMSIS\\CM3\\DeviceSupport\\ST\\STM32F10x\\startup\\arm\\startup_stm32f10x_hd.s
 
 * 添加RT-Thread相关源文件
 
-对工程中初始添加的Source Group1改名为Startup，并添加Kernel，STM32的Group，开始建立工程时产生的STM32F10x.s重命名为start_rvds.s并放到stm32radio\\rt-thread\\libcpu\\arm\\ stm32目录中。
-Kernel Group中添加所有stm32radio\\rt-thread\\kernel下的C源文件； Startup Group中添加startup.c，board.c文件（放于stm32radio\\examples\\project目录中）； STM32中添加context_rvds.s，start_rvds.s，fault_rvds.s，cpu.c,fault.c, interrupt.c, serial.c, stack.c等文件（放于stm32radio\\rt-thread\\stm32目录中）；
+对工程中初始添加的Source Group1改名为Applications，并添加Kernel，Cortex-M3，Drivers的Group
+
+在Cortex-M3分组中,加入libcpu\\arm\\cortex-m3里的context_rvds.S和cpuport.c文件,以及libcpu\\arm\\common中的backtrace.c,div0.cshowmem.c
+
+Kernel Group中添加所有\\src下的C源文件； 
+
+Applications Group中添加startup.c文件（放于bsp\\your_board\\applications目录中）；
+Drivers Group中添加board.c文件（放于bsp\\your_board\\drivers目录中）；
 
 * 添加RT-Thread配置头文件
 
-在stm32radio\\examples\\project目录中添加rtconfig.h文件，内容如下：
+在bsp\\your_board目录中添加rtconfig.h文件，内容如下：
 
 ~~~{.c}
 /* RT-Thread配置文件 */
@@ -176,67 +208,64 @@ Kernel Group中添加所有stm32radio\\rt-thread\\kernel下的C源文件； Star
 
 在Keil MDK自动生成的启动代码中，由于STM32的中断处理方式是以中断向量表的方式进行，所以将不再使用中断统一入口的方式进行，启动代码可以大部分使用这份启动代码。主要修改在：
 
+对于大多数已知的CPU,尤其是内核相同的CPU,他们的启动代码非常相似,可以直接使用标准启动代码,比如说STM32F103ZET6是Cortex-M3内核的,那就可以直接使用已有的启动代码,好处是,这些启动代码都是官方给出的,而且,对于同一种内核来说,基本上都是相同的,比如说异常的入口地址,一般的异常Handler名称等.RT-Thread默认这些Handler都是固定(一般来说都是这样),在内核中已经有相关的Handler处理函数,可以被异常直接调用,省去了修改等的麻烦
+
+一般来说,在移植过程中需要用确认几个异常入口以及变量正确:
+
 1. 栈尺寸
 
-MDK生成的启动代码默认的栈尺寸是0x200，如果中断服务例程使用的栈尺寸需要不高，可以使用默认值。
+如果中断服务例程使用的栈尺寸需要不高，可以使用默认值。
 Stack_Size      EQU     0x00000200
 
-2. PenSV异常。由于PenSV异常在context_rvds.S中实现，需要更改名称为rt_hw_pend_sv。
+2. PenSV异常
 
-3. HardFault异常
+PendSV_Handler在context_rvds.S中实现,完成上下文切换.
 
-HardFault异常直接保留代码也没关系，只是当系统出现了fault异常时，并不容易看到。为完善代码起见，把它更改为rt_hw_hard_fault。
+3. HardFault_Handler异常
+
+HardFault异常直接保留代码也没关系，只是当系统出现了fault异常时，并不容易看到。为完善代码起见，在context_rvds.S中有相关Fault信息输出代码,入口名称为HardFault_Handler异常。
 
 4. 时钟中断
 
-OS时钟在Cortex-M3中使用了统一的中断方式：SysTick。需要把它指向RT-Thread中正确的时钟中断处理函数：rt_hw_timer_handler。
+OS时钟在Cortex-M3中使用了统一的中断方式：SysTick_Handler。需要在bsp的drivers的board.c中调用rt_tick_increase();
 
-相应的更改如下：（rt-thread\\libcpu\\arm\\stm32\\start_rvds.S更改部分代码清单）
+相应的启动代码如下：
 
 ~~~{.c}
-    IMPORT  rt_hw_hard_fault
-    IMPORT  rt_hw_pend_sv
-    IMPORT  rt_hw_timer_handler
-
 ; Vector Table Mapped to Address 0 at Reset
                 AREA    RESET, DATA, READONLY
                 EXPORT  __Vectors
                 EXPORT  __Vectors_End
                 EXPORT  __Vectors_Size
 
-__Vectors     DCD     __initial_sp                  ; Top of Stack
-                DCD     Reset_Handler               ; Reset Handler
-                DCD     NMI_Handler                 ; NMI Handler
-                DCD     rt_hw_hard_fault            ; Hard Fault Handler
-                DCD     MemManage_Handler           ; MPU Fault Handler
-                DCD     BusFault_Handler            ; Bus Fault Handler
-                DCD     UsageFault_Handler          ; Usage Fault Handler
-                DCD     0                           ; Reserved
-                DCD     0                           ; Reserved
-                DCD     0                           ; Reserved
-                DCD     0                           ; Reserved
-                DCD     SVC_Handler                 ; SVCall Handler
-                DCD     DebugMon_Handler            ; Debug Monitor Handler
-                DCD     0                           ; Reserved
-                DCD     rt_hw_pend_sv               ; PendSV Handler in RT-Thread
-                DCD     rt_hw_timer_handler         ; SysTick Handler in RT-Thread
+__Vectors       DCD     __initial_sp               ; Top of Stack
+                DCD     Reset_Handler              ; Reset Handler
+                DCD     NMI_Handler                ; NMI Handler
+                DCD     HardFault_Handler          ; Hard Fault Handler
+                DCD     MemManage_Handler          ; MPU Fault Handler
+                DCD     BusFault_Handler           ; Bus Fault Handler
+                DCD     UsageFault_Handler         ; Usage Fault Handler
+                DCD     0                          ; Reserved
+                DCD     0                          ; Reserved
+                DCD     0                          ; Reserved
+                DCD     0                          ; Reserved
+                DCD     SVC_Handler                ; SVCall Handler
+                DCD     DebugMon_Handler           ; Debug Monitor Handler
+                DCD     0                          ; Reserved
+                DCD     PendSV_Handler             ; PendSV Handler
+                DCD     SysTick_Handler            ; SysTick Handler
+
 ~~~
 
 * 栈初始化代码
 
 栈的初始化代码用于创建线程或初始化线程，“手工”的构造一份线程运行栈，相当于在线程栈上保留了一份线程从初始位置运行的上下文信息。在Cortex-M3体系结构中，当系统进入异常时，CPU Core会自动进行R0 – R3以及R12、psr、pc、lr等压栈，所以手工构造这个初始化栈时，也相应的把这些寄存器初始值放置到正确的位置。
 
-rt-thread\\libcpu\\arm\\stm32\\stack.c程序清单：
+libcpu\\arm\\cortex-m3\\cpuport.c程序清单：
 
 ~~~{.c}
 #include <rtthread.h>
 
-/**
- * @addtogroup STM32
- */
-/*@{*/
-
-/**
  * 这个函数用于初始化线程栈
  *
  * @param tentry 线程的入口函数
@@ -287,7 +316,7 @@ rt_uint8_t *rt_hw_stack_init(void *tentry, void *parameter,
 
 * 上下文切换代码
 
-代码清单rt-thread\\libcpu\\arm\\stm32\\context_rvds.S：
+代码清单libcpu\\arm\\cortex-m3\\context_rvds.S：
 在RT-Thread中，中断锁是完全有芯片移植来实现的，参见 线程间同步与通信章节。以下是Cortex-M3上的开关中断实现，它是使用CPSID指令来实现的。
 
 ~~~{.c}
@@ -422,6 +451,12 @@ rt_hw_context_switch_to    PROC
         LDR     r1, =NVIC_PENDSVSET
         STR     r1, [r0]                        ; 触发PendSV异常
 
+		; restore MSP
+	    LDR     r0, =SCB_VTOR
+	    LDR     r0, [r0]
+	    LDR     r0, [r0]
+	    MSR     msp, r0
+
         CPSIE   I                               ; 使能中断以使PendSV能够正常处理
         ENDP
 ~~~
@@ -443,18 +478,13 @@ rt_hw_context_switch_to    PROC
 在最后一个中断服务例程结束时，Cortex M3将去处理PendSV异常，因为PendSV异常的优先级是最低的，所以只要触发过PendSV异常，它将总是在最后得到处理。
 Fault处理代码
 Fault处理代码并不是必须的，为了系统的完整性，实现fault处理代码无疑对系统出错时定位问题提供非常有利的帮助。
-rt-thread\\libcpu\\arm\\stm32\\fault.S代码清单：
+libcpu\\arm\\cortex-m3\\context_rvds.S程序清单：
 
 ~~~{.c}
-    AREA |.text|, CODE, READONLY, ALIGN=2
-    THUMB
-    REQUIRE8
-    PRESERVE8
 
     IMPORT rt_hw_hard_fault_exception
-
-rt_hw_hard_fault    PROC
-    EXPORT rt_hw_hard_fault
+    EXPORT HardFault_Handler
+HardFault_Handler    PROC
 
     ; get current context
     TST     lr, #0x04               ; if(!EXC_RETURN[2])
@@ -478,7 +508,7 @@ rt_hw_hard_fault    PROC
     END
 ~~~
 
-rt-thread\\libcpu\\arm\\stm32\\fautl.c代码清单：
+libcpu\\arm\\cortex-m3\\cpuport.c程序清单：
 
 ~~~{.c}
 #include <rtthread.h>
@@ -648,7 +678,7 @@ LFLAGS = DEVICE + ' --info sizes --info totals --info unused --info veneers
 
 ### 添加其他相关文件 ###
 
-添加rtconfig.h到bsp目录下,SCONS会根据rtconfig.h中的宏定义来加载相关 `.h` 和 `.c` 文件,具体可以参考 `RT-Thread在ARM Cortex M3上的移植` 中的 `添加RT-Thread配置头文件` 部分的注释,只是使用的话可以直接参考类似架构的MCU,进行小部分修改即可,比如,与MK60同是Cortex-M4内核的STM32F4等bsp的文件,然后根据自己的需要进行更改.
+添加rtconfig.h到bsp目录下,SCONS会根据rtconfig.h中的宏定义来加载相关 `.h` 和 `.c` 文件,具体可以参考 `RT-Thread在ARM Cortex M3上的移植` 中的 `添加RT-Thread配置头文件` 部分的注释,只是使用的话可以直接参考类似架构的CPU,进行小部分修改即可,比如,与MK60同是Cortex-M4内核的STM32F4等bsp的文件,然后根据自己的需要进行更改.
 
 在工程目录下增加启动文件(K60的启动文件 `startup_MK60F12.s` 可以在 `Keil\ARM\Startup\Freescale\Kinetis` 中找到,)
 
@@ -677,7 +707,7 @@ Return('group')
 **注意:**
 
 - 板级相关的宏定义等应该在 `board.h` 中,而不是 `rtconfig.h` 中, `rtconfig.h` 中的宏定义是OS层使用的,所以所有的bsp相关定义应当与 `rtconfig.h` 去相关.
-- 由于属于通用Cortex-M4,所以MCU内核部分可以不用过多的关心,对于任何一款Cortex-M4/M3的MCU,只需要处理系统时钟初始化(主要是systick初始化),NVIC基础配置,并且完成systick中断的ISR即可,相关部分的[代码](https://github.com/RT-Thread/rt-thread/tree/master/libcpu/arm/cortex-m4 "Cortex-M4内核部分代码分析")会在下节中分析.在Cortex-M3移植中谈到的 `PendSV_Handler()`  `PenSV()`  `HardFault_Handler()` 已经被 `\libcpu\arm\cortex-m4\context_rvds.S` 中 `PendSV_Handler   PROC` 所接管(只要在startup文件中相关ISR名字正确)
+- 由于属于通用Cortex-M4,所以内核部分可以不用过多的关心,对于任何一款Cortex-M4/M3的CPU,只需要处理系统时钟初始化(主要是systick初始化),NVIC基础配置,并且完成systick中断的ISR即可,相关部分的[代码](https://github.com/RT-Thread/rt-thread/tree/master/libcpu/arm/cortex-m4 "Cortex-M4内核部分代码分析")会在下节中分析.在Cortex-M3移植中谈到的 `PendSV_Handler()`  `PenSV()`  `HardFault_Handler()` 已经被 `\libcpu\arm\cortex-m4\context_rvds.S` 中 `PendSV_Handler   PROC` 所接管(只要在startup文件中相关ISR名字正确)
 - 对于 `systick` 中断,RT-Thread已经有相关的中断处理函数,对于不同的bsp,只需要在bsp中相关 `SysTick_Handler()` 调用即可,相对是很固定的模式,就像9.4 RT-Thread/STM32其他部分说明中的模板那样:
 
 ~~~{.c}
@@ -694,7 +724,7 @@ void SysTick_Handler(void)
 ~~~
 
 - 对于Systick Timer和NVIC的配置,可以使用ARM标准CMSIS库中的函数进行配置,相关函数和帮助可以参考 `Keil\ARM\CMSIS\index.html` 
-- 需要根据不同的MCU检查堆栈的配置,在 `rt_system_heap_init(...);` 时给出正确的地址RAM段范围.
+- 需要根据不同的CPU检查堆栈的配置,在 `rt_system_heap_init(...);` 时给出正确的地址RAM段范围.
 
 
 这样,基本的模板就已经实现了,可以在命令行中执行 `scons --target=mdk4 -S` ,得到项目文件.
