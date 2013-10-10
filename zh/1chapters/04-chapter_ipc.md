@@ -1599,12 +1599,12 @@ struct rt_mailbox
 {
     struct rt_ipc_object parent;
 
-    rt_uint32_t* msg_pool;             	/* 邮箱缓冲区的开始地址 */
-    rt_uint16_t size;                  	/* 邮箱缓冲区的大小     */
+    rt_uint32_t* msg_pool;             	   /* 邮箱缓冲区的开始地址   */
+    rt_uint16_t size;                  	   /* 邮箱缓冲区的大小      */
 
-    rt_uint16_t entry;                 	/* 邮箱中邮件的数目     */
-rt_uint16_t in_offset, out_offset;	/* 邮箱缓冲的进出指针   */
-rt_list_t suspend_sender_thread;  	/* 发送线程的挂起等待队列 */
+    rt_uint16_t entry;                 	   /* 邮箱中邮件的数目      */
+    rt_uint16_t in_offset, out_offset;	   /* 邮箱缓冲的进出指针    */ 
+    rt_list_t suspend_sender_thread;  	   /* 发送线程的挂起等待队列 */
 };
 typedef struct rt_mailbox* rt_mailbox_t;
 ~~~
@@ -1670,7 +1670,7 @@ RT_EOK
 初始化邮箱跟创建邮箱类似，只是初始化邮箱用于静态邮箱对象的初始化。其他与创建邮箱不同的是，此处静态邮箱对象所使用的内存空间是由用户线程指定的一个缓冲区空间，用户把缓冲区的指针传递给邮箱对象控制块，其余的初始化工作与创建邮箱时相同。函数接口如下：
 
 	rt_err_t rt_mb_init(rt_mailbox_t mb, const char* name, void* msgpool,
-		rt_size_t size, rt_uint8_t flag)
+		            rt_size_t size, rt_uint8_t flag);
 
 初始化邮箱时，该函数接口需要获得用户已经申请获得的邮箱对象控制块，缓冲区的指针，以及邮箱名称和邮箱容量。
 
@@ -1884,7 +1884,7 @@ int mbox_simple_init()
     /* 创建线程1 */
     tid1 = rt_thread_create("t1",
         thread1_entry,    /* 线程入口是thread1_entry */
-        RT_NULL,         /* 入口参数是RT_NULL */
+        RT_NULL,          /* 入口参数是RT_NULL */
         THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
     if (tid1 != RT_NULL)
         rt_thread_startup(tid1);
@@ -1894,7 +1894,7 @@ int mbox_simple_init()
     /* 创建线程2 */
     tid2 = rt_thread_create("t2",
         thread2_entry,     /* 线程入口是thread2_entry */
-        RT_NULL,         /* 入口参数是RT_NULL */
+        RT_NULL,           /* 入口参数是RT_NULL */
         THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
     if (tid2 != RT_NULL)
         rt_thread_startup(tid2);
@@ -2077,7 +2077,8 @@ RT_EOK
 
 初始化静态消息队列对象跟创建消息队列对象类似，只是静态消息队列对象的内存是在系统编译时由编译器分配的，一般放于数据段或ZI段中。在使用这类静态消息队列对象前，需要进行初始化。初始化消息队列对象的函数接口如下：
 
-	rt_err_t rt_mq_init(rt_mq_t mq, const char* name, void *msgpool, rt_size_t msg_size, rt_size_t pool_size, rt_uint8_t flag);
+	rt_err_t rt_mq_init(rt_mq_t mq, const char* name, void *msgpool, rt_size_t msg_size, 
+			    rt_size_t pool_size, rt_uint8_t flag);
 
 初始化消息队列时，该接口需要获得消息队列对象的句柄（即指向消息队列对象控制块的指针）、消息队列名、消息缓冲区指针、消息大小以及消息队列容量。如图6-9所示，消息队列初始化后所有消息都挂在空闲消息列表上，消息队列为空。
 

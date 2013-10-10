@@ -179,7 +179,7 @@ void demo_nw_isr(int vector)
 
     void rt_hw_interrupt_umask(int vector);
 
-调用rt_hw_interrupt_umask函数接口后，如果中断（及对应外设）被正确时，中断触发后，将送到到处理器进行处理。
+调用rt_hw_interrupt_umask函数接口后，如果中断（及对应外设）正确时，中断触发后，将送到到处理器进行处理。
 
 **函数参数**
 
@@ -260,13 +260,13 @@ __Vectors       DCD     __initial_sp        	; Top of Stack
                 DCD     MemManage_Handler      	; MPU Fault Handler
                 DCD     BusFault_Handler      	; Bus Fault Handler
                 DCD     UsageFault_Handler    	; Usage Fault Handler
-                DCD     0                        	; Reserved
-                DCD     0                       	; Reserved
-                DCD     0                       	; Reserved
-                DCD     0                       	; Reserved
+                DCD     0                       ; Reserved
+                DCD     0                       ; Reserved
+                DCD     0                       ; Reserved
+                DCD     0                       ; Reserved
                 DCD     SVC_Handler           	; SVCall Handler
                 DCD     DebugMon_Handler      	; Debug Monitor Handler
-                DCD     0                        	; Reserved
+                DCD     0                       ; Reserved
                 DCD     PendSV_Handler         	; PendSV Handler
                 DCD     SysTick_Handler         ; SysTick Handler
 

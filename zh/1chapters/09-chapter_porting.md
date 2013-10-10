@@ -266,7 +266,7 @@ libcpu\\arm\\cortex-m3\\cpuport.c程序清单：
 ~~~{.c}
 #include <rtthread.h>
 
- * 这个函数用于初始化线程栈
+/* 这个函数用于初始化线程栈
  *
  * @param tentry 线程的入口函数
  * @param parameter 线程入口函数的参数
@@ -461,7 +461,7 @@ rt_hw_context_switch_to    PROC
         ENDP
 ~~~
 
-正常模式下的线程上下文切换的过程可以用下 ***正常模式上下文切换图*** 示：
+正常模式下的线程上下文切换的过程可以用 ***正常模式上下文切换图*** 表示：
 
 ![正常模式上下文切换图](figures/port_thread_switch.png)
  
