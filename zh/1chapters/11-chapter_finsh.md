@@ -157,7 +157,7 @@ FINSH_FUNCTION_EXPORT_ALIAS(hello_rtt,  hr,  say hello to rtt)
 FINSH_VAR_EXPORT(var, finsh_type_int, just a var for test)	
 ~~~
 
-编译后运行，可以看到Finsh中增加了两个命令，一个变量var。如下所示。
+编译后运行，可以看到Finsh中增加了两个命令，一个变量var。
 
 ### 函数方式 ###
 ~~~{.c}
