@@ -28,7 +28,7 @@ Finsh运行于开发板，它可以使用串口/以太网/USB等与PC机进行�
 
 下图是Finsh的实际运行运行效果图。开发板运行RT-Thread，并使能了Finsh组件，通过串口与PC机连接，PC上运行Secure CRT。
 
-![finsh运行界面](figures/finsh-run1.png)
+![finsh运行界面](figures/finsh_run1.png)
 
 按下回车，然后输入list_thread(),将会打印系统当前所有线程，以及状态。关于这个命令的详细解释请参考本章最后一节。
 
@@ -280,7 +280,7 @@ lock     (NULL)   0000 0
          mutex  互斥量的名称
          owner  互斥量的持有者
           Hold  持有者在这个信号量上嵌套持有的次数
-suspend thread  等在这个信号量上的线程数目
+suspend thread  等在这个互斥量上的线程数目
 -----------------------------------------------------------------------
 
 
@@ -345,7 +345,7 @@ current tick:0x000004d4
          timer  定时器的名称
       periodic  定时器是否是周期性的
        timeout  定时器超时时的节拍数
-          flag  定时器的状态，activated表示活动的，deactivated表示不活动的
+          flag  定时器状态，activated-活动的，deactivated-不活动的
   current tick  当前系统的节拍
 -----------------------------------------------------------------------
 
