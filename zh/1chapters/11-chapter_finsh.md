@@ -12,7 +12,7 @@ finsh是RT-Thread的命令行外壳（shell）。finsh提供了一套供用户�
 
 ![系统结构图](figures/finsh_what_is_shell.png)
 
-在图形界面系统出现之前，shell这个命令行程序曾经统治计算机的交互接口数十年之久，并由大名鼎鼎的Unix系统发扬光大，诞生了多种shell软件，bsh，bash，csh，ksh，zsh，这些shell功能都非常强大，不仅可以供用户输入命令，它们还都支持shell编程语言，可以完整复杂的操作。这些shell目前都可以在*nix系统上使用。即使后来windows统治PC，对于一般人来说，shell的光彩逐渐暗淡，它并未因此退出操作系统。在windows上，CMD可以认为就是一种shell。
+在图形界面系统出现之前，shell这个命令行程序曾经统治计算机的交互接口数十年之久，并由大名鼎鼎的Unix系统发扬光大，诞生了多种shell软件，如bsh、bash、csh、ksh、zsh。这些shell功能都非常强大，不仅可以供用户输入命令，它们还都支持shell编程语言，可以完成复杂的操作。这些shell目前都可以在*nix系统上使用。即使后来windows统治PC，对于一般人来说，shell的光彩逐渐暗淡，它并未因此退出操作系统。在windows上，CMD可以认为就是一种shell。
 
 ## 初识finsh ##
 

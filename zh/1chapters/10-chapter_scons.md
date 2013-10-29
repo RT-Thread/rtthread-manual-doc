@@ -67,7 +67,7 @@ rtconfig.py是一个RT-Thread标准的编译器配置文件，主要用于完成
 - 指定编译器（可以支持多个编译器）
 - 指定编译器参数，如编译选项、链接选线等
 
-首先确保你的系统上已经安装了编译器。RT-Thread构建系统支持多种编译器。目前支持的编译器包括arm gcc，MDK，IAR，VisualStudio，Visual DSP。主流的ARM CortexM0，M3，M4平台，基本上ARM GCC，MDK，IAR都是支持的。有一些bsp可能仅支持一种，读者可以通过阅读该bsp目录下的rtconfig.py查看当前支持的编译器。
+首先确保你的系统上已经安装了编译器。RT-Thread构建系统支持多种编译器。目前支持的编译器包括arm gcc，MDK，IAR，VisualStudio，Visual DSP。主流的ARM Cortex M0、M3、M4平台，基本上ARM GCC、MDK、IAR都是支持的。有一些bsp可能仅支持一种，读者可以阅读该bsp目录下的rtconfig.py查看当前支持的编译器。
 
 这里以bsp/stm32f10x 为例，其rtconfig.py如下所示
 
@@ -102,10 +102,10 @@ elif CROSS_TOOL == 'iar':
 
 这里有两点需要注意：
 
-1. 安装编译器时（如MDK，ARM GCC，IAR等），不要安装到带有中文或者空格的路径中。很多命令行程序再解析路径时会出现错误。有些程序默认会安装到```C:\Program Files```目录下，中间带有空格。建议安装时选择其他路径，养成良好的开发习惯。
-2. 修改EXEC_PATH时，需要注意路径的格式。在windows平台上，默认的路径分割符号是反斜杠```\```,而这个符号在C语言以及Python中都是用于转移字符的。所以修改路径时，可以将```\```改为```/```，或者在前面加r，这是python特有的语法，加入某编译器安装位置为```D:\Dir1\Dir2```下。
+1. 安装编译器时（如MDK，ARM GCC，IAR等），不要安装到带有中文或者空格的路径中。否则，某些解析路径时会出现错误。有些程序默认会安装到```C:\Program Files```目录下，中间带有空格。建议安装时选择其他路径，养成良好的开发习惯。
+2. 修改EXEC_PATH时，需要注意路径的格式。在windows平台上，默认的路径分割符号是反斜杠```\```,而这个符号在C语言以及Python中都是用于转移字符的。所以修改路径时，可以将```\```改为```/```，或者在前面加r（python特有的语法）。
 
-下面几种是正确的写法:
+假如某编译器安装位置为```D:\Dir1\Dir2```下。下面几种是正确的写法:
 
     EXEC_PATH = r'D:\Dir1\Dir2'  注意，字符串前带有r，则可正常使用“\”
     EXEC_PATH = 'D:/Dir1/Dir2'   注意，改用“/”，前面没有r
@@ -124,9 +124,11 @@ elif CROSS_TOOL == 'iar':
 
 ### SCons基本命令 ###
 
+本节介绍RT-Thread中常用SCons命令。SCons不仅完成基本的编译，还可以生成MDK/IAR/VS工程。
+
 #### scons ####
 
-编译目标。如果执行过scons后，修改一些文件，再次执行scons则SCons会自动编译。
+编译目标。如果执行过scons后修改一些文件，再次执行scons则SCons会增量编译，仅编译修改过的文件并链接。
 
 #### scons -jN ####
 
@@ -136,7 +138,7 @@ elif CROSS_TOOL == 'iar':
 
 #### scons -c ####
 
-清除编译目标。这个命令会清除执行scons时生成的临时文件和目标文件。此外，还可以使用SCons来生成MDK/IAR/VS工程。
+清除编译目标。这个命令会清除执行scons时生成的临时文件和目标文件。
 
 #### scons --target=XXX -s ####
 
@@ -150,7 +152,7 @@ elif CROSS_TOOL == 'iar':
 
 不要试图打开template.uvproj的文件，这个文件仅是一个模板文件，用于辅助SCons生成project.uvproj。
 
-有时候无法打开，则先删除project.uvopt，然后重试。
+如果打开project.uvproj失败，则删除project.uvopt，然后重新打开project.uvproj。
 
     scons --target=iar -s
 
