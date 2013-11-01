@@ -201,7 +201,7 @@ SCons使用SConscript和SConstruct文件来组织源码结构，通常来说一�
 
 [图片待补充]
 
-为了使RT-Thread支持更好的多种编译器，以及方便的调整编译参数，RT-Thread的每个bsp中单独创建了一个名为rtconfig.py的文件。因此每一个RT-Thread bsp目录下都会存在下面三个文件，它们用于具体控制BSP的编译。
+为了使RT-Thread更好的支持多种编译器，以及方便的调整编译参数，RT-Thread为每个bsp单独创建了一个名为rtconfig.py的文件。因此每一个RT-Thread bsp目录下都会存在下面三个文件，它们具体控制BSP的编译。
 
     rtconfig.py
     SConstruct
@@ -239,7 +239,7 @@ SCons使用SConscript和SConstruct文件来组织源码结构，通常来说一�
 	 
 	    POST_ACTION = 'fromelf --bin $TARGET --output rtthread.bin \nfromelf -z $TARGET'
 
-其中**CFLAGS**存储就是针对C文件的编译选项，**AFLAGS** 则是针对汇编文件的编译选项，**LFLAGS** 是链接选项。**BUILD** 变量控制代码优化的级别。默认 **BUILD** 变量取值为`'debug'`，即使用debug方式编译，优化级别0。如果将这个变量修改为其他值，就会使用优化级别2编译。下面几种都是可行的写法（总之只要不是`'debug'`就可以了！)
+其中**CFLAGS**存储C文件的编译选项，**AFLAGS** 则是汇编文件的编译选项，**LFLAGS** 是链接选项。**BUILD** 变量控制代码优化的级别。默认 **BUILD** 变量取值为`'debug'`，即使用debug方式编译，优化级别0。如果将这个变量修改为其他值，就会使用优化级别2编译。下面几种都是可行的写法（总之只要不是`'debug'`就可以了)。
 
     BUILD = ''
     BUILD = 'release'
@@ -251,7 +251,7 @@ SCons使用SConscript和SConstruct文件来组织源码结构，通常来说一�
 
 ### 内置函数 ###
 
-如果想要将自己的一些源代码加入到SCons编译环境中，一般可以通过创建或修改已有SConscript文件来实现。SConscript文件可以控制源码文件的加入，并且可以指定文件的Group（与MDK/IAR等IDE中的Group的概念类似）。
+如果想要将自己的一些源代码加入到SCons编译环境中，一般可以创建或修改已有SConscript文件。SConscript文件可以控制源码文件的加入，并且可以指定文件的Group（与MDK/IAR等IDE中的Group的概念类似）。
 
 SCons提供了很多内置函数可以帮助我们快速添加源码程序。简单介绍一些常用函数。
 
@@ -265,7 +265,7 @@ SCons提供了很多内置函数可以帮助我们快速添加源码程序。简
 
 	GetDepend(macro)
 
-在tools/目录下的脚本文件中定义，它会从rtconfig.h文件读取组件配置信息，其参数为rtconfig.h中的宏名，如果rtconfig.h打开了某个宏，则这个方法（函数）返回真，否则返回假。
+在tools/目录下的脚本文件中定义，它会从rtconfig.h文件读取组件配置信息，其参数为rtconfig.h中的宏名。如果rtconfig.h打开了某个宏，则这个方法（函数）返回真，否则返回假。
 
 	Split(str)
 
@@ -280,18 +280,20 @@ DefineGroup用于定义一个组件。组件可以是一个目录（下的文件
 - src用于定义这个Group中包含的文件，一般指的是C/C++源文件。方便起见，也能够通过Glob函数采用通配符的方式列出SConscript文件所在目录中匹配的文件。
 - depend 用于定义这个Group编译时所依赖的选项（例如finsh组件依赖于RT_USING_FINSH宏定义）。编译选项一般指rtconfig.h中定义的RT_USING_xxx宏。当在rtconfig.h配置文件中定义了相应宏时，那么这个Group才会被加入到编译环境中进行编译。如果依赖的宏并没在rtconfig.h中被定义，那么这个Group将不会被加入编译。相类似的，在使用scons生成为IDE工程文件时，如果依赖的宏未被定义，相应的Group也不会在工程文件中出现。
 - parameters则可以输入一组字符串，后面还可以加入的参数包括：
-  + CCFLAGS – C源文件编译的参数；
-  + CPPPATH – 应该额外包含的头文件路径；
-  + CPPDEFINES – C源文件编译时额外的宏定义；
-  + LINKFLAGS – 连接时应该添加的参数。
-  + LIBRARY – 包含此参数，则会将组生成的目标文件打包成库文件
+    + CCFLAGS – C源文件编译参数；
+    + CPPPATH – 头文件路径；
+    + CPPDEFINES – 添加预定义宏；
+    + LINKFLAGS – 链接时参数。
+    + LIBRARY – 包含此参数，则会将组件生成的目标文件打包成库文件
 
-    SConscript（dirs, variant_dir, duplicate)
+可见DefineGroup的功能十分强大，实际使用时不需要配置所有参数。
+
+	SConscript（dirs, variant_dir, duplicate)
 
 SCons内置函数。其参数包括三个：
 
 - dirs指明SConscript文件路径，
-- variant_dir则指定生成的目标文件的存放路径，
+- variant_dir指定生成的目标文件的存放路径，
 - duiplicate的作用是设定是否拷贝或链接源文件到variant_dir
 
 利用这些函数，再配合一些简单的Python语句我们就能随心所欲向项目中添加或者删除源码了。下一节我们将介绍几个典型的SConscript示例文件来学习，并达到举一反三的目的。
@@ -321,7 +323,7 @@ bsp/stm32f10x/application/SConcript
 `src = Glob('*.c')`得到当前目录下所有的C文件，`cwd = GetCurrentDir()`将当前路径赋值给cwd，注意cwd是一个字符串；
 `include_path = [cwd]`将当前头文件路径保存为一个list变量。最后一行使用DefineGroup创建一个组。组名为Applications。depend为空，表示该组不依赖任何rtconfig.h的任何宏。`CPPPATH = include_path`表示将当前目录添加到系统的头文件路径中。
 
-总结：这个源程序会将当前目录下的所有c程序加入到组Applications中，并且将这个目录添加到系统头文件搜索路径中。因此，如果在这个目录下增加或者删除文件，就可以将文件加入工程或者从工程中删除。
+总结：这个源程序会将当前目录下的所有c程序加入到组Applications中，并将这个目录添加到系统头文件搜索路径中。因此，如果在这个目录下增加或者删除文件，就可以将文件加入工程或者从工程中删除。
 
 它适用于批量添加源码文件。
 
