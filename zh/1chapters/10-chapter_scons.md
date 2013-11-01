@@ -298,7 +298,9 @@ SCons内置函数。其参数包括三个：
 
 ### SConscript示例1 ###
 
-bsp\stm32f10x\application\SConcript
+bsp/stm32f10x/application/SConcript
+
+~~~~ {#SConscript .py .numberLines startFrom="1"}
 
 	Import('RTT_ROOT')
 	Import('rtconfig')
@@ -311,6 +313,8 @@ bsp\stm32f10x\application\SConcript
 	group = DefineGroup('Applications', src, depend = [''], CPPPATH = include_path)
 	
 	Return('group')
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 上面这个脚本完成如下功能：
 
@@ -363,7 +367,7 @@ DefinGroup同样将finsh目录下的所有文件创建为finsh组。
 
 ### SConscript示例3 ###
 
-bsp\stm32f10x\SConscript
+bsp/stm32f10x/SConscript
 
 ~~~~ {#SConscript .py .numberLines startFrom="1"}
 
@@ -393,7 +397,7 @@ bsp\stm32f10x\SConscript
 
 ### SConscript示例4 ###
 
-stm32f10x\drivers\SConscript
+stm32f10x/drivers/SConscript
 
 ~~~~ {#SConscript .py .numberLines startFrom="1"}
 
