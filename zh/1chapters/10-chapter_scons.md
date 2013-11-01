@@ -197,22 +197,256 @@ elif CROSS_TOOL == 'iar':
 
 ## SCons进阶 ##
 
+SCons使用SConscript和SConstruct文件来组织源码结构，通常来说一个项目只有一个SConstruct，但是会有多个SConscript。一般情况下，每个存放有源代码的子目录下都会放置一个SConscript，这些SCons的脚本文件组成如下所示的等级结构。
+
+[图片待补充]
+
+为了使RT-Thread支持更好的多种编译器，以及方便的调整编译参数，RT-Thread的每个bsp中单独创建了一个名为rtconfig.py的文件。因此每一个RT-Thread bsp目录下都会存在下面三个文件，它们用于具体控制BSP的编译。
+
+    rtconfig.py
+    SConstruct
+    SConscript文
+
+大部分组件源码文件夹下存在SConscript文件，这些文件会被BSP目录下的SConscript文件“找到”从而将rtconfig.h中定义的组件加入编译器来。一个BSP中只有一个SConstruct文件，但是却会有多个SConscript文件，可以说SConscript文件是组织源码的主力军。
+
 ### 修改编译器选项 ###
 
-### 增加文件 ###
+在rtconfig.py中控制了大部分编译选项。下面以stm32f10x/rtconfig.py为例（部分）
+
+	elif PLATFORM == 'armcc':
+	    # toolchains
+	    CC = 'armcc'
+	    AS = 'armasm'
+	    AR = 'armar'
+	    LINK = 'armlink'
+	    TARGET_EXT = 'axf'
+	 
+	    DEVICE = ' --device DARMSTM'
+	    CFLAGS = DEVICE + ' --apcs=interwork'
+	    AFLAGS = DEVICE
+	    LFLAGS = DEVICE + ' --info sizes --info totals --info unused --info veneers --list rtthread-stm32.map --scatter stm32_rom.sct'
+	 
+	    CFLAGS += ' -I' + EXEC_PATH + '/ARM/RV31/INC'
+	    LFLAGS += ' --libpath ' + EXEC_PATH + '/ARM/RV31/LIB'
+	 
+	    EXEC_PATH += '/arm/bin40/'
+	 
+	    if BUILD == 'debug':
+	        CFLAGS += ' -g -O0'
+	        AFLAGS += ' -g'
+	    else:
+	        CFLAGS += ' -O2'
+	 
+	    POST_ACTION = 'fromelf --bin $TARGET --output rtthread.bin \nfromelf -z $TARGET'
+
+其中**CFLAGS**存储就是针对C文件的编译选项，**AFLAGS** 则是针对汇编文件的编译选项，**LFLAGS** 是链接选项。**BUILD** 变量控制代码优化的级别。默认 **BUILD** 变量取值为`'debug'`，即使用debug方式编译，优化级别0。如果将这个变量修改为其他值，就会使用优化级别2编译。下面几种都是可行的写法（总之只要不是`'debug'`就可以了！)
+
+    BUILD = ''
+    BUILD = 'release'
+    BUILD = 'hello, world'
+
+建议在开发阶段都使用debug方式编译，不开优化，等产品稳定之后再考虑优化。
+
+关于这些选项的具体含义需要参考编译器手册，如上面使用的armcc是MDK的底层编译器。其编译选项的含义在MDK help中有详细说明。
+
+### 内置函数 ###
+
+如果想要将自己的一些源代码加入到SCons编译环境中，一般可以通过创建或修改已有SConscript文件来实现。SConscript文件可以控制源码文件的加入，并且可以指定文件的Group（与MDK/IAR等IDE中的Group的概念类似）。
+
+SCons提供了很多内置函数可以帮助我们快速添加源码程序。简单介绍一些常用函数。
+
+	GetCurrentDir()
+
+获取当前路径
+
+	Glob('*.c')
+
+获取当前目录下的所有C文件。修改参数的值为其他后缀就可以匹配当前目录下的所有某类型的文件。
+
+	GetDepend(macro)
+
+在tools/目录下的脚本文件中定义，它会从rtconfig.h文件读取组件配置信息，其参数为rtconfig.h中的宏名，如果rtconfig.h打开了某个宏，则这个方法（函数）返回真，否则返回假。
+
+	Split(str)
+
+将字符串str分割成一个list
+
+	DefineGroup(name, src, depend, **parameters)
+
+这是RT-Thread基于SCons扩展的一个方法（函数）。
+DefineGroup用于定义一个组件。组件可以是一个目录（下的文件或子目录），也是后续一些IDE工程文件中的一个Group或文件夹。
+
+- name来定义这个group的名字
+- src用于定义这个Group中包含的文件，一般指的是C/C++源文件。方便起见，也能够通过Glob函数采用通配符的方式列出SConscript文件所在目录中匹配的文件。
+- depend 用于定义这个Group编译时所依赖的选项（例如finsh组件依赖于RT_USING_FINSH宏定义）。编译选项一般指rtconfig.h中定义的RT_USING_xxx宏。当在rtconfig.h配置文件中定义了相应宏时，那么这个Group才会被加入到编译环境中进行编译。如果依赖的宏并没在rtconfig.h中被定义，那么这个Group将不会被加入编译。相类似的，在使用scons生成为IDE工程文件时，如果依赖的宏未被定义，相应的Group也不会在工程文件中出现。
+- parameters则可以输入一组字符串，后面还可以加入的参数包括：
+  + CCFLAGS – C源文件编译的参数；
+  + CPPPATH – 应该额外包含的头文件路径；
+  + CPPDEFINES – C源文件编译时额外的宏定义；
+  + LINKFLAGS – 连接时应该添加的参数。
+  + LIBRARY – 包含此参数，则会将组生成的目标文件打包成库文件
+
+    SConscript（dirs, variant_dir, duplicate)
+
+SCons内置函数。其参数包括三个：
+
+- dirs指明SConscript文件路径，
+- variant_dir则指定生成的目标文件的存放路径，
+- duiplicate的作用是设定是否拷贝或链接源文件到variant_dir
+
+利用这些函数，再配合一些简单的Python语句我们就能随心所欲向项目中添加或者删除源码了。下一节我们将介绍几个典型的SConscript示例文件来学习，并达到举一反三的目的。
+
+### SConscript示例1 ###
+
+bsp\stm32f10x\application\SConcript
+
+	Import('RTT_ROOT')
+	Import('rtconfig')
+	from building import *
+	
+	src	= Glob('*.c')
+	cwd = GetCurrentDir()
+	include_path = [cwd]
+	
+	group = DefineGroup('Applications', src, depend = [''], CPPPATH = include_path)
+	
+	Return('group')
+
+上面这个脚本完成如下功能：
+
+`src = Glob('*.c')`得到当前目录下所有的C文件，`cwd = GetCurrentDir()`将当前路径赋值给cwd，注意cwd是一个字符串；
+`include_path = [cwd]`将当前头文件路径保存为一个list变量。最后一行使用DefineGroup创建一个组。组名为Applications。depend为空，表示该组不依赖任何rtconfig.h的任何宏。`CPPPATH = include_path`表示将当前目录添加到系统的头文件路径中。
+
+总结：这个源程序会将当前目录下的所有c程序加入到组Applications中，并且将这个目录添加到系统头文件搜索路径中。因此，如果在这个目录下增加或者删除文件，就可以将文件加入工程或者从工程中删除。
+
+它适用于批量添加源码文件。
+
+### SConscript示例2 ###
+
+component/finsh/SConscript
+
+~~~~ {#SConscript .py .numberLines startFrom="1"}
+
+	Import('rtconfig')
+	from building import *
+	
+	cwd     = GetCurrentDir()
+	src     = Glob('*.c')
+	CPPPATH = [cwd]
+	if rtconfig.CROSS_TOOL == 'keil':
+	    LINKFLAGS = ' --keep __fsym_* --keep __vsym_* '
+	else:
+	    LINKFLAGS = '' 
+	
+	group = DefineGroup('finsh', src, depend = ['RT_USING_FINSH'], CPPPATH = CPPPATH, LINKFLAGS = LINKFLAGS)
+	
+	Return('group')
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+从第7行开始，于示例1有些区别。
+
+	if rtconfig.CROSS_TOOL == 'keil':
+	    LINKFLAGS = ' --keep __fsym_* --keep __vsym_* '
+	else:
+	    LINKFLAGS = '' 
+
+这是Python的条件判断语句，如果编译工具是keil，则变量`LINKFLAGS =  --keep __fsym_* --keep __vsym_* `，否则置空。
+
+DefinGroup同样将finsh目录下的所有文件创建为finsh组。
+
+`depend = ['RT_USING_FINSH']`表示这个组依赖rtconfig.h中的`RT_USING_FINSH`。即，当rtconfig.h中打开宏`RT_USING_FINSH`时，finsh组内的源码才会被实际编译，否则SCons不会编译。
+
+`CPPPATH = CPPPATH`，左边的CPPPATH是DefineGroup中内置参数，右边的CPPPATH是本文件第6行定义的，意思是将finsh目录加入到系统头文件目录中。这样我们就可以在其他源码中引用finsh目录下的头文件了，如finsh.h。
+
+`LINKFLAGS = LINKFLAGS`的含义与`CPPPATH = CPPPATH`类似。左边的LINKFLAGS表示链接参数，右边的LINKFLAGS则是前面if else语句所设定的值。
+
+### SConscript示例3 ###
+
+bsp\stm32f10x\SConscript
+
+~~~~ {#SConscript .py .numberLines startFrom="1"}
+
+	# for module compiling
+	import os
+	Import('RTT_ROOT')
+	
+	cwd = str(Dir('#'))
+	objs = []
+	list = os.listdir(cwd)
+	
+	for d in list:
+	    path = os.path.join(cwd, d)
+	    if os.path.isfile(os.path.join(path, 'SConscript')):
+	        objs = objs + SConscript(os.path.join(d, 'SConscript'))
+	
+	Return('objs')
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+`cwd = str(Dir('#')` 获取工程的顶级目录，也就是工程的SConstruct所在的目录，在这里它的效果与 `cwd = GetCurrentDir()`相同。随后定义了一个空的list型变量objs。第6行`list = os.listdir(cwd)`得到当前目录下的所有子目录，并保存到变量list中。
+随后是一个python的for循环，其含义是取出一个当前目录的子目录，利用os.path.join(cwd,d)拼接成一个完整路径，然后判断这个子目录是否存在一个名为SConscript的文件，若存在，则执行
+
+	objs = objs + SConscript(os.path.join(d, 'SConscript'))
+
+上面这一句中使用了SCons提供的一个内置函数`SConscript`，它可以读入一个新的SConscript文件，并将SConscript文件中所指明的源码加入编译列表中来。
+
+### SConscript示例4 ###
+
+stm32f10x\drivers\SConscript
+
+~~~~ {#SConscript .py .numberLines startFrom="1"}
+
+	Import('RTT_ROOT')
+	Import('rtconfig')
+	from building import *
+	
+	cwd  = GetCurrentDir()
+	
+	# add the general drvers.
+	src = Split('''
+	board.c
+	stm32f10x_it.c
+	led.c
+	usart.c
+	''')
+	
+	# add Ethernet drvers.
+	if GetDepend('RT_USING_LWIP'):
+	    src += ['dm9000a.c']
+	
+	# add Ethernet drvers.
+	if GetDepend('RT_USING_DFS'):
+	    src += ['sdcard.c']
+	
+	# add Ethernet drvers.
+	if GetDepend('RT_USING_RTC'):
+	    src += ['rtc.c']
+	
+	# add Ethernet drvers.
+	if GetDepend('RT_USING_RTGUI'):
+	    src += ['touch.c']
+	    if rtconfig.RT_USING_LCD_TYPE == 'ILI932X':
+	        src += ['ili_lcd_general.c']
+	    elif rtconfig.RT_USING_LCD_TYPE == 'SSD1289':
+	        src += ['ssd1289.c']
+	
+	    
+	CPPPATH = [cwd]
+	
+	group = DefineGroup('Drivers', src, depend = [''], CPPPATH = CPPPATH)
+	
+	Return('group')
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+第8行使用Split方法来将一个文件字符串分割成成一个list，其效果等价于
+
+	src = ['board.c', 'stm32f10x_it.c', 'led.c', 'usart.c']
+
+第15行到第33行使用了GetDepend方法检查rtconfig.h中的某个宏是否打开，如果打开，则使用`src += [src_name]`来添加源码。最后使用DefineGroup创建组。
 
 ### 添加库 ###
-
-### 生成库 ###
-
-### 配置其他参数 ###
-
-
-## SCons高级 ##
-
-### 编写BSP的SConstruct ###
-
-### 编写组件的SConscript ###
 
 ### 增加一个SCons命令 ###
 
