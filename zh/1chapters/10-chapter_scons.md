@@ -71,7 +71,7 @@ rtconfig.py是一个RT-Thread标准的编译器配置文件，主要用于完成
 
 这里以bsp/stm32f10x 为例，其rtconfig.py如下所示
 
-~~~{.py}
+~~~{.python}
 ARCH='arm'
 CPU='cortex-m3'
 CROSS_TOOL='keil'
@@ -302,7 +302,7 @@ SCons内置函数。其参数包括三个：
 
 bsp/stm32f10x/application/SConcript
 
-~~~~ {#SConscript .py .numberLines startFrom="1"}
+~~~~ {#SConscript .python .numberLines startFrom="1"}
 
 	Import('RTT_ROOT')
 	Import('rtconfig')
@@ -331,7 +331,7 @@ bsp/stm32f10x/application/SConcript
 
 component/finsh/SConscript
 
-~~~~ {#SConscript .py .numberLines startFrom="1"}
+~~~~ {#SConscript .python .numberLines startFrom="1"}
 
 	Import('rtconfig')
 	from building import *
@@ -371,7 +371,7 @@ DefinGroup同样将finsh目录下的所有文件创建为finsh组。
 
 bsp/stm32f10x/SConscript
 
-~~~~ {#SConscript .py .numberLines startFrom="1"}
+~~~~ {#SConscript .python .numberLines startFrom="1"}
 
 	# for module compiling
 	import os
@@ -401,7 +401,7 @@ bsp/stm32f10x/SConscript
 
 stm32f10x/drivers/SConscript
 
-~~~~ {#SConscript .py .numberLines startFrom="1"}
+~~~~ {#SConscript .python .numberLines startFrom="1"}
 
 	Import('RTT_ROOT')
 	Import('rtconfig')
