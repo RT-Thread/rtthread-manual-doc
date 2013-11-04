@@ -560,12 +560,26 @@ closedir()函数用来关闭一个目录。该函数必须和opendir()函数成�
     删除目录成功返回0，否则返回-1。
 
 
+### 格式化文件系统 ###
+
+	int mkfs(const char * fs_name, const char * device)
+
++ 参数： 
+
+    fs_name  - 文件系统名； 
+    device  - 设备名； 
+
++ 返回值： 
+
+    格式化成功返回0，否则返回-1。
+
+RT-Thread中目前支持的文件系统参见本章最后一节。
+
 ##底层驱动接口##
 
 RT-Thread DFS 文件系统针对下层媒介使用的是RT-Thread 的设备IO系统，其中主要包括设备读写等操作。但是有些文件系统并不依赖于RT-Thread 的设备系统，例如1.0.x分支引入的只读文件系统、网络文件系统等。对于常使用的FAT 文件系统，下层驱动必须用块设备的形式来实现。
 
-
-##文件系统初始化##
+###文件系统初始化###
 
 在使用文件系统接口前，需要对文件系统进行初始化，代码如下：
 
@@ -602,7 +616,7 @@ void rt_init_thread_entry(void *parameter)
 其主要包括的函数接口为： 
 
 	int dfs_mount(const char* device_name, const char* path, const char* filesystemtype, 
-	              rt_uint32_t rwflag, const void* data); 
+	rt_uint32_t rwflag, const void* data); 
 
 dfs_mount 函数用于把以device_name 为名称的设备挂接到path 路径中。filesystemtype 指定了设备上的文件系统的类型（如上面代码所述的elm、rom、nfs 等文件系统）。data参数对某些文件系统是有意义的，如nfs，对elm 类型系统则没有意义。 
 
@@ -618,3 +632,97 @@ dfs_mount 函数用于把以device_name 为名称的设备挂接到path 路径�
 
     装载成功将返回0，否则返回-1。具体的错误需要查看errno。
 
+
+## FatFs ##
+
+FatFs是专为小型嵌入式设备开发的一个兼容微软fat的文件系统，采用ANSI C编写，采用抽象的硬件I/O层，因此具有良好的硬件无关性以及可移植性。
+
+    FatFs官方网址  http://elm-chan.org/fsw/ff/00index_e.html
+
+RT-Thread将FatFs整合为一个RT-Thread组件，并置于DFS层之下。因此可以非常方便的在RT-Thread中使用FatFs。
+
+### FatFs 相关宏 ###
+
+	/* DFS: ELM FATFS options */
+	#define RT_USING_DFS_ELMFAT
+
+在RT-Thread中使用Elm FatFs，需要在rtconfig.h打开此宏。
+
+
+	/* Maximum sector size to be handled. */
+	#define RT_DFS_ELM_MAX_SECTOR_SIZE  512
+
+指定FatFs的内部扇区大小，注意，这个宏需要与实际硬件驱动的扇区大小一致。例如，某spi flash芯片扇区为4096字节，则上述宏需要修改为4096，否则FatFs从驱动读入数据时就会发生数组越界而导致系统崩溃。
+
+	/* Number of volumes (logical drives) to be used. */
+	#define RT_DFS_ELM_DRIVES                        2
+
+FatFs支持多分区，默认支持一个分区，如果想要在多个设备上挂载FatFs，可以修改上述宏定义。
+
+	/* Reentrancy (thread safe) of the FatFs module.  */
+	#define RT_DFS_ELM_REENTRANT
+
+Elm FatFs充分考虑了多线程安全读写安全的情况，当在多线程中读写FafFs时，为了避免重入带来的问题，需要打开上述宏。如果系统仅有一个线程操作文件系统，不会出现重入问题，则可以关闭上述宏以节省资源。
+
+	#define RT_DFS_ELM_USE_LFN                       1
+	#define RT_DFS_ELM_MAX_LFN                     255
+
+默认情况下，FatFs使用8.3方式的文件命名规则，这种方式具有如下缺点：
+
+-   文件名（不含后缀）最长不超过8个字符，后缀最长不超过3个字符。文件名和后缀超过限制后将会被截断。
+-   文件名不支持大小写（显示为大写）
+
+如果需要支持长文件名，则需要打开上述宏。注意，Elm FatFs支持三种方式的长文件名
+
+-   1  采用静态缓冲区支持长文件名，多线程操作文件名时将会带来重入问题。
+-   2  采用栈内临时缓冲区支持长文件名。对栈空间需求较大。
+-   3  使用heap（malloc申请）缓冲区存放长文件名。最安全。
+
+在RT-Thread中，如果对需要使用长文件名，建议使用长文件名模式3，即按照如下方式定义
+
+	#define RT_DFS_ELM_USE_LFN                       3
+
+当打开长文件名支持时，FatFs内部会使用Unicode编码文件名，而完整Unicode字库较大，不利于嵌入式设备上使用，FatFs可以单独配置文件名编码，在rtconfig.h指定宏`RT_DFS_ELM_CODE_PAGE`的值可以配置FatFs的编码。如果需要存储中文文件名，可以使用936编码（GBK编码），如下所示
+
+	#define RT_DFS_ELM_CODE_PAGE 936
+
+当打开长文件名宏`RT_DFS_ELM_USE_LFN`时，RT-Thread/FatFs默认使用936编码。936编码需要一个大约180KB的字库。如果仅使用英文字符作为文件，则可以设置宏为437（美国英语），这样就可以节省这180KB的Flash空间。
+
+FatFs所支持的文件编码如下所示。
+
+	/* The _CODE_PAGE specifies the OEM code page to be used on the target system.
+	/  Incorrect setting of the code page can cause a file open failure.
+	/
+	/   932  - Japanese Shift-JIS (DBCS, OEM, Windows)
+	/   936  - Simplified Chinese GBK (DBCS, OEM, Windows)
+	/   949  - Korean (DBCS, OEM, Windows)
+	/   950  - Traditional Chinese Big5 (DBCS, OEM, Windows)
+	/   1250 - Central Europe (Windows)
+	/   1251 - Cyrillic (Windows)
+	/   1252 - Latin 1 (Windows)
+	/   1253 - Greek (Windows)
+	/   1254 - Turkish (Windows)
+	/   1255 - Hebrew (Windows)
+	/   1256 - Arabic (Windows)
+	/   1257 - Baltic (Windows)
+	/   1258 - Vietnam (OEM, Windows)
+	/   437  - U.S. (OEM)
+	/   720  - Arabic (OEM)
+	/   737  - Greek (OEM)
+	/   775  - Baltic (OEM)
+	/   850  - Multilingual Latin 1 (OEM)
+	/   858  - Multilingual Latin 1 + Euro (OEM)
+	/   852  - Latin 2 (OEM)
+	/   855  - Cyrillic (OEM)
+	/   866  - Russian (OEM)
+	/   857  - Turkish (OEM)
+	/   862  - Hebrew (OEM)
+	/   874  - Thai (OEM, Windows)
+
+## nfs ##
+
+## uffs ##
+
+## jffs2 ##
+
+## yaffs ##
