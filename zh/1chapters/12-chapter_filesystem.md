@@ -719,9 +719,130 @@ FatFs所支持的文件编码如下所示。
 	/   862  - Hebrew (OEM)
 	/   874  - Thai (OEM, Windows)
 
-## nfs ##
+## NFS ##
 
-## uffs ##
+NFS是Network File System（网络文件系统）的简称。NFS允许一个系统在网络上与他人共享目录和文件。通过NFS，用户和程序可以像访问本地文件一样访问远端系统上的文件。NFS可以加速程序的开发调试，在嵌入式系统中应用十分广泛。
+
+NFS主要由部分组成：一台服务器和一台或多台客户机。客户机远程访问存放在服务器上的资源。
+
+PC上运行NFS server程序，运行RT-Thread的嵌入式系统做NFS Client，可以将PC上的目录通过以太网络挂载到RT-Thread中。
+
+### RT-Thread中使用NFS ###
+
+NFS通过以太网实现数据传输，因此要想在RT-Thread中使用NFS，需要一些基本条件：
+
+- 开发板硬件带有以太网支持
+- 以太网驱动测试通过，可以在RT-Thread中正确运行Lwip
+
+当具备这两个条件，我们就可以在RT-Thread上使用NFS了。
+
+#### 主机配置  ####
+
+Windows上可以使用FreeNFS搭建一个简单的NFS Server。[下载FreeNFS](http://www.rt-thread.org/dokuwiki/lib/exe/fetch.php?media=freenfs.7z "下载FreeNFS")。
+
+双击即可运行。运行以后，程序会在系统托盘中，右击选择setting，可以主机的目录（如下）
+
+    C:\Users\Administrator\Documents\FreeNFS
+
+被作为共享目录，读者可以根据需要修改此路径。
+
+#### 开发板配置 ####
+
+需要在rtconfig.h中开DFS以及LWIP，并根据开发板的网络环境修改网络配置，并确保PC机与开发板可以正常ping通。
+
+	#define RT_USING_LWIP
+
+    #define RT_LWIP_IPADDR0	192
+    #define RT_LWIP_IPADDR1	168
+    #define RT_LWIP_IPADDR2	1
+    #define RT_LWIP_IPADDR3	30
+ 
+    /* gateway address of target*/
+    #define RT_LWIP_GWADDR0	192
+    #define RT_LWIP_GWADDR1	168
+    #define RT_LWIP_GWADDR2	1
+    #define RT_LWIP_GWADDR3	1
+ 
+    /* mask address of target*/
+    #define RT_LWIP_MSKADDR0	255
+    #define RT_LWIP_MSKADDR1	255
+    #define RT_LWIP_MSKADDR2	255
+    #define RT_LWIP_MSKADDR3	0
+    #define RT_USING_DFS_NFS
+
+NFS属于DFS组件，因此同样需要打开DFS宏，以及DFS_NFS宏，并配置`RT_NFS_HOST_EXPORT`宏。
+
+    #define RT_USING_DFS
+    #define RT_USING_DFS_NFS 
+    #define RT_NFS_HOST_EXPORT	"192.168.1.2:/"
+
+`RT_NFS_HOST_EXPORT`宏用于指定NFS Server的ip地址以及共享目录路径。
+
+如果读者使用的bsp中的rtconfig.h中没有上述宏，则需要自己添加上。
+
+NFS相关的启动代码，如下所示（以stmf10x作为参考平台）。
+
+~~~{.c}
+/* LwIP Initialization */
+#ifdef RT_USING_LWIP
+	{
+		extern void lwip_sys_init(void);
+ 
+		/* register ethernetif device */
+		eth_system_device_init();
+ 
+#ifdef STM32F10X_CL
+		rt_hw_stm32_eth_init();
+#else
+	/* STM32F103 */
+	#if STM32_ETH_IF == 0
+			rt_hw_enc28j60_init();
+	#elif STM32_ETH_IF == 1
+			rt_hw_dm9000_init();
+	#endif
+#endif
+ 
+		/* re-init device driver */
+		rt_device_init_all();
+ 
+		/* init lwip system */
+		lwip_sys_init();
+		rt_kprintf("TCP/IP initialized!\n");
+	}
+#endif
+ 
+#if defined(RT_USING_DFS) && defined(RT_USING_LWIP) && defined(RT_USING_DFS_NFS)
+	{
+		/* NFSv3 Initialization */
+		rt_kprintf("begin init NFSv3 File System ...\n");
+		nfs_init();
+ 
+		if (dfs_mount(RT_NULL, "/", "nfs", 0, RT_NFS_HOST_EXPORT) == 0)
+			rt_kprintf("NFSv3 File System initialized!\n");
+		else
+			rt_kprintf("NFSv3 File System initialzation failed!\n");
+	}
+#endif
+~~~
+
+上述代码可以分为两部分，第一部分是初始化lwip组件。第二部分包括NFS初始化，以及挂在NFS Server上的共享目录。示例代码中将NFS挂载到了系统根目录下，	读者也可以选择其他文件系统挂在根目录，并将NFS挂载到其他子路径下。
+
+编译烧录程序后，就可以在finsh中使用`ls`、`mkdir`、`cat`等命令操作NFS共享的目录中的文件了。
+
+## UFFS ##
+
+UFFS是Ultra-low-cost Flash File System（超低功耗的闪存文件系统）的简称。它是国人开发的、专为嵌入式设备等小内存环境中使用Nand Flash的开源文件系统。与嵌入式中常使用的yaffas文件系统相比具有资源占用少、启动速度快、免费等优势。
+
+    UFFS官方代码仓库  http://sourceforge.net/projects/uffs/
+
+### RT-Thread/uffs配置 ###
+
+http://www.rt-thread.org/phpBB3/viewtopic.php?f=2&t=2645&start=10
+还有论坛上两部分关于驱动的介绍。
+
+TODO：增加更多的代码测试，优化驱动速度，裁剪uffs体积（这个代码已经有了。需要写一些简单说明）
+
+### RT-Thread/uffs驱动 ###
 
 ## jffs2 ##
 
