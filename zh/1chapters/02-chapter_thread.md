@@ -349,8 +349,8 @@ RT-Thread实时操作系统为空闲线程提供了钩子函数（钩子函数�
  */
 #include <rtthread.h>
 
-#define THREAD_PRIORITY        25
-#define THREAD_STACK_SIZE    512
+#define THREAD_PRIORITY         25
+#define THREAD_STACK_SIZE       512
 #define THREAD_TIMESLICE        5
 
 /* 指向线程控制块的指针 */
@@ -404,7 +404,7 @@ int rt_application_init()
     rt_err_t rt_thread_delete(rt_thread_t thread);
 
 调用该函数后，线程对象将会被移出线程队列并且从内核对象管理器中删除，线程占用的堆栈空间也会被释放，收回的空间将重新用于其他的内存分配。
-实际上，用rt_thread_delete函数删除线程接口，仅仅是把相应的线程状态更改为RT_THREAD_STATE_CLOSE状态，然后放入到rt_thread_defunct队列中；而真正的删除动作（释放线程控制块和释放线程栈）需要到下一次执行idle线程时，由idle线程完成最后的线程删除动作。用rt_thread_init初始化的静态线程则不能使用此接口删除。
+实际上，用rt_thread_delete函数删除线程接口，仅仅是把相应的线程状态更改为RT_THREAD_CLOSE状态，然后放入到rt_thread_defunct队列中；而真正的删除动作（释放线程控制块和释放线程栈）需要到下一次执行idle线程时，由idle线程完成最后的线程删除动作。用rt_thread_init初始化的静态线程则不能使用此接口删除。
 
 
 **线程安全**
@@ -445,8 +445,8 @@ int rt_application_init()
  */
 #include <rtthread.h>
 
-#define THREAD_PRIORITY        25
-#define THREAD_STACK_SIZE    512
+#define THREAD_PRIORITY         25
+#define THREAD_STACK_SIZE       512
 #define THREAD_TIMESLICE        5
 
 /*
