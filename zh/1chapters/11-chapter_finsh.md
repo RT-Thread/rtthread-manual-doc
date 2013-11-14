@@ -79,6 +79,7 @@ finsh支持两种方式向finsh中输出符号（函数或变量），下面将�
 ### 宏方式 ###
 
 定义宏FINSH_USING_SYMTAB，开启宏输出方式。
+
 ~~~{.c}
 #include <finsh.h>
 FINSH_FUNCTION_EXPORT(name, desc)
