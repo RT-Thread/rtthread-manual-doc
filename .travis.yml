@@ -1,6 +1,3 @@
-language: haskell
-install:
-  - cabal install pandoc
 before_script:
   - uname -a 
   - cat /etc/lsb-release
@@ -8,6 +5,12 @@ before_script:
   - sudo apt-get install -q ttf-arphic-gbsn00lp ttf-arphic-ukai ttf-wqy-microhei ttf-wqy-zenhei
   - sudo apt-get install -q texlive-xetex texlive-latex-recommended texlive-latex-extra
   - sudo apt-get install -q curl
+
+  - sudo apt-get install -q wget
+  - mkdir -pv ~/.cabal/bin/
+  - wget http://www.rt-thread.com/download/tools/pandoc.tar.gz -O ~/.cabal/bin/pandoc.tar.gz
+  - tar -vxf ~/.cabal/bin/pandoc.tar.gz -C ~/.cabal/bin/
+  - chmod +x  ~/.cabal/bin/pandoc
   - ~/.cabal/bin/pandoc -v
   - export PATH=~/.cabal/bin:$PATH
 
