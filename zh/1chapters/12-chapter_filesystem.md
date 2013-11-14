@@ -840,9 +840,250 @@ UFFS是Ultra-low-cost Flash File System（超低功耗的闪存文件系统）�
 http://www.rt-thread.org/phpBB3/viewtopic.php?f=2&t=2645&start=10
 还有论坛上两部分关于驱动的介绍。
 
-TODO：增加更多的代码测试，优化驱动速度，裁剪uffs体积（这个代码已经有了。需要写一些简单说明）
+首先来介绍rtconfig.h中的UFFS中的相关宏。
 
-### RT-Thread/uffs驱动 ###
+	#define RT_USING_MTD_NAND
+	#define RT_USING_DFS
+	#define RT_USING_DFS_UFFS
+
+在RT-Thread中的UFFS使用了MTD NAND的接口，因此需要打开`RT_USING_MTD_NAND`。此外，要想正确使用UFFS还必须提供NAND的驱动程序，它需要符合RT-Thread的MTD NAND接口规范。该驱动程序的实现将在后面的章节介绍。后面两个宏必须打开。
+
+更多配置参考dfs_uffs.h与uffs_config.h
+
+UFFS配置相关宏。在nand flash芯片上通常使用ECC进行数据校验（ECC是一种数据校验与纠错机制）。UFFS支持多种校验方式，包括如下几种：
+
+1. UFFS_ECC_SOFT
+2. UFFS_ECC_HW_AUTO
+3. UFFS_ECC_NONE
+
+方式一为软件校验方式，主要用于一些不支持硬件ECC的的情况下，ECC校验由UFFS完成。由于ECC数据校验比较耗时，因此这种方式会导致读写速度降低，不推荐使用。
+方式二为硬件自动方式。这种方式下，ECC校验由NAND驱动程序完成，UFFS不做任何ECC校验工作。这种方式比较灵活，驱动程序可以自行决定ECC数据的存放位置。
+方式三为无ECC校验方式。在这种方式下，UFFS不使用ECC校验，由于NAND芯片可能出现数据写入错误，并且ECC可以识别并纠正一定bit的错误（一般ECC可以纠正一个bit的错误，可以识别2个bit的错误但是无法纠正，但这并不绝对，ECC bit数目阅读其纠错能力越强）。在NAND设备上通常会有一定的安全风险。
+
+综上，当在NAND设备上使用UFFS时推荐使用方式二`UFFS_ECC_HW_AUTO`方式。
+
+注意：UFFS不仅可以使用在NAND设备上，也可以使用NOR FLASH、SPI FLASH设备等。不过目前RT-Thread中的UFFS仅支持在NAND上使用UFFS。未来可能会考虑增加对NOR FLASH以及SPI FLASH的支持。
+
+	#define RT_CONFIG_UFFS_ECC_MODE  UFFS_ECC_HW_AUTO
+
+上面这个宏用于配置UFFS的校验方式。
+
+    #define RT_UFFS_USE_CHECK_MARK_FUNCITON
+
+NAND容易产生坏块，一般NAND文件系统(如yaffs）都需要提供检测坏块和标记坏块的功能。为了简化UFFS驱动编写，UFFS提供了上面这个宏。当打开这个宏时，MTD NAND需要提供坏块检测与坏块标记这两个函数。如果关闭这个宏，UFFS将会借助MTD NAND驱动结构提供的NAND PAGE读写函数实现坏块检查与标记。
+
+### UFFS 内存精简 ###
+
+UFFS本身支持非常多的配置选项，配置非常灵活。在下面文件中有大量的配置选项。修改这个文件来定制UFFS，以达到精简内存占用的目的。
+
+	components/dfs/filesystems/uffs/uffs_config.h
+
+此文件配置选项中多，内存占用较大的几个宏如下所示。
+
+	/**
+	 * \def MAX_CACHED_BLOCK_INFO
+	 * \note uffs cache the block info for opened directories and files,
+	 *       a practical value is 5 ~ MAX_OBJECT_HANDLE
+	 */
+	#define MAX_CACHED_BLOCK_INFO	6//50
+	
+	/** 
+	 * \def MAX_PAGE_BUFFERS
+	 * \note the bigger value will bring better read/write performance.
+	 *       but few writing performance will be improved when this 
+	 *       value is become larger than 'max pages per block'
+	 */
+	#define MAX_PAGE_BUFFERS		10//40
+
+	/**
+	 * \def MAX_DIRTY_PAGES_IN_A_BLOCK 
+	 * \note this value should be between '2' and the lesser of
+	 *		 'max pages per block' and (MAX_PAGE_BUFFERS - CLONE_BUFFERS_THRESHOLD - 1).
+	 *
+	 *       the smaller the value the frequently the buffer will be flushed.
+	 */
+	#define MAX_DIRTY_PAGES_IN_A_BLOCK 7//32	
+
+	/** 
+	 * \def MAX_OBJECT_HANDLE
+	 * maximum number of object handle 
+	 */
+	#define MAX_OBJECT_HANDLE	8//50
+
+按照上面修改后，可以显著降低内存占用。注意，这是这样可能会降低UFFS的读写性能。究竟该配置什么样的参数，还需要读者根据自己板子的实际情况配置并测试才能找到内存占用少速度又快的配置选项。
+
+### MTD NAND驱动 ###
+
+TOADD：NAND结构简介
+
+在RT-Thread上使用UFFS，还需要提供NAND驱动。RT-Thread针对NAND芯片设计了一层简单的MTD NAND接口层。MTD NAND接口对NAND芯片做了简单的抽象和封装，为一个NAND芯片编写符合MTD接口的程序后就可以在NAND上使用RT-Thread支持的NAND组件，如UFFS、Yaffs以及NFTL等。
+
+NFTL即Nand Flash Translate Layer，用于在NAND上使用FatFs文件系统，目前仅面向商业客户提供，关于NFTL的相关信息，请参考RT-Thread商业支持网站 `http://www.rt-thread.com/`
+
+MTD NAND接口源码位于`components/drivers/mtd`目录下
+
+其中最重要的数据结构包括两个：
+
+1. struct rt_mtd_nand_device 
+
+	struct rt_mtd_nand_device
+	{
+		struct rt_device parent;
+	
+		rt_uint16_t page_size;	/* The Page size in the flash */
+		rt_uint16_t oob_size;	/* Out of bank size */	
+		rt_uint16_t oob_free;   /* the free area in oob that flash driver not use */
+		rt_uint16_t plane_num; 	/* the number of plane in the NAND Flash */
+	
+		rt_uint32_t pages_per_block; /* The number of page a block */
+	    rt_uint16_t block_total;
+	
+		rt_uint32_t block_start;/* The start of available block*/
+		rt_uint32_t block_end;	/* The end of available block */
+	
+		/* operations interface */
+		const struct rt_mtd_nand_driver_ops* ops;
+	};
+
+-  page_size 页大小，指页数据区字节数目
+-  oob_size  页spare区（或称为oob区）字节大小
+-  oob_free  表示页spare区中可能空间大小，MTD驱动通常会将ECC数据校验以及坏块标志放在Spare区，oob_free指除这些数据之外的spare区的剩余空间大小。
+-  plane_num NAND flash的plane数目
+-  pages_per_block 每个NAND FLASH块的页数目。
+-  block_total 块数目
+-  block_start 起始块号
+-  block_end   结束块号
+-  ops 用来填充MTD NAND的操作函数名
+
+2. struct rt_mtd_nand_driver_ops
+
+	struct rt_mtd_nand_driver_ops
+	{
+		rt_err_t (*read_id) (struct rt_mtd_nand_device* device);
+	
+		rt_err_t (*read_page)(struct rt_mtd_nand_device* device,
+	                          rt_off_t page,
+	                          rt_uint8_t* data, rt_uint32_t data_len,
+	                          rt_uint8_t * spare, rt_uint32_t spare_len);
+	
+		rt_err_t (*write_page)(struct rt_mtd_nand_device * device,
+	                           rt_off_t page,
+	                           const rt_uint8_t * data, rt_uint32_t data_len,
+	                           const rt_uint8_t * spare, rt_uint32_t spare_len);
+		rt_err_t (*move_page) (struct rt_mtd_nand_device *device, rt_off_t src_page, rt_off_t dst_page);						   
+	
+		rt_err_t (*erase_block)(struct rt_mtd_nand_device* device, rt_uint32_t block);
+		rt_err_t (*check_block)(struct rt_mtd_nand_device* device, rt_uint32_t block);
+		rt_err_t (*mark_badblock)(struct rt_mtd_nand_device* device, rt_uint32_t block);
+	};
+
+这是MTD NAND定义的一组用于操作NAND FLASH的方法。接下来分别介绍各个函数的作用。
+
+readid用于返回MTD NAND设备的id。
+
+#### 读写页
+
+	rt_err_t (*read_page)(struct rt_mtd_nand_device* device,
+                          rt_off_t page,
+                          rt_uint8_t* data, rt_uint32_t data_len,
+                          rt_uint8_t * spare, rt_uint32_t spare_len);
+	rt_err_t (*write_page)(struct rt_mtd_nand_device * device,
+                           rt_off_t page,
+                           const rt_uint8_t * data, rt_uint32_t data_len,
+                           const rt_uint8_t * spare, rt_uint32_t spare_len);
+
++ 参数：
+
+    device   - 设备指针；
+    page     - 页号，此页号为块内页号，即某页在其块内的页号
+    data     - 页数据缓冲区地址，如果不读/写data区则设置为NULL
+    data_len - 页数据长度；
+    spare    - 页SPARE（OOB）缓冲区地址，若不读/写SPARE区则设置为NULL
+    spare_len- 页SPARE缓冲区长度；
+
++ 返回值：
+
+	RT_EOK            - 读写成功
+    -RT_MTD_EECC      - ECC错误
+    -RT_EIO           - 参数错误
+
+#### 擦除块
+
+	rt_err_t (*erase_block)(struct rt_mtd_nand_device* device, rt_uint32_t block);
+
++ 参数：
+
+    device   - 设备指针；
+    block    - 块号
+
++ 返回值：
+
+	RT_EOK   - 擦除成功
+
+#### 块状态检查
+
+	rt_err_t (*check_block)(struct rt_mtd_nand_device* device, rt_uint32_t block);
+
+用于检查一个块是否为坏块。当使用UFFS并打开宏`RT_UFFS_USE_CHECK_MARK_FUNCITON`时，必须实现这个函数。
+
++ 参数：
+
+    device   - 设备指针；
+    block    - 块号
+
++ 返回值：
+
+	RT_EOK   - 好块
+    -1       - 坏块
+
+#### 标记坏块
+ 
+	rt_err_t (*mark_badblock)(struct rt_mtd_nand_device* device, rt_uint32_t block);
+
+用于标记一个块为坏块。当使用UFFS并打开宏`RT_UFFS_USE_CHECK_MARK_FUNCITON`时，必须实现这个函数。
+
++ 参数：
+
+    device   - 设备指针；
+    block    - 块号
+
++ 返回值：
+
+	RT_EOK   - 标记成功
+    非0值     - 标记失败 
+
+#### 移动页
+
+	rt_err_t (*move_page) (struct rt_mtd_nand_device *device, rt_off_t src_page, rt_off_t dst_page);	
+将NAND FLASH中的一个页移动到另一个页中。NAND FLASH控制器通常硬件命令实现此功能。
+注意：此函数UFFS与YAFFS并不需要。NFTL需要实现。
+
++ 参数：
+
+    device   - 设备指针；
+    src_page - 块内源页号
+	dst_page - 块内目的页号
+
++ 返回值：
+
+	RT_EOK   - 操作成功
+	-RT_EIO  - 参数错误或其硬件错误等
+
+	rt_err_t rt_mtd_nand_register_device(const char* name, struct rt_mtd_nand_device* device);
+
+### UFFS示例驱动
+
+目前RT-Thread中使用UFFS还是比较容易的，stm32f10x，stm32f40x上实现了k9f1g08 NAND的支持，并且在bsp/simulator恶意是用文件来模拟NAND，并支持UFFS模拟。
+
+读者可以参考这些学习MTD NAND驱动的写法。
+
+1. stm32f40x的k9f2g08.c驱动
+
+    https://github.com/RT-Thread/realtouch-stm32f4/blob/master/software/examples/drivers/k9f2g08u0b.c
+
+2. stm32f10x的k9f1g08.c驱动
+
+    https://github.com/prife/stm32f10x_demo/blob/master/wdrivers/k9f_nand.c
 
 ## jffs2 ##
 
