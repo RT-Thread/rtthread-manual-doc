@@ -66,7 +66,7 @@ finsh支持基本的C语言数据类型，包括：
 |  long, unsigned long |   （带符号）长整型变量              |
 +----------------------+-------------------------------------+
 |   char*, short*,     |    指针型变量                       |
-|   long*, void *,     |                                     |
+|   long*, void *      |                                     |
 +----------------------+-------------------------------------+
 
 
@@ -79,6 +79,7 @@ finsh支持两种方式向finsh中输出符号（函数或变量），下面将�
 ### 宏方式 ###
 
 定义宏FINSH_USING_SYMTAB，开启宏输出方式。
+
 ~~~{.c}
 #include <finsh.h>
 FINSH_FUNCTION_EXPORT(name, desc)
@@ -88,10 +89,10 @@ FINSH_FUNCTION_EXPORT(name, desc)
 --------------  -------------------------------------------------------
           name  函数指针，一般为函数名；
 
-          desc  函数描述
+          desc  函数描述;
 -----------------------------------------------------------------------
 
-    desc一般为一段字符串，中间不可以有逗号，两边也没有引号。
+desc一般为一段字符串，中间不可以有逗号，两边也没有引号。
 
 ~~~{.c}
 FINSH_VAR_EXPORT(name, type, desc)	
@@ -104,7 +105,7 @@ FINSH_VAR_EXPORT(name, type, desc)
 
           type  变量类型；
 
-          desc  变量描述
+          desc  变量描述;
 -----------------------------------------------------------------------
 
 type的包括以下类型：
@@ -141,17 +142,14 @@ FINSH_FUNCTION_EXPORT_ALIAS(name, alias, desc)
 --------------  -------------------------------------------------------
           name  函数指针，一般为函数名；
 
-          alias 输出到finsh中的命令名
+          alias 输出到finsh中的命令名;
 
-          desc  函数描述
+          desc  函数描述;
 -----------------------------------------------------------------------
 
 当函数名字过长时，可以利用上面这个宏导出一个简短的名字以方便输入。
 
-**说明**
-
-    FINSH的函数名字长度是有限制的，它由finsh.h中的宏FINSH_NAME_MAX控制，默认是16字节。意味着finsh命令长度不会超过16字节。
-    这里有个潜在的问题。当一个函数名长度超过FINSH_NAME_MAX时，使用FINSH_FUNCTION_EXPORT导出这个函数到命令表中后，在finsh符号表中看到完整的函数名，但是完整输入执行会出现null node错误。这是因为虽然显示了完整的函数名，但是实际上finsh中却保存了前16字节作为命令，过多的输入会导致无法正确找到命令，这时就可以使用FINSH_FUNCTION_EXPORT_ALIAS来对导出的命令进行重命名。
+* 说明: FINSH的函数名字长度是有限制的，它由finsh.h中的宏FINSH_NAME_MAX控制，默认是16字节。意味着finsh命令长度不会超过16字节。这里有个潜在的问题。当一个函数名长度超过FINSH_NAME_MAX时，使用FINSH_FUNCTION_EXPORT导出这个函数到命令表中后，在finsh符号表中看到完整的函数名，但是完整输入执行会出现null node错误。这是因为虽然显示了完整的函数名，但是实际上finsh中却保存了前16字节作为命令，过多的输入会导致无法正确找到命令，这时就可以使用FINSH_FUNCTION_EXPORT_ALIAS来对导出的命令进行重命名。
 
 一个简单的输出函数和变量到finsh的例子：
 
@@ -182,9 +180,9 @@ void finsh_syscall_append(const char* name, syscall_func func)
 -----------------------------------------------------------------------
           参数  描述
 --------------  -------------------------------------------------------
-          name  函数在finsh中访问的名称，即命令名
+          name  函数在finsh中访问的名称，即命令名;
 
-          func  函数地址，一般为函数名
+          func  函数地址，一般为函数名;
 -----------------------------------------------------------------------
 
 这个函数可以输出一个函数到finsh中，可以在finsh命令行中使用。
@@ -196,11 +194,11 @@ void finsh_sysvar_append(const char* name, u_char type, void* addr)
 -----------------------------------------------------------------------
           参数  描述
 --------------  -------------------------------------------------------
-          name  变量在finsh中访问的名称，即命令名
+          name  变量在finsh中访问的名称，即命令名;
 
-          type  变量的类型
+          type  变量的类型;
 
-          addr  变量地址
+          addr  变量地址;
 -----------------------------------------------------------------------
 
 这个函数用于输出一个变量到finsh中。
@@ -211,31 +209,34 @@ void finsh_sysvar_append(const char* name, u_char type, void* addr)
 
 * 注：在finsh shell中使用命令（即Ｃ语言中的函数），必须类似Ｃ语言中的函数调用方式，即必须携带"()"符号。而最后finsh shell的输出为此函数的返回值，对于一些不存在返回值的函数，这个打印输出没有意义。要查看命令行信息必须定义对应相应的宏。
 
-finsh>>list()
+
+    finsh>>list()
 
 显示当前系统中存在的命令及变量，执行结果如下：
 
-	--Function List:
-	list_mem         -- list memory usage information
-	hello            -- say hello world
-	version          -- show RT-Thread version information
-	list_thread      -- list thread
-	list_sem         -- list semaphone in system
-	list_event       -- list event in system
-	list_mutex       -- list mutex in system
-	list_mailbox     -- list mail box in system
-	list_magqueue    -- list messgae queue in system
-	list_mempool     -- list memory pool in system
-	list_timer       -- list timer in system
-	list_device      -- list device in system
-	list             -- list all symbol in system
-	--Variable List:
-	dummy            -- dummy variable for finsh
-		0, 0x00000000
+~~~{.c}
+--Function List:
+list_mem         -- list memory usage information
+hello            -- say hello world
+version          -- show RT-Thread version information
+list_thread      -- list thread
+list_sem         -- list semaphone in system
+list_event       -- list event in system
+list_mutex       -- list mutex in system
+list_mailbox     -- list mail box in system
+list_magqueue    -- list messgae queue in system
+list_mempool     -- list memory pool in system
+list_timer       -- list timer in system
+list_device      -- list device in system
+list             -- list all symbol in system
+--Variable List:
+dummy            -- dummy variable for finsh
+	0, 0x00000000
+~~~
+
+    finsh>>list_thread()
 
 ~~~{.c}
-finsh>>list_thread()
-
 thread   pri   status     sp       stack size   max used     left tick   error    
 ------- ----- ------- ----------- ------------ ------------ ------------ ----
 tidle   0x1f   ready  0x00000058   0x00000100   0x00000058   0x0000000b  000
@@ -243,6 +244,7 @@ shell   0x14   ready  0x00000080   0x00000800   0x000001b0   0x00000006  000
 ~~~
 
 显示当前系统中线程状态：
+
 -----------------------------------------------------------------------
           字段  描述
 --------------  -------------------------------------------------------
@@ -263,14 +265,15 @@ shell   0x14   ready  0x00000080   0x00000800   0x000001b0   0x00000006  000
 	    error  线程的错误号;
 -----------------------------------------------------------------------
 
-~~~{.c}
-finsh>>list_sem()
+    finsh>>list_sem()
 
+~~~{.c}
 semaphore  v   suspend thread    
 --------- --- ----------------
 ~~~
 
 显示系统中信号量状态：
+
 -----------------------------------------------------------------------
           字段  描述
 --------------  -------------------------------------------------------
@@ -281,14 +284,15 @@ semaphore  v   suspend thread
 suspend thread  等待这个信号量的线程数目；
 -----------------------------------------------------------------------
 
-~~~{.c}
-finsh>>list_event()
+    finsh>>list_event()
 
+~~~{.c}
 event  set   suspend thread    
 ----- ----- ----------------
 ~~~
 
 显示系统中事件状态：
+
 -----------------------------------------------------------------------
           字段  描述
 --------------  -------------------------------------------------------
@@ -299,9 +303,9 @@ event  set   suspend thread
 suspend thread  等待这个事件的线程数目：
 -----------------------------------------------------------------------
 
+    finsh>>list_mutex()
+ 
 ~~~{.c}
-finsh>>list_mutex() 
-
 mutex      owner   hold   suspend thread   
 -------  -------- ------  ---------------
 fslock   (NULL)   0000    0
@@ -309,6 +313,7 @@ lock     (NULL)   0000    0
 ~~~
 
 显示系统中互斥量状态：
+
 -----------------------------------------------------------------------
           字段  描述
 --------------  -------------------------------------------------------
@@ -321,14 +326,15 @@ lock     (NULL)   0000    0
 suspend thread  等待这个互斥量的线程数目；
 -----------------------------------------------------------------------
 
-~~~{.c}
-finsh>>list_mb()
+    finsh>>list_mb()
 
+~~~{.c}
 mailbox  entry  size  suspend thread    
 -------  -----  ----  ---------------
 ~~~
 
 显示系统中信箱状态:
+
 -----------------------------------------------------------------------
           字段  描述
 --------------  -------------------------------------------------------
@@ -341,14 +347,15 @@ mailbox  entry  size  suspend thread
 suspend thread  等这个信箱上的线程数目；
 -----------------------------------------------------------------------
 
-~~~{.c}
-finsh>>list_mq()
+    finsh>>list_mq()
 
+~~~{.c}
 msgqueue  entry  suspend thread    
 --------  -----  ----------------
 ~~~
 
 显示系统中消息队列状态：
+
 -----------------------------------------------------------------------
           字段  描述
 --------------  -------------------------------------------------------
@@ -359,14 +366,15 @@ msgqueue  entry  suspend thread
 suspend thread  等待这个消息队列上的线程数目；
 -----------------------------------------------------------------------
 
-~~~{.c}
-finsh>>list_memp() 
+    finsh>>list_memp() 
 
+~~~{.c}
 mempool  block  total free  suspend thread    
 -------  -----  ----- ----  --------------
 ~~~
 
 显示系统中内存池状态：
+
 -----------------------------------------------------------------------
           字段  描述
 --------------  -------------------------------------------------------
@@ -381,9 +389,9 @@ mempool  block  total free  suspend thread
 suspend thread  挂起线程数目； 
 -----------------------------------------------------------------------
 
-~~~{.c}
-finsh>>list_timer()
+    finsh>>list_timer()
 
+~~~{.c}
 timer    periodic    timeout       flag    
 ------  ----------  ----------  -----------
 tidle   0x00000000  0x00000000  deactivated
@@ -392,6 +400,7 @@ current tick:0x0000d7e
 ~~~
 
 显示系统中定时器状态：
+
 -----------------------------------------------------------------------
           字段  描述
 --------------  -------------------------------------------------------
@@ -403,12 +412,12 @@ current tick:0x0000d7e
 
           flag  定时器的状态，activated表示活动的，deactivated表示不活动的；
 		  
-  current tick  当前系统的节拍
+  current tick  当前系统的节拍;
 -----------------------------------------------------------------------
 
-~~~{.c}
-finsh>> list_device()
+    finsh>> list_device()
 
+~~~{.c}
 device       type    
 -------  ----------------
 uart3    Character Device 
@@ -417,6 +426,7 @@ uart1    Character Device
 ~~~
 
 显示系统中设备状态：
+
 -----------------------------------------------------------------------
           字段   描述
 -------------- -------------------------------------------------------
