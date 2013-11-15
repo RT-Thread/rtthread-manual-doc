@@ -16,8 +16,9 @@ default:
   indent: "\\qquad"
   thanks: "This is the PDF file for the RT-Thread Programming Manual book contents."
 zh:
-  title: RT-Thread Programming Manual
+  title: RT-Thread编程指南
   langrule: "\\XeTeXlinebreakskip=0em plus 0.1em minus 0.01em\n\\XeTeXlinebreakpenalty=0"
+  thanks: "这个是RT-Thread编程指南的PDF版本，由github.com上最新提交内容自动生成。"
   font: WenQuanYi Micro Hei
   bold: WenQuanYi Micro Hei
   mono: WenQuanYi Zen Hei Mono
