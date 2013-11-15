@@ -185,7 +185,7 @@ void finsh_syscall_append(const char* name, syscall_func func)
           func  函数地址，一般为函数名;
 -----------------------------------------------------------------------
 
-这个函数可以输出一个函数到finsh中，可以在finsh命令行中使用。
+这个函数可以输出一个函数到finsh中，使之可以在finsh命令行中使用。
 
 ~~~{.c}
 #include <finsh.h>
@@ -207,8 +207,7 @@ void finsh_sysvar_append(const char* name, u_char type, void* addr)
 
 在RT-Thread中默认内置了一些finsh命令，在finsh中按下TAB键可以打印则会当前系统支持所有符号，也可以输入list()回车，二者效果相同。
 
-* 注：在finsh shell中使用命令（即Ｃ语言中的函数），必须类似Ｃ语言中的函数调用方式，即必须携带"()"符号。而最后finsh shell的输出为此函数的返回值，对于一些不存在返回值的函数，这个打印输出没有意义。要查看命令行信息必须定义对应相应的宏。
-
+注意：在finsh shell中使用命令（即Ｃ语言中的函数），必须类似Ｃ语言中的函数调用方式，即必须携带"()"符号。finsh shell的输出为此函数的返回值，对于那些不存在返回值的函数，这个打印输出没有意义。要查看命令行信息必须定义对应相应的宏。
 
     finsh>>list()
 
@@ -411,7 +410,7 @@ current tick:0x0000d7e
        timeout  定时器超时时的节拍数；
 
           flag  定时器的状态，activated表示活动的，deactivated表示不活动的；
-		  
+
   current tick  当前系统的节拍;
 -----------------------------------------------------------------------
 
@@ -467,11 +466,11 @@ RT-Thread的各个组件会向finsh输出一些命令。 如当打开DFS组件�
     cat              -- print file
     copy             -- copy source file to destination file
     mkdir            -- create a directory
-	
 
 ## 移植 ##
 
-由于finsh完全采用ANSI C编写，具备极好的移植性，同时在内存占用上也比较小，如果不使用到一些动态向finsh shell添加API的函数，整个finsh将不会动态申请内存。移植相关需要注意的事项包括如下：
+finsh完全采用ANSI C编写，具备极好的移植性；内存占用少，如果不使用前面11.6节介绍的函数方式动态地向finsh添加符号，finsh将不会动态申请内存。
+finsh源码位于 `components/finsh` 目录下。移植finsh需要注意以下几个方面：
 
 * finsh shell线程：
 
@@ -479,7 +478,7 @@ RT-Thread的各个组件会向finsh输出一些命令。 如当打开DFS组件�
 
 * finsh的输出：
 
-finsh的输出依赖于系统的输出，在RT-Thread中依赖的是 `rt_printf `输出。在启动函数 `rt_hw_board_init()` 中， `rt_console_set_device(const char* name)` 函数设置了finsh的打印输出设备。
+finsh的输出依赖于系统的输出，在RT-Thread中依赖`rt_kprintf`输出。在启动函数 `rt_hw_board_init()` 中， `rt_console_set_device(const char* name)` 函数设置了finsh的打印输出设备。
 
 * finsh的输入：
 
@@ -487,16 +486,17 @@ finsh shell线程在获得了rx_sem信号量后，调用 `rt_device_read()` 函�
 
 ## 宏选项 ##
 
-finsh下有许多宏定义，开启不同部分实现的功能不一样。
+finsh有一些宏定义可以简单配置。
 
-* #define RT_USING_FINSH
+    #define RT_USING_FINSH
 
-要开启finsh的支持，将其作为shell，在RT-Thread的配置中必须定义,此宏在rtconfig.h中。
+此宏定义在rtconfig.h中，用于在RT-Thread中打开finsh，并将其作为shell。
 
-* #define FINSH_USING_SYMTAB 和#define FINSH_USING_DESCRIPTION
+    #define FINSH_USING_SYMTAB
+    #define FINSH_USING_DESCRIPTION
 
-可以使用内置符号表。
+此宏定义在rtconfig.h中。打开`FINSH_USING_SYMTAB`可以在finsh中使用符号表，打开`FINSH_USING_DESCRIPTION`后需要给每个finsh的符号添加一段字符串描述。这两个宏一般都需要打开。
 
-* #define FINSH_USING_HISTORY
+    #define FINSH_USING_HISTORY
 
-可以查看历史指令。
+此宏定义在rtconfig.h中，打开后可以在finsh中使用方向键（上下）回溯历史指令。
