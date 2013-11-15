@@ -471,32 +471,32 @@ RT-Thread的各个组件会向finsh输出一些命令。 如当打开DFS组件�
 
 ## 移植 ##
 
-由于finsh完全采用ANSI C编写，具备极好的移植性，同时在内存占用上也非常小，如果不使用上述提到的API函数，整个finsh将不会动态申请内存。
+由于finsh完全采用ANSI C编写，具备极好的移植性，同时在内存占用上也比较小，如果不使用到一些动态向finsh shell添加API的函数，整个finsh将不会动态申请内存。移植相关需要注意的事项包括如下：
 
 * finsh shell线程：
 
-每次的命令执行都是在finsh shell线程的上下文中完成的。定义宏RT_USING_FINSH，在启动函数中就配置了finsh_system_init()和finsh_set_device(const char*device_name)函数，finsh shell线程在函数finsh_system_init()中创建，它将一直等待rx_sem信号量的释放。
+每次的命令执行都是在finsh shell线程的上下文中完成的。当定义RT_USING_FINSH宏时，就可以在初始化线程中调用finsh_system_init()初始化finsh shell线程。RT-Thread 1.2.0版本中可以不使用 `finsh_set_device(const char* device_name)` 函数去显式指定使用的设备，而是会自动调用 `rt_console_get_device()` 函数去使用console设备（RT-Thread 1.1.x及以下版本中必须使用 `finsh_set_device(const char* device_name)` 指定finsh shell使用的设备）。finsh shell线程在函数 `finsh_system_init()` 函数中被创建，它将一直等待rx_sem信号量。
 
 * finsh的输出：
 
-finsh的输出依赖于系统的输出，在RT-Thread中依赖的是rt_printf输出。在启动函数rt_hw_board_init()中，rt_console_set_device(const char*name)函数设置了finsh的打印输出设备。
+finsh的输出依赖于系统的输出，在RT-Thread中依赖的是 `rt_printf `输出。在启动函数 `rt_hw_board_init()` 中， `rt_console_set_device(const char* name)` 函数设置了finsh的打印输出设备。
 
 * finsh的输入：
 
-finsh shell线程在获得了rx_sem信号量后，调用rt_decice_read()函数从设备(选用串口设备)中获得一个字符然后处理。所以finsh的移植需要rt_decice_read()函数的实现。而rx_sem信号量的释放通过调用rx_indicate()函数以完成对finsh shell线程的输入通知。通常的过程是，当串口接收中断发生是（即串口有输入），接受中断服务例程调用rx_indicate()函数通知finsh shelli线程有输入：而后finsh shell线程获取串口输入最后做相应的命令处理。
+finsh shell线程在获得了rx_sem信号量后，调用 `rt_device_read()` 函数从设备(选用串口设备)中获得一个字符然后处理。所以finsh的移植需要 `rt_device_read()` 函数的实现。而rx_sem信号量的释放通过调用 `rx_indicate()` 函数以完成对finsh shell线程的输入通知。通常的过程是，当串口接收中断发生是（即串口有输入），接受中断服务例程调用 `rx_indicate()` 函数通知finsh shelli线程有输入：而后finsh shell线程获取串口输入最后做相应的命令处理。
 
 ## 宏选项 ##
 
 finsh下有许多宏定义，开启不同部分实现的功能不一样。
 
-### #define RT_USING_FINSH ###
+* #define RT_USING_FINSH
 
 要开启finsh的支持，将其作为shell，在RT-Thread的配置中必须定义,此宏在rtconfig.h中。
 
-### #define FINSH_USING_SYMTAB 和#define FINSH_USING_DESCRIPTION  ###
+* #define FINSH_USING_SYMTAB 和#define FINSH_USING_DESCRIPTION
 
 可以使用内置符号表。
 
-### #define FINSH_USING_HISTORY ###
+* #define FINSH_USING_HISTORY
 
 可以查看历史指令。
