@@ -110,14 +110,18 @@ typedef struct rt_timer* rt_timer_t;
                    rt_uint8_t flag  定时器创建时的参数，支持的值包括（可以用“或”关系取多个值）：
 ----------------------------------------------------------------------------------------------
 
+include/rtdef.h中定义了一些定时器相关的宏，如下。
+
 ~~~{.c}
+#define RT_TIMER_FLAG_DEACTIVATED   0x0     /* 定时器为非激活态 */
+#define RT_TIMER_FLAG_ACTIVATED     0x1     /* 定时器为激活状态 */
 #define RT_TIMER_FLAG_ONE_SHOT      0x0     /* 单次定时     */
 #define RT_TIMER_FLAG_PERIODIC      0x2     /* 周期定时     */
 #define RT_TIMER_FLAG_HARD_TIMER    0x0     /* 硬件定时器   */
 #define RT_TIMER_FLAG_SOFT_TIMER    0x4     /* 软件定时器   */
 ~~~
 
-当指定的flag为RT_IMER_FLAG_HARD_TIMER时，如果定时器超时，定时器的回调函数将在时钟中断的服务例程上下文中被调用；当指定的flag为RT_TIMER_FLAG_SOFT_TIMER时，如果定时器超时，定时器的回调函数将在系统时钟timer线程的上下文中被调用。
+当指定的flag为`RT_IMER_FLAG_HARD_TIMER`时，如果定时器超时，定时器的回调函数将在时钟中断的服务例程上下文中被调用；当指定的flag为`RT_TIMER_FLAG_SOFT_TIMER`时，如果定时器超时，定时器的回调函数将在系统时钟timer线程的上下文中被调用。
 
 **函数返回**
 
@@ -430,7 +434,7 @@ int rt_application_init(void)
 
 RT-Thread的定时器与其他实时操作系统的定时器实现稍微有些不同（特别是RT-Thread早期版本的实现中），因为RT-Thread里定时器默认的方式是HARD_TIMER定时器，即定时器超时后，超时函数是在系统时钟中断的上下文环境中运行的。在中断上下文中的执行方式决定了定时器的超时函数不应该调用任何会让当前上下文挂起的系统函数；也不能够执行非常长的时间，否则会导致其他中断的响应时间加长或抢占了其他线程执行的时间。
 
-另外，回顾第五章，你是否有留意到每个线程控制块中都包含了一个定时器：thread_timer。这个thread_timer也是一个HARD_TIMER定时器。它被用于当线程需要执行一些带时间特性的系统调用中，例如带超时特性的试图持有信号量，接收事件、接收消息等，而当相应的条件不能够被满足时线程就将被挂起，在线程挂起前，这个内置的定时器将会被激活并启动（超时函数设定为rt_thread_timeout）。当线程定时器超时时，这个线程依然还未被唤醒， rt_thread_timeout函数仍将继续被调用，接着设置线程的error代码为-RT_ETIMEOUT，接着唤醒这个线程。所以从某个意义上说，在线程中执行rt_thread_sleep/rt_thread_delay函数，也可以算是另一种意义的超时。
+另外，在第二章第三节线程控制块中，你是否有留意到每个线程控制块中都包含了一个定时器：thread_timer。这个thread_timer也是一个HARD_TIMER定时器。它被用于当线程需要执行一些带时间特性的系统调用中，例如带超时特性的试图持有信号量，接收事件、接收消息等，而当相应的条件不能够被满足时线程就将被挂起，在线程挂起前，这个内置的定时器将会被激活并启动（超时函数设定为rt_thread_timeout）。当线程定时器超时时，这个线程依然还未被唤醒， rt_thread_timeout函数仍将继续被调用，接着设置线程的error代码为-RT_ETIMEOUT，接着唤醒这个线程。所以从某个意义上说，在线程中执行rt_thread_sleep/rt_thread_delay函数，也可以算是另一种意义的超时。
 
 回到上一段对HARD_TIMER定时器描述中来，可以看到HARD_TIMER定时器超时函数工作于中断的上下文环境中，这种在中断中执行的方式显得非常麻烦，因此开发人员需要时刻关心超时函数究竟执行了哪些操作；相反如果定时器超时函数是在线程中执行，显然会好很多，如果有更高优先级的线程就绪，依然可以抢占这个定时器执行线程从而获得优先处理权。如果是想要使用rt_thread_sleep/rt_thread_delay的方式实现定时器超时操作，那么可以使用如图9-4的方式： 
  
