@@ -8,7 +8,7 @@
 
 当前RT-Thread支持应用模块的架构包括arm7、arm9、cortex M0/M3/M4。当前RT-Thread内核可使用多种编译器，如GCC, ARMCC、IAR等工具链，模块编译只支持GCC工具链，因此编译RT-Threas模块需下载GCC工具，笔者使用的是CodeSourcery的arm-none-eabi工具链。
 
-应用模块也带来了一定的限制，它仅支持加载到RAM中运行，而不能直接在flash上运行，向此RAM耗费会到一些。
+应用模块也带来了一定的限制，它仅支持加载到RAM中运行，而不能直接在flash上运行，因此，RAM耗费的会多一些。
 
 ## 使用应用模块 ##
 
