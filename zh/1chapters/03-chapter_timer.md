@@ -440,7 +440,7 @@ RT-Thread的定时器与其他实时操作系统的定时器实现稍微有些�
  
 ![线程定时器](figures/rt_timer_thread.png)
 
-在上面的例子中，timer_thread是一个线程入口函数，在线程中执行rt_thread_delay(n)后，课以实现n个OS tick的定时，当执行rt_thread_delay时，线程的内置定时器将会被激活并启动；当线程定时器超时时，这个线程将被唤醒，并接着rt_thread_delay运行后续的代码。
+在上面的例子中，timer_thread是一个线程入口函数，在线程中执行rt_thread_delay(n)后，可以实现n个OS tick的定时，当执行rt_thread_delay时，线程的内置定时器将会被激活并启动；当线程定时器超时时，这个线程将被唤醒，并接着rt_thread_delay运行后续的代码。
 
 上述描述的都是HARD_TIMER的特性。另外，在RT-Thread中，我们也可以在创建定时器时，把定时器指定成SOFT_TIMER的方式，这样可以使得定时器超时函数完全运行在timer系统线程上下文环境中。如果系统在初始化时需要使用SOFT_TIMER特性，需要在系统配置中打开RT_USING_TIMER_SOFT宏定义，那么调用rt_system_timer_thread_init函数就可以启动timer系统线程。这里值得注意的是，SOFT_TIMER定时器的精度由RT_TIMER_TICK_PER_SECOND定义的值所决定（每秒触发的timer tick次数是多少），这个值必须是OS tick的整数倍。
 
