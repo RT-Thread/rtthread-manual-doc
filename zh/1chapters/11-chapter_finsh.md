@@ -2,7 +2,14 @@
 
 ## 简介 ##
 
-finsh是RT-Thread的命令行外壳（shell），提供一套供用户在命令行的操作接口，主要用于调试、查看系统信息。finsh被设计成一个不同于传统命令行的C语言表达式解释器：由于很多嵌入式系统都是采用C语言来编写，finsh正是采用了这种系统软件开发人员都会的语法形式，把C语言表达式变成了命令行的风格。它能够解析执行大部分C语言的表达式，也能够使用类似C语言的函数调用方式访问系统中的函数及全局变量，此外它也能够通过命令行方式创建变量。
+finsh是RT-Thread的命令行外壳（shell），提供一套供用户在命令行的操作接口，主要用于调试、查看系统信息。
+finsh支持两种模式：1. C语言解释器模式, 为行文方便称之为c-style；2. 传统命令行模式，此模式又称为msh(module shell)。
+
+C语言表达式解释模式下, finsh能够解析执行大部分C语言的表达式，并使用类似C语言的函数调用方式访问系统中的函数及全局变量，此外它也能够通过命令行方式创建变量。
+
+在msh模式下，finsh运行方式类似于dos/bash等传统shell。
+
+在本章的最后一节宏选项中介绍如何配置finsh，读者可以根据自己的喜好配置finsh。
 
 ## 工作模式 ##
 
@@ -22,6 +29,8 @@ finsh是RT-Thread的命令行外壳（shell），提供一套供用户在命令�
 
 在大部分嵌入式系统中，一般开发调试都使用硬件调试器和printf日志打印，在有些情况下，这两种方式并不是那么好用。比如对于RT-Thread这个多线程系统，我们想知道某个时刻系统中的线程运行状态、手动控制系统状态。如果有一个shell，就可以输入命令，直接相应的函数执行获得需要的信息，或者控制程序的行为。这无疑会十分方便。
 
+### finsh(C-Style) ###
+
 在嵌入式领域，C语言是最常用的开发语言，如果shell程序的命令是C语言的风格，那无疑是非常易用且有趣的。
 
 嵌入式设备通常采用交叉编译，一般需要将开发板与PC机连接起来通讯，常见连接方式包括，串口、USB、以太网、wifi等。一个灵活的shell应该可以在多种连接方式上工作。
@@ -36,7 +45,19 @@ finsh正是基于这些考虑而诞生的。finsh运行于开发板，它可以�
 
 按下回车，然后输入list_thread()将会打印系统当前所有线程，以及状态。关于这个命令的详细解释请参考本章最后一节。
 
-**WARNING**: finsh是一个C语言风格的Shell，与Linux/Unix以及Windows下的CMD的风格不同。在finsh shell中使用命令（即C语言中的函数），必须类似C语言中的函数调用方式，即必须携带“()”符号。最后finsh命令的输出为此函数的返回值。对于一些不存在返回值的函数（void返回值），这个打印输出没有意义。
+**WARNING**: 此模式下，finsh是一个C语言风格的Shell，与Linux/Unix以及Windows下的CMD的风格不同。在finsh shell中使用命令（即C语言中的函数），必须类似C语言中的函数调用方式，即必须携带“()”符号。最后finsh命令的输出为此函数的返回值。对于一些不存在返回值的函数（void返回值），这个打印输出没有意义。
+
+### finsh(msh) ###
+
+实际上，一开始finsh仅支持C-Style模式。后来随着RT-Thread的不断发展，尤其支持app module之后（请参考本书应用模块一章了解相关内容），C-Style模式执行app module时操作起来不太方便，而传统的shell则更方便些，另外，C-Style模式下，finsh占用体积较大。出于这些考虑，在RT-Thread1.2.0中为finsh增加了msh模式。
+
+msh模式下，finsh与传统shell（dos/bash）执行方式一致，其命令执行格式如下
+
+    command [arg1] [arg2] [...]
+
+其中command既可以RT-Thread内置的命令，也可以是编译出的app module（类似于dos里的exe）。当
+
+finsh(msh)内置的命令风格采用bash的风格，内置命令将在本章后续章节详细介绍。
 
 ### finsh中的按键 ###
 
@@ -48,7 +69,7 @@ finsh支持TAB键自动补全，当没有输入任何字符时按下TAB键将会
 
 ## finsh特性 ##
 
-### finsh的数据类型 ###
+### finsh(c-style)的数据类型 ###
 
 finsh支持基本的C语言数据类型，包括：
 
@@ -72,13 +93,13 @@ finsh支持基本的C语言数据类型，包括：
 
 在finsh的命令行上，输入上述数据类型的C表达式可以被识别。浮点类型以及复合数据类型unin与struct等暂不支持。此外，finsh也不支持 for，while，跳转语句goto。
 
-## finsh中增加命令/变量 ##
+## finsh(c-style)中增加命令/变量 ##
 
 finsh支持两种方式向finsh中输出符号（函数或变量），下面将分别介绍这两种方式。
 
 ### 宏方式 ###
 
-定义宏FINSH_USING_SYMTAB，开启宏输出方式。
+需要在rtconfig.h中定义宏FINSH_USING_SYMTAB。
 
 ~~~{.c}
 #include <finsh.h>
@@ -160,18 +181,19 @@ int var;
 
 int hello_rtt(int a)
 {
-　　rt_kprintf(“hello, world! I am %d\n”, a);
+　　rt_kprintf("hello, world! I am %d\n", a);
 　　return a;
 }
-FINSH_FUNCTION_EXPORT(hello_rtt,  say hello to rtt)
-FINSH_FUNCTION_EXPORT_ALIAS(hello_rtt,  hr,  say hello to rtt)
+FINSH_FUNCTION_EXPORT(hello_rtt, say hello to rtt)
+FINSH_FUNCTION_EXPORT_ALIAS(hello_rtt, hr, say hello to rtt)
 
-FINSH_VAR_EXPORT(var, finsh_type_int, just a var for test)	
+FINSH_VAR_EXPORT(var, finsh_type_int, just a var for test)
 ~~~
 
 编译后运行，可以看到finsh中增加了两个命令，一个变量var。
 
 ### 函数方式 ###
+
 ~~~{.c}
 #include <finsh.h>
 void finsh_syscall_append(const char* name, syscall_func func)
@@ -203,11 +225,101 @@ void finsh_sysvar_append(const char* name, u_char type, void* addr)
 
 这个函数用于输出一个变量到finsh中。
 
+## finsh(msh)中增加命令 ##
+
+当使用msh模式时，finsh不支持C表达式，因此只能添加命令，并不能向c-style模式下动态创建变量。msh模式添加命令仅支持下面两种宏方式添加命令。
+
+~~~{.c}
+#include <finsh.h>
+FINSH_FUNCTION_EXPORT_ALIAS(name, alias, desc)
+MSH_CMD_EXPORT(command, desc)
+~~~
+
+### 添加内置命令 ###
+
+在RT-Thread/components/finsh/msh_cmd.c定义了一些预定义命令，读者可以参考其实现。
+
+首先在finsh(msh)中添加一个func命令，它什么也不做，只是打印一句话。第一种方法如下。
+
+~~~{.c}
+#include <finsh.h>
+
+int func(void)
+{
+    rt_kprintf("hello, world! I am function\n");
+    return 0;
+}
+
+FINSH_FUNCTION_EXPORT_ALIAS(func, __cmd_func, say hello to rtt)
+~~~
+
+msh要求内置命令的名字必须以`__cmd`开头，因此为了在finsh中可以输入func，我们借助`FINSH_FUNCTION_EXPORT_ALIAS`将func导出为`__cmd_func`，这也意味着func命令对应的函数完全可以是任意的，如下修改代码，编译链接后运行，输入func后回车，一样可以正确打印。
+
+~~~{.c}
+#include <finsh.h>
+
+int func_test(void)
+{
+    rt_kprintf("hello, world! I am function\n");
+    return 0;
+}
+
+FINSH_FUNCTION_EXPORT_ALIAS(func_test,  __cmd_func, say hello to rtt)
+~~~
+
+为了简化输入，finsh(msh)还提供了`MSH_CMD_EXPORT`来向finsh中添加内置命令，如下所示。
+
+~~~{.c}
+#include <finsh.h>
+
+int func(void)
+{
+    rt_kprintf("hello, world! I am function\n");
+    return 0;    
+}
+MSH_CMD_EXPORT(func,  say hello to rtt)
+~~~
+
+如果想要添加支持参数的内置命令，则命令对应的函数原型需要如下所示：
+
+    int command_func(int argc, char** argv)
+
+这个参数与C语言中带有参数的main函数的原型一致，参数argc表示finsh命令中参数的个数，argv为一个指针数组，数组每个元素都指向一个字符串，即finsh中你所输入的各个参数，argv[0]就是命令。argv[1].. 因此存放参数。
+
+假如我们在finsh(msh)中实现一个内置命令sum，它将传递给它的参数累加，并打印最终的和。则一种可能的实现方法如下：
+
+~~~{.c}
+#include <finsh.h>
+
+int sum(int argc, char** argv)
+{
+    int i;
+    int total=0;
+    for (i=1; i<argc; i++)
+    {
+        total += atoi(argv[i]);
+    }
+    rt_kprintf("total = %d\n", total);
+
+    return 0;
+}
+MSH_CMD_EXPORT(sum, do sum in finsh)
+~~~
+
+编译后运行, 效果如下。
+
+    finsh />sum
+    total = 0
+    finsh />sum 1 3 3
+    total = 7
+    finsh />
+
 ## RT-Thread内置命令 ##
 
 在RT-Thread中默认内置了一些finsh命令，在finsh中按下TAB键可以打印则会当前系统支持所有符号，也可以输入list()回车，二者效果相同。
 
-注意：在finsh shell中使用命令（即Ｃ语言中的函数），必须类似Ｃ语言中的函数调用方式，即必须携带"()"符号。finsh shell的输出为此函数的返回值，对于那些不存在返回值的函数，这个打印输出没有意义。要查看命令行信息必须定义对应相应的宏。
+### finsh(c-style) ### 
+注意：在finsh(c-style)中使用命令（即Ｃ语言中的函数），必须类似Ｃ语言中的函数调用方式，即必须携带"()"符号。finsh shell的输出为此函数的返回值，对于那些不存在返回值的函数，这个打印输出没有意义。要查看命令行信息必须定义对应相应的宏。
 
     finsh>>list()
 
@@ -467,6 +579,47 @@ RT-Thread的各个组件会向finsh输出一些命令。 如当打开DFS组件�
     copy             -- copy source file to destination file
     mkdir            -- create a directory
 
+### finsh(msh) 内置命令 ###
+
+msh模式下，内置命令风格与bash类似，按下tab键后可以列出当前支持的所有命令。
+
+~~~{.c}
+RT-Thread shell commands:
+list_timer       - list timer in system
+list_device      - list device in system
+version          - show RT-Thread version information
+list_thread      - list thread
+list_sem         - list semaphore in system
+list_event       - list event in system
+list_mutex       - list mutex in system
+list_mailbox     - list mail box in system
+list_msgqueue    - list message queue in system
+ls               - List information about the FILEs.
+cp               - Copy SOURCE to DEST.
+mv               - Rename SOURCE to DEST.
+cat              - Concatenate FILE(s)
+rm               - Remove (unlink) the FILE(s).
+cd               - Change the shell working directory.
+pwd              - Print the name of the current working directory.
+mkdir            - Create the DIRECTORY.
+ps               - List threads in the system.
+time             - Execute command with time.
+free             - Show the memory usage in the system.
+exit             - return to RT-Thread shell mode.
+help             - RT-Thread shell help.
+~~~
+
+执行方式与传统shell相同，因此不详细赘述，以cat为例简单介绍。如果打开DFS，并正确挂载了文件系统, 则可以执行ls查看列出的当前目录。
+
+    finsh>ls
+    Directory /:
+    ..                  <DIR>
+    a.txt               1119
+
+当前目录下存在名为a.txt的文件，则可执行如下命令打印a.txt的内容。
+
+    finsh>> cat a.txt
+
 ## 移植 ##
 
 finsh完全采用ANSI C编写，具备极好的移植性；内存占用少，如果不使用前面11.6节介绍的函数方式动态地向finsh添加符号，finsh将不会动态申请内存。
@@ -500,3 +653,17 @@ finsh有一些宏定义可以简单配置。
     #define FINSH_USING_HISTORY
 
 此宏定义在rtconfig.h中，打开后可以在finsh中使用方向键（上下）回溯历史指令。
+
+    #define FINSH_USING_MSH
+
+此宏定义在rtconfig.h中，打开后finsh将支持传统shell模式。
+
+    #define FINSH_USING_MSH_ONLY
+
+此宏定义在rtconfig.h中，打开后finsh仅支持msh模式。
+
+如果打开了`FINSH_USING_MSH`而没有打开`FINSH_USING_MSH_ONLY`, finsh同时支持两种c-style模式与msh模式，但是默认进入c-style模式，执行 `msh()`即可切换到msh模式，在msh模式下执行 `exit`后即退回到c-style模式。
+
+    #define DFS_USING_WORKDIR
+
+此宏定义在rtconfig.h中，它实际上是DFS组件的宏，但由于它与finsh有一定关系，因此在这里也介绍一下。打开此宏后finsh可以支持工作目录。当使用msh时，建议打开此宏。
