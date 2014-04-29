@@ -56,7 +56,8 @@ TCP/IP的进程模型可以被设计为以下两种：（当然也可以是其�
 
 ```c
     // Creates a new thread
-    sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread, void *arg, int stacksize, int prio);
+    sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread, 
+											void *arg, int stacksize, int prio);
     /** Create a new mutex
      * @param mutex pointer to the mutex to create
      * @return a new mutex */
@@ -118,52 +119,65 @@ RT-Thread有一套自己的设备框架，这里只作一个简单的描述，�
 ```c
 struct rt_object_information
 {
-    enum rt_object_class_type type;                     /**< object class type */
-    rt_list_t                 object_list;              /**< object list */
-    rt_size_t                 object_size;              /**< object size */
+    enum rt_object_class_type type;	/**< object class type*/
+    rt_list_t object_list;	/**< object list */
+    rt_size_t object_size;	/**< object size */
 };
 
 struct rt_object_information rt_object_container[RT_Object_Class_Unknown] =
 {
     /* initialize object container - thread */
-    {RT_Object_Class_Thread, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_Thread), sizeof(struct rt_thread)},
+    {RT_Object_Class_Thread, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_Thread), 
+		sizeof(struct rt_thread)},
 #ifdef RT_USING_SEMAPHORE
     /* initialize object container - semaphore */
-    {RT_Object_Class_Semaphore, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_Semaphore), sizeof(struct rt_semaphore)},
+    {RT_Object_Class_Semaphore,
+		_OBJ_CONTAINER_LIST_INIT(RT_Object_Class_Semaphore), 
+		sizeof(struct rt_semaphore)},
 #endif
 #ifdef RT_USING_MUTEX
     /* initialize object container - mutex */
-    {RT_Object_Class_Mutex, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_Mutex), sizeof(struct rt_mutex)},
+    {RT_Object_Class_Mutex, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_Mutex), 
+		sizeof(struct rt_mutex)},
 #endif
 #ifdef RT_USING_EVENT
     /* initialize object container - event */
-    {RT_Object_Class_Event, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_Event), sizeof(struct rt_event)},
+    {RT_Object_Class_Event, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_Event), 
+		sizeof(struct rt_event)},
 #endif
 #ifdef RT_USING_MAILBOX
     /* initialize object container - mailbox */
-    {RT_Object_Class_MailBox, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_MailBox), sizeof(struct rt_mailbox)},
+    {RT_Object_Class_MailBox, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_MailBox), 
+		sizeof(struct rt_mailbox)},
 #endif
 #ifdef RT_USING_MESSAGEQUEUE
     /* initialize object container - message queue */
-    {RT_Object_Class_MessageQueue, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_MessageQueue), sizeof(struct rt_messagequeue)},
+    {RT_Object_Class_MessageQueue, 
+		_OBJ_CONTAINER_LIST_INIT(RT_Object_Class_MessageQueue), 
+		sizeof(struct rt_messagequeue)},
 #endif
 #ifdef RT_USING_MEMHEAP
     /* initialize object container - memory heap */
-    {RT_Object_Class_MemHeap, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_MemHeap), sizeof(struct rt_memheap)},
+    {RT_Object_Class_MemHeap, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_MemHeap), 
+		sizeof(struct rt_memheap)},
 #endif
 #ifdef RT_USING_MEMPOOL
     /* initialize object container - memory pool */
-    {RT_Object_Class_MemPool, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_MemPool), sizeof(struct rt_mempool)},
+    {RT_Object_Class_MemPool, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_MemPool), 
+		sizeof(struct rt_mempool)},
 #endif
 #ifdef RT_USING_DEVICE
     /* initialize object container - device */
-    {RT_Object_Class_Device, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_Device), sizeof(struct rt_device)},
+    {RT_Object_Class_Device, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_Device), 
+		sizeof(struct rt_device)},
 #endif
     /* initialize object container - timer */
-    {RT_Object_Class_Timer, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_Timer), sizeof(struct rt_timer)},
+    {RT_Object_Class_Timer, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_Timer), 
+		sizeof(struct rt_timer)},
 #ifdef RT_USING_MODULE
     /* initialize object container - module */
-    {RT_Object_Class_Module, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_Module), sizeof(struct rt_module)},
+    {RT_Object_Class_Module, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_Module), 
+		sizeof(struct rt_module)},
 #endif
 };
 
@@ -263,19 +277,20 @@ void lwip_system_init(void)
     fm3_emac_device0.dev_addr[4] = 0x34;
     fm3_emac_device0.dev_addr[5] = 0x56;
 
-    fm3_emac_device0.parent.parent.init		 = fm3_emac_init;
-    fm3_emac_device0.parent.parent.open		 = fm3_emac_open;
-    fm3_emac_device0.parent.parent.close	 = fm3_emac_close;
-    fm3_emac_device0.parent.parent.read		 = fm3_emac_read;
-    fm3_emac_device0.parent.parent.write	 = fm3_emac_write;
-    fm3_emac_device0.parent.parent.control	 = fm3_emac_control;
+    fm3_emac_device0.parent.parent.init = fm3_emac_init;
+    fm3_emac_device0.parent.parent.open	 = fm3_emac_open;
+    fm3_emac_device0.parent.parent.close = fm3_emac_close;
+    fm3_emac_device0.parent.parent.read	= fm3_emac_read;
+    fm3_emac_device0.parent.parent.write = fm3_emac_write;
+    fm3_emac_device0.parent.parent.control = fm3_emac_control;
     fm3_emac_device0.parent.parent.user_data = RT_NULL;
 
-    fm3_emac_device0.parent.eth_rx			 = fm3_emac_rx;
-    fm3_emac_device0.parent.eth_tx			 = fm3_emac_tx;
+    fm3_emac_device0.parent.eth_rx = fm3_emac_rx;
+    fm3_emac_device0.parent.eth_tx = fm3_emac_tx;
 
     /* init tx buffer free semaphore */
-    rt_sem_init(&fm3_emac_device0.tx_buf_free, "tx_buf0", EMAC_TXBUFNB, RT_IPC_FLAG_FIFO);
+    rt_sem_init(&fm3_emac_device0.tx_buf_free, "tx_buf0", EMAC_TXBUFNB, 
+					RT_IPC_FLAG_FIFO);
     // 关键代码，驱动向系统注册网卡设备
     eth_device_init(&(fm3_emac_device0.parent), "e0");
 #endif /* #ifdef USING_MAC0 */
