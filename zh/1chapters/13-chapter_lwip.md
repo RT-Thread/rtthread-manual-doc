@@ -57,7 +57,7 @@ TCP/IP的进程模型可以被设计为以下两种：（当然也可以是其�
 ```c
     // Creates a new thread
     sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread, 
-											void *arg, int stacksize, int prio);
+	                                void *arg, int stacksize, int prio);
     /** Create a new mutex
      * @param mutex pointer to the mutex to create
      * @return a new mutex */
@@ -235,9 +235,12 @@ void lwip_system_init(void)
     {
         struct ip_addr ipaddr, netmask, gw;
 
-        IP4_ADDR(&ipaddr, RT_LWIP_IPADDR0, RT_LWIP_IPADDR1, RT_LWIP_IPADDR2, RT_LWIP_IPADDR3);
-        IP4_ADDR(&gw, RT_LWIP_GWADDR0, RT_LWIP_GWADDR1, RT_LWIP_GWADDR2, RT_LWIP_GWADDR3);
-        IP4_ADDR(&netmask, RT_LWIP_MSKADDR0, RT_LWIP_MSKADDR1, RT_LWIP_MSKADDR2, RT_LWIP_MSKADDR3);
+        IP4_ADDR(&ipaddr, RT_LWIP_IPADDR0, RT_LWIP_IPADDR1, RT_LWIP_IPADDR2, 
+		           RT_LWIP_IPADDR3);
+        IP4_ADDR(&gw, RT_LWIP_GWADDR0, RT_LWIP_GWADDR1, RT_LWIP_GWADDR2, 
+		           RT_LWIP_GWADDR3);
+        IP4_ADDR(&netmask, RT_LWIP_MSKADDR0, RT_LWIP_MSKADDR1, RT_LWIP_MSKADDR2, 
+		           RT_LWIP_MSKADDR3);
 
         netifapi_netif_set_addr(netif_default, &ipaddr, &netmask, &gw);
     }
@@ -266,7 +269,7 @@ void lwip_system_init(void)
     /* set autonegotiation mode */
     fm3_emac_device0.phy_mode = EMAC_PHY_AUTO;
     fm3_emac_device0.FM3_ETHERNET_MAC = FM3_ETHERNET_MAC0;
-    fm3_emac_device0.ETHER_MAC_IRQ  = ETHER_MAC0_IRQn;
+    fm3_emac_device0.ETHER_MAC_IRQ = ETHER_MAC0_IRQn;
 
     // OUI 00-00-0E FUJITSU LIMITED
     fm3_emac_device0.dev_addr[0] = 0x00;
@@ -278,9 +281,9 @@ void lwip_system_init(void)
     fm3_emac_device0.dev_addr[5] = 0x56;
 
     fm3_emac_device0.parent.parent.init = fm3_emac_init;
-    fm3_emac_device0.parent.parent.open	 = fm3_emac_open;
+    fm3_emac_device0.parent.parent.open = fm3_emac_open;
     fm3_emac_device0.parent.parent.close = fm3_emac_close;
-    fm3_emac_device0.parent.parent.read	= fm3_emac_read;
+    fm3_emac_device0.parent.parent.read = fm3_emac_read;
     fm3_emac_device0.parent.parent.write = fm3_emac_write;
     fm3_emac_device0.parent.parent.control = fm3_emac_control;
     fm3_emac_device0.parent.parent.user_data = RT_NULL;
