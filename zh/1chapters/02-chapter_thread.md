@@ -928,8 +928,6 @@ int rt_application_init(void)
         rt_err_t rt_thread_sleep(rt_tick_t tick);
         rt_err_t rt_thread_delay(rt_tick_t tick);
 
-在实际应用中，我们有时需要让运行的当前线程延迟一段时间，在指定的时间到达后重新运行，这就叫做“线程睡眠”。线程睡眠可使用上面这两个函数接口之一。
-
 这两个函数接口的作用相同，调用它们可以使当前线程挂起一段指定的时间，当这个时间过后，线程会被唤醒并再次进入就绪状态。这个函数接受一个参数，该参数指定了线程的休眠时间（单位是OS Tick时钟节拍）。
 
 
