@@ -19,11 +19,11 @@ RT-Thread的定时器提供两类定时器机制：第一类是单次触发定�
 
 ![定时器链表](figures/rt_timer_list.png)
 
-如图9-1所示，系统当前tick值为20，在当前系统中已经创建并启动了三个定时器，分别是定时时间为50个tick的Timer1、100个tick的Timer2和500个tick的Timer3，这三个定时器分别加上系统当前时间rt_tick = 20，从小到大排序链接在rt_timer_list链表中，形成如图9-1所示的定时器链表结构。
+如图3-1所示，系统当前tick值为20，在当前系统中已经创建并启动了三个定时器，分别是定时时间为50个tick的Timer1、100个tick的Timer2和500个tick的Timer3，这三个定时器分别加上系统当前时间rt_tick = 20，从小到大排序链接在rt_timer_list链表中，形成如图3-1所示的定时器链表结构。
 
 而rt_tick随着硬件定时器的触发一直在增长（每一次硬件定时器中断来临，rt_tick变量会加1）， 50个tick以后， rt_tick从20增长到70，与Timer1的timeout值相等， 这时会触发与Timer1定时器相关连的超时函数，同时将Timer1从rt_timer_list链表上删除。同理，100个tick和500个tick过去后，与Timer2和Timer3定时器相关联的超时函数会被触发，接着将Time2和Timer3定时器从rt_timer_list链表中删除。
 
-如果系统当前定时器状态在10个tick以后（rt_tick = 30）有一个任务新创建了一个tick值为300的Timer4定时器，由于Timer4定时器的timeout = rt_tick + 300 =330, 因此它将被插入到Timer2和Timer3定时器中间，形成如图9-2所示链表结构：
+如果系统当前定时器状态在10个tick以后（rt_tick = 30）有一个任务新创建了一个tick值为300的Timer4定时器，由于Timer4定时器的timeout = rt_tick + 300 =330, 因此它将被插入到Timer2和Timer3定时器中间，形成如图3-2所示链表结构：
  
 ![插入Timer #4后的示意图](figures/rt_timer_timer4.png)
 
