@@ -125,19 +125,19 @@ IPv6地址可分为三类：
 
 ## RT-Thread中如何使用IPv6##
 
-要使用IPv6，需使用lwip-head版本的协议栈，需要在相应的BSP包中的rtconfig.h文件中添加“#define RT\_USING\_LWIP\_HEAD 1”。
+要使用IPv6，需使用lwip-head版本的协议栈，需要在相应的BSP包中的rtconfig.h文件中添加“#define RT\_USING\_LWIP\_HEAD”。
 
 ### 使用IPv4/v6双栈
 
-要在RT-Thread中使用IPv4/v6双栈，需在相应的BSP包中的rtconfig.h文件添加“#define RT\_LWIP\_IPV6 1”,这样当网络初始化后就会为网卡创建link-local address，用于局域网内的通信。当然也可以为网卡创建全球单播地址，这里提供了两种方式：
+要在RT-Thread中使用IPv4/v6双栈，需在相应的BSP包中的rtconfig.h文件添加“#define RT\_LWIP\_IPV6”,这样当网络初始化后就会为网卡创建link-local address，用于局域网内的通信。当然也可以为网卡创建全球单播地址，这里提供了两种方式：
 
-1）无状态地址自动配置，只要在rtconfig.h中添加“#define RT\_LWIP\_IPV6\_AUTOCONFIG 1”,这样将开发板接入支持IPv6的路由器时（如极路由和其他支持openwrt系统的路由器）即可完成IPv6地址的自动配置。
+1）无状态地址自动配置，只要在rtconfig.h中添加“#define RT\_LWIP\_IPV6\_AUTOCONFIG”,这样将开发板接入支持IPv6的路由器时（如极路由和其他支持openwrt系统的路由器）即可完成IPv6地址的自动配置。
 
 2）手动配置，在你的应用程序中完成了网络的初始化后，可调用“void set_if6(char* netif\_name, char* ip6\_addr)” 函数设置网络地址，如你想要为网卡“e0”设置“2001::1”的地址，则调用set\_if6("e0", "2001::1")即可。
 
 ### 仅使用IPv4
 
-在lwip-head中网络层仅使用IPv4协议栈，只要不在相应的BSP包中的rtconfig.h文件添加“#define RT\_LWIP\_IPV6 1”即可，RT-Thread不会将IPv6相关的源文件、头文件编译进去。IPv4中仍然支持使用DHCP协议与静态IP地址配置。
+在lwip-head中网络层仅使用IPv4协议栈，只要不在相应的BSP包中的rtconfig.h文件添加“#define RT\_LWIP\_IPV6”即可，RT-Thread不会将IPv6相关的源文件、头文件编译进去。IPv4中仍然支持使用DHCP协议与静态IP地址配置。
 
 ### 对开发板进行Ping测试
 
