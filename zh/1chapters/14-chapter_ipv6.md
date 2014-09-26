@@ -125,19 +125,19 @@ IPv6地址可分为三类：
 
 ## RT-Thread中如何使用IPv6##
 
-要使用IPv6，需使用lwip-head版本的协议栈，需要在相应的BSP包中的rtconfig.h文件中添加“#define RT\_USING\_LWIP\_HEAD 1”。
+要使用IPv6，需使用lwip-head版本的协议栈，需要在相应的BSP包中的rtconfig.h文件中添加“#define RT\_USING\_LWIP\_HEAD”。
 
 ### 使用IPv4/v6双栈
 
-要在RT-Thread中使用IPv4/v6双栈，需在相应的BSP包中的rtconfig.h文件添加“#define RT\_LWIP\_IPV6 1”,这样当网络初始化后就会为网卡创建link-local address，用于局域网内的通信。当然也可以为网卡创建全球单播地址，这里提供了两种方式：
+要在RT-Thread中使用IPv4/v6双栈，需在相应的BSP包中的rtconfig.h文件添加“#define RT\_LWIP\_IPV6”,这样当网络初始化后就会为网卡创建link-local address，用于局域网内的通信。当然也可以为网卡创建全球单播地址，这里提供了两种方式：
 
-1）无状态地址自动配置，只要在rtconfig.h中添加“#define RT\_LWIP\_IPV6\_AUTOCONFIG 1”,这样将开发板接入支持IPv6的路由器时（如极路由和其他支持openwrt系统的路由器）即可完成IPv6地址的自动配置。
+1）无状态地址自动配置，只要在rtconfig.h中添加“#define RT\_LWIP\_IPV6\_AUTOCONFIG”,这样将开发板接入支持IPv6的路由器时（如极路由和其他支持openwrt系统的路由器）即可完成IPv6地址的自动配置。
 
 2）手动配置，在你的应用程序中完成了网络的初始化后，可调用“void set_if6(char* netif\_name, char* ip6\_addr)” 函数设置网络地址，如你想要为网卡“e0”设置“2001::1”的地址，则调用set\_if6("e0", "2001::1")即可。
 
 ### 仅使用IPv4
 
-在lwip-head中网络层仅使用IPv4协议栈，只要不在相应的BSP包中的rtconfig.h文件添加“#define RT\_LWIP\_IPV6 1”即可，RT-Thread不会将IPv6相关的源文件、头文件编译进去。IPv4中仍然支持使用DHCP协议与静态IP地址配置。
+在lwip-head中网络层仅使用IPv4协议栈，只要不在相应的BSP包中的rtconfig.h文件添加“#define RT\_LWIP\_IPV6”即可，RT-Thread不会将IPv6相关的源文件、头文件编译进去。IPv4中仍然支持使用DHCP协议与静态IP地址配置。
 
 ### 对开发板进行Ping测试
 
@@ -181,22 +181,21 @@ IPv4地址为192.168.199.134，IPv6的link-local地址为fe80::200:eff:fe12:3456
 
 在基于Socket API进行开发的应用程序中，IPv4/v6都使用基本相同的编程模型；如connect、accept、listen、send/sendto、recv/recvfrom等Socket API函数在IPv4/v6中用法也基本一致，而IPv4与IPv6间的主要差异体现在了与地址相关的API函数上，其具体差异如下图所示：
 
-<table>
-<tbody>
-<tr><td><em></em></td><td><em>IPv4</em></td><td><em>IPv6</em></td></tr>
-<tr><td>地址族</td><td>AF_INET</td><td>AF_INET6</td></tr>
-<tr><td>协议族</td><td>PF_INET</td><td>PF_INET6</td></tr>
-<tr><td>数据结构</td><td>in_addr sockaddr_in</td><td>in6_addr sockaddr_in6</td></tr>
-<tr><td>结构体成员</td><td>结构体长度：sin_len</td><td>sin6_len</td></tr>
-<tr><td></td><td>协议族：sin_family</td><td>sin6_family</td></tr>
-<tr><td></td><td>端口号：sin_port</td><td>sin6_port</td></tr>
-<tr><td></td><td>地址：sin_addr</td><td>sin6_addr</td></tr>
-<tr><td>通配地址</td><td>INADDR_ANY</td><td>IP6_ADDR_ANY</td></tr>
-<tr><td>网络地址转换函数</td><td>inet_aton()/inet_addr()</td><td>inet_pton()</td></tr>
-<tr><td></td><td>inet_ntoa()</td><td>inet_ntop()</td></tr>
-<tr><td>地址转换函数</td><td>gethostbyname()</td><td>getaddrinfo()</td>
-</tbody>
-</table>
+----------------------------------------------------------------------------------------------
+                                  IPv4                             IPv6
+-------------------------------   ------------------------------   ---------------------------
+地址族                             AF_INET                          AF_INET6
+协议族                             PF_INET                          PF_INET6
+数据结构                           in_addr sockaddr_in              in6_addr sockaddr_in6
+结构体成员                         结构体长度：sin_len                sin6_len
+                                  协议族：sin_family                sin6_family
+                                  端口号：sin_port                  sin6_port
+                                  地址：sin_addr                    sin6_addr
+通配地址                           INADDR_ANY                       IP6_ADDR_ANY
+网络地址转换函数                    inet_aton()/inet_addr()          inet_pton()
+                                  inet_ntoa()                      inet_ntop()
+地址转换函数                       gethostbyname()                  gethostbyname()
+----------------------------------------------------------------------------------------------
 
 getaddrinfo()函数在lwIP中实现不完善，这里只介绍inet_pton()函数的用法：
 
