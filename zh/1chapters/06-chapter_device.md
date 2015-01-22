@@ -33,31 +33,31 @@ struct rt_device
 {
   struct rt_object parent;
 
-	/* 设备类型 */
-	enum rt_device_class_type type;
-	/* 设备参数及打开参数 */
-	rt_uint16_t flag, open_flag;
+    /* 设备类型 */
+    enum rt_device_class_type type;
+    /* 设备参数及打开参数 */
+    rt_uint16_t flag, open_flag;
 
-	/* 提供给上层应用的回调函数 */
-	rt_err_t (*rx_indicate)(rt_device_t dev, rt_size_t size);
-	rt_err_t (*tx_complete)(rt_device_t dev, void* buffer);
+    /* 提供给上层应用的回调函数 */
+    rt_err_t (*rx_indicate)(rt_device_t dev, rt_size_t size);
+    rt_err_t (*tx_complete)(rt_device_t dev, void* buffer);
 
-	/* 公共的设备接口(由驱动程序提供) */
-	rt_err_t  (*init)	(rt_device_t dev);
-	rt_err_t  (*open)	(rt_device_t dev, rt_uint16_t oflag);
-	rt_err_t  (*close)(rt_device_t dev);
-	rt_size_t (*read)	(rt_device_t dev, rt_off_t pos, void* buffer, rt_size_t size);
-	rt_size_t (*write)(rt_device_t dev, rt_off_t pos, const void* buffer, rt_size_t size);
-	rt_err_t  (*control)(rt_device_t dev, rt_uint8_t cmd, void *args);
+    /* 公共的设备接口(由驱动程序提供) */
+    rt_err_t  (*init) (rt_device_t dev);
+    rt_err_t  (*open) (rt_device_t dev, rt_uint16_t oflag);
+    rt_err_t  (*close)(rt_device_t dev);
+    rt_size_t (*read) (rt_device_t dev, rt_off_t pos, void* buffer, rt_size_t size);
+    rt_size_t (*write)(rt_device_t dev, rt_off_t pos, const void* buffer, rt_size_t size);
+    rt_err_t  (*control)(rt_device_t dev, rt_uint8_t cmd, void *args);
 
-	/* 用于支持电源管理的函数接口 */
+    /* 用于支持电源管理的函数接口 */
 #ifdef RT_USING_DEVICE_SUSPEND
-	rt_err_t (*suspend) (rt_device_t dev);
-	rt_err_t (*resumed) (rt_device_t dev);
+    rt_err_t (*suspend) (rt_device_t dev);
+    rt_err_t (*resumed) (rt_device_t dev);
 #endif
 
-	/* 设备的私有数据 */
-	void* user_data;
+    /* 设备的私有数据 */
+    void* user_data;
 };
 typedef struct rt_device* rt_device_t;
 ~~~
@@ -87,11 +87,11 @@ enum rt_device_class_type
 
 ### 注册设备 ###
 
-一个设备能够被上层应用访问前，需要先把这个设备注册到系统中，并添加一些相应的属性。这些注册的设备均可以通过设备名，采用“查找设备接口”的方式来查找，从而获得该设备控制块（或设备句柄）。注册设备的函数接口如下：
+一个设备能够被上层应用访问前，需要先把这个设备注册到系统中，并添加一些相应的一些属性。这些注册的设备均可以通过设备名，采用“查找设备接口”的方式从系统中查找到，从而获得该设备控制块（或设备句柄）。注册设备的函数接口如下：
 
-	rt_err_t rt_device_register(rt_device_t dev, const char* name, rt_uint8_t flags);
+    rt_err_t rt_device_register(rt_device_t dev, const char* name, rt_uint8_t flags);
+	
 **函数参数**
-
 
 -----------------------------------------------------------------------
           参数  描述
@@ -107,19 +107,19 @@ enum rt_device_class_type
 flags参数支持下列参数(可以采用或的方式支持多种参数)：
 
 ~~~{.c}
-#define RT_DEVICE_FLAG_DEACTIVATE 	0x000    /* 未初始化设备		*/
-#define RT_DEVICE_FLAG_RDONLY       0x001    /* 只读设备			*/
-#define RT_DEVICE_FLAG_WRONLY       0x002    /* 只写设备			*/
-#define RT_DEVICE_FLAG_RDWR         0x003    /* 读写设备			*/
-#define RT_DEVICE_FLAG_REMOVABLE  	0x004    /* 可移除设备		*/
-#define RT_DEVICE_FLAG_STANDALONE  	0x008    /* 独立设备			*/
-#define RT_DEVICE_FLAG_ACTIVATED   	0x010    /* 已激活设备		*/
-#define RT_DEVICE_FLAG_SUSPENDED  	0x020    /* 挂起设备			*/
-#define RT_DEVICE_FLAG_STREAM       0x040    /* 设备处于流模式		*/
-#define RT_DEVICE_FLAG_INT_RX       0x100    /* 设备处于中断接收模式	*/
-#define RT_DEVICE_FLAG_DMA_RX       0x200    /* 设备处于DMA接收模式	*/
-#define RT_DEVICE_FLAG_INT_TX       0x400    /* 设备处于中断发送模式	*/
-#define RT_DEVICE_FLAG_DMA_TX       0x800    /* 设备处于DMA发送模式	*/
+#define RT_DEVICE_FLAG_DEACTIVATE   0x000    /* 未初始化设备        */
+#define RT_DEVICE_FLAG_RDONLY       0x001    /* 只读设备            */
+#define RT_DEVICE_FLAG_WRONLY       0x002    /* 只写设备            */
+#define RT_DEVICE_FLAG_RDWR         0x003    /* 读写设备            */
+#define RT_DEVICE_FLAG_REMOVABLE    0x004    /* 可移除设备          */
+#define RT_DEVICE_FLAG_STANDALONE   0x008    /* 独立设备            */
+#define RT_DEVICE_FLAG_ACTIVATED    0x010    /* 已激活设备          */
+#define RT_DEVICE_FLAG_SUSPENDED    0x020    /* 挂起设备            */
+#define RT_DEVICE_FLAG_STREAM       0x040    /* 设备处于流模式      */
+#define RT_DEVICE_FLAG_INT_RX       0x100    /* 设备处于中断接收模式*/
+#define RT_DEVICE_FLAG_DMA_RX       0x200    /* 设备处于DMA接收模式 */
+#define RT_DEVICE_FLAG_INT_TX       0x400    /* 设备处于中断发送模式*/
+#define RT_DEVICE_FLAG_DMA_TX       0x800    /* 设备处于DMA发送模式 */
 ~~~
 
 设备流模式RT_DEVICE_FLAG_STREAM参数用于向串口终端输出字符串：当输出的字符是"\\n"时，自动在前面补一个"\\r"做分行。
@@ -128,17 +128,15 @@ flags参数支持下列参数(可以采用或的方式支持多种参数)：
 
 返回RT_EOK
 
-* 警告：应当避免重复注册已经注册的设备，以及注册已有名字的设备驱动程序。
+* 警告：应当避免重复注册已经注册的设备，以及注册相同名字的设备。
 
-### 卸载设备 ###
+### 移除设备 ###
 
-将设备从设备系统中卸载，被卸载的设备将不能再通过“查找设备接口”被查找到。卸载设备的函数接口如下所示：
+将设备从设备系统中移除，被卸载的设备将不能再通过“查找设备接口”被查找到。卸载设备的函数接口如下所示：
 
-	rt_err_t rt_device_unregister(rt_device_t dev)
-
+    rt_err_t rt_device_unregister(rt_device_t dev)
 
 **函数参数**
-
 
 -----------------------------------------------------------------------
           参数  描述
@@ -146,24 +144,21 @@ flags参数支持下列参数(可以采用或的方式支持多种参数)：
            dev  设备句柄；
 -----------------------------------------------------------------------
 
-
 **函数返回**
 
 返回RT_EOK
 
-注：	卸载设备并不会释放设备控制块所占用的内存。
+注：卸载设备并不会释放设备控制块所占用的内存。
 
 ### 初始化所有设备 ###
 
 初始化所有注册到设备对象管理器中的未初始化的设备，可以通过如下函数接口完成：
 
-	rt_err_t rt_device_init_all(void)
-
+    rt_err_t rt_device_init_all(void)
 
 **函数参数**
 
 无
-
 
 **函数返回**
 
@@ -173,14 +168,13 @@ flags参数支持下列参数(可以采用或的方式支持多种参数)：
 
 ### 查找设备 ###
 
-根据指定的设备名称来查找设备，可以通过如下接口完成：
+根据指定的设备名称查找设备，可以通过如下接口完成：
 
-	rt_device_t rt_device_find(const char* name)
+    rt_device_t rt_device_find(const char* name)
 
-使用这个函数接口时，系统会在设备对象类型所对应的对象容器中遍历寻找设备对象，然后返回该设备，如果没有找到相应的设备对象，则返回RT_NULL。
+使用这个函数接口时，系统会在设备对象类型所对应的对象容器中遍历寻找设备对象，然后返回该设备的句柄，如果没有找到相应的设备对象，则返回RT_NULL。
 
 **函数参数**
-
 
 -----------------------------------------------------------------------
           参数  描述
@@ -188,18 +182,17 @@ flags参数支持下列参数(可以采用或的方式支持多种参数)：
           name  设备名称。
 -----------------------------------------------------------------------
 
-
 **函数返回**
 
-查找到对应设备将返回相应的设备对象；否则返回RT_NULL
+查找到对应设备将返回相应的设备句柄；否则返回RT_NULL
 
 ### 打开设备 ###
 
 根据设备控制块来打开设备，可以通过如下函数接口完成：
 
-	rt_err_t rt_device_open (rt_device_t dev, rt_uint16_t oflags)
-**函数参数**
+    rt_err_t rt_device_open (rt_device_t dev, rt_uint16_t oflags)
 
+**函数参数**
 
 -----------------------------------------------------------------------
           参数  描述
@@ -212,17 +205,18 @@ flags参数支持下列参数(可以采用或的方式支持多种参数)：
 其中oflags支持以下列表中的参数：
 
 ~~~{.c}
-#define RT_DEVICE_OFLAG_RDONLY  	0x001    	/* 只读模式访问	*/
-#define RT_DEVICE_OFLAG_WRONLY   	0x002    	/* 只写模式访问	*/
-#define RT_DEVICE_OFLAG_RDWR     	0x003    	/* 读写模式访问	*/
+#define RT_DEVICE_OFLAG_CLOSE   0x000   /* 设备已经关闭（内部使用） */
+#define RT_DEVICE_OFLAG_RDONLY  0x001   /* 以只读方式打开设备 */
+#define RT_DEVICE_OFLAG_WRONLY  0x002   /* 以只写方式打开设备 */
+#define RT_DEVICE_OFLAG_RDWR    0x003   /* 以读写方式打开设备 */
+#define RT_DEVICE_OFLAG_OPEN    0x008   /* 设备已经打开（内部使用） */
 ~~~
-
 
 **函数返回**
 
 返回驱动的open函数返回值
 
-注：	如果设备flags域包含RT_DEVICE_FLAG_STANDALONE参数，将不允许重复打开。
+注：如果设备注册时指定的参数中包括RT_DEVICE_FLAG_STANDALONE参数，此设备将不允许重复打开，返回`-RT_EBUSY`。
 
 ### 关闭设备 ###
 
@@ -232,13 +226,11 @@ flags参数支持下列参数(可以采用或的方式支持多种参数)：
 
 **函数参数**
 
-
 -----------------------------------------------------------------------
           参数  描述
 --------------  -------------------------------------------------------
            dev  设备句柄；
 -----------------------------------------------------------------------
-
 
 **函数返回**
 
@@ -246,14 +238,13 @@ flags参数支持下列参数(可以采用或的方式支持多种参数)：
 
 ### 读设备 ###
 
-根据设备控制块来读取设备，可以通过如下函数接口完成：
+从设备中读取，或获得数据，可以通过如下函数接口完成：
 
-	rt_size_t rt_device_read (rt_device_t dev, rt_off_t pos, void* buffer, rt_size_t size)
+    rt_size_t rt_device_read (rt_device_t dev, rt_off_t pos, void* buffer, rt_size_t size)
 
-根据底层驱动的实现，通常这个接口并不会阻塞上层应用线程。
+调用这个函数，会从设备dev中获得数据，并存放在buffer缓冲区中。这个缓冲区的最大长度是size。pos根据不同的设备类别存在不同的意义。
 
 **函数参数**
-
 
 -----------------------------------------------------------------------
           参数  描述
@@ -262,23 +253,22 @@ flags参数支持下列参数(可以采用或的方式支持多种参数)：
 
            pos  读取数据偏移量；
 
-        buffer  内存缓冲区指针；
+        buffer  内存缓冲区指针，读取的数据将会被保存在缓冲区中；
 
           size  读取数据的大小。
 -----------------------------------------------------------------------
 
-
 **函数返回**
 
-返回读到数据的实际大小(以字节为单位)；如果返回0，则需要读取当前线程的errno来判断错误状态。
+返回读到数据的实际大小（如果是字符设备，返回大小以字节为单位；如果是块设备，返回的大小以块为单位）；如果返回0，则需要读取当前线程的errno来判断错误状态。
 
 ### 写设备 ###
 
-根据设备控制块来写入设备，可以通过如下函数接口完成：
+向设备中写入数据，可以通过如下函数接口完成：
 
-	rt_size_t rt_device_write(rt_device_t dev, rt_off_t pos, const void* buffer, rt_size_t size)
+    rt_size_t rt_device_write(rt_device_t dev, rt_off_t pos, const void* buffer, rt_size_t size)
 
-根据底层驱动的实现，通常这个接口也不会阻塞上层应用线程。
+调用这个函数，会把缓冲区buffer中的数据写入到设备dev中。写入数据的最大长度是size。pos根据不同的设备类别存在不同的意义。
 
 **函数参数**
 
@@ -290,26 +280,24 @@ flags参数支持下列参数(可以采用或的方式支持多种参数)：
 
            pos  读取数据偏移量；
 
-        buffer  内存缓冲区指针；
+        buffer  内存缓冲区指针，放置要写入的数据；
 
-          size  读取数据的大小。
+          size  写入数据的大小。
 -----------------------------------------------------------------------
-
 
 **函数返回**
 
-返回写入数据的实际大小(以字节为单位)；如果返回0，则需要读取当前线程的errno来判断错误状态
+返回写入数据的实际大小(如果是字符设备，返回大小以字节为单位；如果是块设备，返回的大小以块为单位)；如果返回0，则需要读取当前线程的errno来判断错误状态
 
-* 注：	在RT-Thread的块设备中，从1.0.0版本开始，rt_device_write()接口的pos、size参数按照以块为单位。0.3.x以前的版本则按字节为单位。
+* 注：在RT-Thread的块设备中，从1.0.0版本开始，`rt_device_read()/rt_device_write()`接口的pos、size参数按照以块为单位。0.3.x以前的版本则按字节为单位。
 
 ### 控制设备 ###
 
 根据设备控制块来控制设备，可以通过下面的函数接口完成：
 
-	rt_err_t rt_device_control(rt_device_t dev, rt_uint8_t cmd, void* arg)
+    rt_err_t rt_device_control(rt_device_t dev, rt_uint8_t cmd, void* arg)
 
 **函数参数**
-
 
 -----------------------------------------------------------------------
           参数  描述
@@ -321,7 +309,6 @@ flags参数支持下列参数(可以采用或的方式支持多种参数)：
            arg  控制的参数
 -----------------------------------------------------------------------
 
-
 **函数返回**
 
 返回驱动控制接口的返回值
@@ -330,12 +317,11 @@ flags参数支持下列参数(可以采用或的方式支持多种参数)：
 
 设置一个回调函数，当硬件设备收到数据时回调以通知用程序有数据到达。可以通过如下函数接口完成设置接收指示：
 
-	rt_err_t rt_device_set_rx_indicate(rt_device_t dev, rt_err_t (*rx_ind )(rt_device_t dev,rt_size_t size))
+    rt_err_t rt_device_set_rx_indicate(rt_device_t dev, rt_err_t (*rx_ind )(rt_device_t dev,rt_size_t size))
 
 在调用这个函数时，回调函数rx_ind由调用者提供。当硬件设备接收到数据时，会回调这个函数并把收到的数据长度放在size参数中传递给上层应用。上层应用线程应在收到指示后，立刻从设备中读取数据。
 
 **函数参数**
-
 
 -----------------------------------------------------------------------
           参数  描述
@@ -345,7 +331,6 @@ flags参数支持下列参数(可以采用或的方式支持多种参数)：
          rx_ind 接收回调函数。
 -----------------------------------------------------------------------
 
-
 **函数返回**
 
 返回RT_EOK
@@ -354,12 +339,11 @@ flags参数支持下列参数(可以采用或的方式支持多种参数)：
 
 在上层应用调用rt_device_write写入数据时，如果底层硬件能够支持自动发送，那么上层应用可以设置一个回调函数。这个回调函数会在底层硬件给出的发送完成后(例如DMA传送完成或FIFO已经写入完毕产生完成中断时)被调用。可以通过如下函数接口设置设备发送完成指示：
 
-	rt_err_t rt_device_set_tx_complete(rt_device_t dev, rt_err_t (*tx_done)(rt_device_t dev,void *buffer))
+    rt_err_t rt_device_set_tx_complete(rt_device_t dev, rt_err_t (*tx_done)(rt_device_t dev,void *buffer))
 
 调用这个函数时，回调函数tx_done参数由调用者提供，当硬件设备发送完数据时，由驱动程序回调这个函数并把发送完成的数据块地址buffer做为参数传递给上层应用。上层应用（线程）在收到指示时应根据发送buffer的情况，释放buffer内存块或将其做为下一个写数据的缓存。
 
 **函数参数**
-
 
 -----------------------------------------------------------------------
           参数  描述
@@ -368,7 +352,6 @@ flags参数支持下列参数(可以采用或的方式支持多种参数)：
 
        tx_done  发送回调函数。
 -----------------------------------------------------------------------
-
 
 **函数返回**
 
@@ -382,13 +365,12 @@ flags参数支持下列参数(可以采用或的方式支持多种参数)：
 
 在10.1节中提及了RT-Thread设备接口类，我们着重看看其中包含的一套公共设备接口(类似上节说的设备访问接口，但面向的层次已经不一样，这里是面向底层驱动)：
 
-
 ~~~{.c}
 /* 公共的设备接口(由驱动程序提供) */
-rt_err_t  (*init)	(rt_device_t dev);
-rt_err_t  (*open)	(rt_device_t dev, rt_uint16_t oflag);
+rt_err_t  (*init) (rt_device_t dev);
+rt_err_t  (*open) (rt_device_t dev, rt_uint16_t oflag);
 rt_err_t  (*close)(rt_device_t dev);
-rt_size_t (*read)	(rt_device_t dev, rt_off_t pos, void* buffer, rt_size_t size);
+rt_size_t (*read) (rt_device_t dev, rt_off_t pos, void* buffer, rt_size_t size);
 rt_size_t (*write)(rt_device_t dev, rt_off_t pos, const void* buffer, rt_size_t size);
 rt_err_t  (*control)(rt_device_t dev, rt_uint8_t cmd, void *args);
 
