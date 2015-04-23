@@ -31,7 +31,7 @@ RT-Thread的设备模型是建立在内核对象模型基础之上的。在第4�
 ~~~{.c}
 struct rt_device
 {
-  struct rt_object parent;
+    struct rt_object parent;
 
     /* 设备类型 */
     enum rt_device_class_type type;
@@ -67,19 +67,27 @@ typedef struct rt_device* rt_device_t;
 ~~~{.c}
 enum rt_device_class_type
 {
-	RT_Device_Class_Char = 0,	/* 字符设备 	*/
-	RT_Device_Class_Block,		/* 块设备 	*/
-	RT_Device_Class_NetIf,		/* 网络接口 	*/
-	RT_Device_Class_MTD,		/* 内存设备	*/
-	RT_Device_Class_CAN,		/* CAN设备	*/
-	RT_Device_Class_RTC,		/* RTC设备	*/
-	RT_Device_Class_Sound,		/* 声音设备	*/
-	RT_Device_Class_Display, 	/* 显示设备 	*/
-	RT_Device_Class_Unknown		/* 未知设备	*/
+    RT_Device_Class_Char = 0,         /* 字符设备       */
+    RT_Device_Class_Block,            /* 块设备         */
+    RT_Device_Class_NetIf,            /* 网络接口设备   */
+    RT_Device_Class_MTD,              /* 内存设备       */
+    RT_Device_Class_CAN,              /* CAN设备        */
+    RT_Device_Class_RTC,              /* RTC设备        */
+    RT_Device_Class_Sound,            /* 声音设备       */
+    RT_Device_Class_Graphic,          /* 图形设备       */
+    RT_Device_Class_I2CBUS,           /* I2C总线        */
+    RT_Device_Class_USBDevice,        /* USB device设备 */
+    RT_Device_Class_USBHost,          /* USB host设备   */
+    RT_Device_Class_SPIBUS,           /* SPI总线        */
+    RT_Device_Class_SPIDevice,        /* SPI设备        */
+    RT_Device_Class_SDIO,             /* SDIO设备       */
+    RT_Device_Class_PM,               /* 电源管理设备   */
+    RT_Device_Class_Pipe,             /* 管道设备       */
+    RT_Device_Class_Portal,           /* 双向管道设备   */
+    RT_Device_Class_Miscellaneous,    /* 杂类设备       */
+    RT_Device_Class_Unknown           /* 未知设备       */
 };
 ~~~
-
-* 注：uspend、resume回调函数只会在RT_USING_DEVICE_SUSPEND宏使能的情况下才会有效。
 
 从设备控制块，我们可以看到，每个设备对象都会在内核中维护一个设备控制块结构，这种结构是使设备对象继承rt_object基类，然后形成rt_device设备类型。
 
@@ -205,11 +213,17 @@ flags参数支持下列参数(可以采用或的方式支持多种参数)：
 其中oflags支持以下列表中的参数：
 
 ~~~{.c}
-#define RT_DEVICE_OFLAG_CLOSE   0x000   /* 设备已经关闭（内部使用） */
-#define RT_DEVICE_OFLAG_RDONLY  0x001   /* 以只读方式打开设备 */
-#define RT_DEVICE_OFLAG_WRONLY  0x002   /* 以只写方式打开设备 */
-#define RT_DEVICE_OFLAG_RDWR    0x003   /* 以读写方式打开设备 */
-#define RT_DEVICE_OFLAG_OPEN    0x008   /* 设备已经打开（内部使用） */
+#define RT_DEVICE_OFLAG_CLOSE   0x000   /* 设备已经关闭（内部使用）*/
+#define RT_DEVICE_OFLAG_RDONLY  0x001   /* 以只读方式打开设备      */
+#define RT_DEVICE_OFLAG_WRONLY  0x002   /* 以只写方式打开设备      */
+#define RT_DEVICE_OFLAG_RDWR    0x003   /* 以读写方式打开设备      */
+#define RT_DEVICE_OFLAG_OPEN    0x008   /* 设备已经打开（内部使用）*/
+
+#define RT_DEVICE_FLAG_STREAM   0x040   /* 设备以流模式打开        */
+#define RT_DEVICE_FLAG_INT_RX   0x100   /* 设备以中断接收模式打开  */
+#define RT_DEVICE_FLAG_DMA_RX   0x200   /* 设备以DMA接收模式打开   */
+#define RT_DEVICE_FLAG_INT_TX   0x400   /* 设备以中断发送模式打开  */
+#define RT_DEVICE_FLAG_DMA_TX   0x800   /* 设备以DMA发送模式打开   */
 ~~~
 
 **函数返回**
@@ -217,6 +231,8 @@ flags参数支持下列参数(可以采用或的方式支持多种参数)：
 返回驱动的open函数返回值
 
 注：如果设备注册时指定的参数中包括RT_DEVICE_FLAG_STANDALONE参数，此设备将不允许重复打开，返回`-RT_EBUSY`。
+
+注：如果上次应用程序需要设置设备的接收回调函数，则必须以INT_RX或者DMA_RX的方式打开设备，否则不会回调函数。
 
 ### 关闭设备 ###
 
