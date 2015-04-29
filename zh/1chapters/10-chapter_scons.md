@@ -133,6 +133,14 @@ elif CROSS_TOOL == 'iar':
 
 这个命令用于直接编译目标。如果执行过scons后修改一些文件，再次执行scons时，则SCons会进行增量编译，仅编译修改过的文件并链接。
 
+注：
+
+如果在Windows上执行scons输出以下的警告信息， 
+
+    scons: warning: No version of Visual Studio compiler found - C/C++ compilers most likely not set correctly
+
+说明scons并没在你的机器上找到Visual Studio编译器，但实际上我们主要是针对设备开发，和Windows本地没什么关系。请直接忽略掉它。
+
 #### scons -jN ####
 
 多线程编译目标，在多核计算机上可以加快编译速度。一般来说，一颗cpu核心可以支持2个线程线程。双核机器上使用-j4即可。
