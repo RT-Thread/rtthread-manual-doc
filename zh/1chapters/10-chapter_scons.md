@@ -1,16 +1,16 @@
 # SCons构建系统 #
 
-SCons是一套由Python语言编写的开源构建系统，类似于GNU Make。它采用不同于通常Makefile文件的SConstruct和SConscript文件。这些文件也是Python脚本，能够使用标准的Python语法来编写。所以在SConstruct、SConscript文件中可以调用Python标准库进行各类复杂的处理，而不局限于Makefile设定的规则。
+SCons是一套由Python语言编写的开源构建系统，类似于GNU Make。它采用不同于通常Makefile文件方式，而使用SConstruct和SConscript文件来替代。这些文件也是Python脚本，能够使用标准的Python语法来编写。所以在SConstruct、SConscript文件中可以调用Python标准库进行各类复杂的处理，而不局限于Makefile设定的规则。
 
-在[SCons的网站](http://www.scons.org/doc/production/HTML/scons-user/index.html)上可以找到详细的SCons用户手册，本章节讲述SCons的基本用法，以及如何在RT-Thread中用好SCons工具。
+在[SCons](http://www.scons.org/doc/production/HTML/scons-user/index.html)的网站上可以找到详细的SCons用户手册，本章节讲述SCons的基本用法，以及如何在RT-Thread中用好SCons工具。
 
 ## 什么是构建工具(software construction tool) ##
 
 构建工具是一种软件，它可以根据一定的规则或指令，将源代码编译成可执行的二进制程序。这是构建工具最基本也是最重要的功能。实际上，构建工具的功能不至于此，通常这些规则有一定的语法，并组织成文件。这些文件用于来控制构建工具的行为，在完成软件构建之外，也可以做其他事情。
 
-目前最流行的构建工具是Make。很多知名开源软件，如Linux内核就采用Make构建。Make通过读取Makefile文件来检测文件的组织结构和依赖关系，并完成Makefile中所指定的命令。
+目前最流行的构建工具是GNU Make。很多知名开源软件，如Linux内核就采用Make构建。Make通过读取Makefile文件来检测文件的组织结构和依赖关系，并完成Makefile中所指定的命令。
 
-由于历史原因，Makefile的语法比较混乱,不利于初学者学习。此外，在Windows平台上使用Make也不方便，需要安装Cygwin环境。为了克服Make的种种缺点，人们开发了其他构建工具，如CMak和SCons等。
+由于历史原因，Makefile的语法比较混乱,不利于初学者学习。此外，在Windows平台上使用Make也不方便，需要安装Cygwin环境。为了克服Make的种种缺点，人们开发了其他构建工具，如CMake和SCons等。
 
 ## RT-Thread构建 ##
 
@@ -18,11 +18,11 @@ RT-Thread早期使用Make/Makefile构建。从0.3.x开始，RT-Thread开发团�
 
 有些读者可能会有些疑惑，这里介绍的构建工具有IDE有什么不同。
 
-通常IDE有自己的管理源码的方式，一些IDE使用XML来组织文件，并解决依赖关系。大部分IDE会根据用户所添加的源码生成类似Makefile与SConscript的脚本文件，在底层调用类似Make与SCons的工具来构建源码。IDE通过可以图形化的操作来完成构建。
+通常IDE有自己的管理源码的方式，一些IDE使用XML来组织文件，并解决依赖关系。大部分IDE会根据用户所添加的源码生成类似Makefile或SConscript的脚本文件，在底层调用类似Make与SCons的工具来构建源码。IDE通过可以图形化的操作来完成构建。
 
 ## 安装SCons环境 ##
 
-在使用SCons系统前需要在PC主机中安装它，因为它是Python语言编写的，所以在之前需要安装Python语言环境。需要注意的是，由于目前SCons还不支持Python 3.x，所以需要安装Python 2.x环境。
+在使用SCons系统前需要在PC主机中安装它，因为它是Python语言编写的，所以在之前需要安装Python语言环境。需要注意的是，由于目前SCons还不支持Python 3.x，所以需要安装Python 2.x环境，可以选择Python 2.x的最新版本进行安装。
 
 ### Linux、BSD环境 ###
 
@@ -34,13 +34,13 @@ RT-Thread早期使用Make/Makefile构建。从0.3.x开始，RT-Thread开发团�
 
 请到[Python网站](http://www.python.org/getit/)下载Python 2.x系列安装包，当前推荐使用Python 2.7.x系列的Python版本。
 
-请到[SCons网站](http://www.scons.org/)下载SCons安装包，从RT-Thread使用经验来看，SCons的各个版本（1.0.0 - 2.3.x）都可以在RT-Thread上正常使用
+请到[SCons网站](http://www.scons.org/)下载SCons安装包，从RT-Thread使用经验来看，SCons的各个版本（1.0.0 - 2.3.x）都可以在RT-Thread上正常使用。
 
 在Windows下安装完成Python 和 SCons后，需要把scons命令添加到系统的PATH环境变量中，假设Python默认安装在
 
     C:\Python27
 
-目录下，可以把```C:\\Python27\\Scripts```目录加入到PATH环境变量中。在Windows的我的电脑中，右键把系统属性设置窗口点出来，如下图所示：
+目录下，可以把```C:\\Python27\\Scripts```目录加入到PATH环境变量中。在Windows的我的电脑中，单击右键把系统属性设置窗口点出来，如下图所示：
 
 ![我的电脑系统属性设置](figures/scons_SettingENV1.png)
 
@@ -64,8 +64,8 @@ RT-Thread早期使用Make/Makefile构建。从0.3.x开始，RT-Thread开发团�
 
 rtconfig.py是一个RT-Thread标准的编译器配置文件，主要用于完成以下工作：
 
-- 指定编译器（可以支持多个编译器）
-- 指定编译器参数，如编译选项、链接选线等
+- 指定编译器（从支持多个编译器中选择一个你现在使用的编译器）
+- 指定编译器参数，如编译选项、链接选项等
 
 首先确保你的系统上已经安装了编译器。RT-Thread构建系统支持多种编译器。目前支持的编译器包括arm gcc，MDK，IAR，VisualStudio，Visual DSP。主流的ARM Cortex M0、M3、M4平台，基本上ARM GCC、MDK、IAR都是支持的。有一些bsp可能仅支持一种，读者可以阅读该bsp目录下的rtconfig.py查看当前支持的编译器。
 
@@ -88,22 +88,22 @@ elif CROSS_TOOL == 'iar':
  .....
 ~~~
 
-一般来说，我们只需要修改CROSS_TOOL和下面的EXEC_PATH两个选项。
+一般来说，我们只需要修改```CROSS_TOOL```和下面的```EXEC_PATH```两个选项。
 
 - CROSS_TOOL 
 
-编译器名字，可选的值为```'keil'```, ```'gcc'```,```'iar'```。大致浏览rtconfig.py查看当前bsp所支持的编译器。
+指定编译器，可选的值为```'keil'```, ```'gcc'```,```'iar'```。大致浏览rtconfig.py可以查看当前bsp所支持的编译器。
 
 - EXEC_PATH
 
 编译器的安装路径。
 
-如果您的机器上安装了MDK，那么将CROSS_TOOL修改为```'keil'```，并修改```EXEC_PATH = r'C:/Keil'```为您的MDK的安装路径。
+如果您的机器上安装了MDK，那么将```CROSS_TOOL```修改为```'keil'```，并修改```EXEC_PATH = r'C:/Keil'```为您的MDK的安装路径。
 
 这里有两点需要注意：
 
-1. 安装编译器时（如MDK，ARM GCC，IAR等），不要安装到带有中文或者空格的路径中。否则，某些解析路径时会出现错误。有些程序默认会安装到```C:\Program Files```目录下，中间带有空格。建议安装时选择其他路径，养成良好的开发习惯。
-2. 修改EXEC_PATH时，需要注意路径的格式。在windows平台上，默认的路径分割符号是反斜杠```\```,而这个符号在C语言以及Python中都是用于转移字符的。所以修改路径时，可以将```\```改为```/```，或者在前面加r（python特有的语法）。
+1. 安装编译器时（如MDK，GNU GCC，IAR等），不要安装到带有中文或者空格的路径中。否则，某些解析路径时会出现错误。有些程序默认会安装到```C:\Program Files```目录下，中间带有空格。建议安装时选择其他路径，养成良好的开发习惯。
+2. 修改```EXEC_PATH```时，需要注意路径的格式。在windows平台上，默认的路径分割符号是反斜杠```\```,而这个符号在C语言以及Python中都是用于转移字符的。所以修改路径时，可以将```\```改为```/```，或者在前面加r（python特有的语法，表示原始数据）。
 
 假如某编译器安装位置为```D:\Dir1\Dir2```下。下面几种是正确的写法:
 
@@ -117,18 +117,21 @@ elif CROSS_TOOL == 'iar':
 
 编译器配置完成之后，我们就可以使用SCons来编译RT-Thread的bsp了。
 
-在当前目录打开命令行窗口，执行scons.就会启动编译。
+在当前目录打开命令行窗口，执行scons，就会启动编译过程。
 
 小技巧：
-在WIN7上，在当前目录按下SHIFT同时点击鼠标右键，弹出的菜单中，会有“在此处打开命令窗口”的菜单项。点击可以快速打开CMD窗口。
+
+在WIN7上，在当前目录按下SHIFT+鼠标右键，弹出的菜单中，会有“在此处打开命令窗口”的菜单项。点击可以快速打开CMD窗口。
 
 ### SCons基本命令 ###
 
-本节介绍RT-Thread中常用SCons命令。SCons不仅完成基本的编译，还可以生成MDK/IAR/VS工程。
+本节介绍RT-Thread中常用的SCons命令。SCons不仅完成基本的编译，还可以生成MDK/IAR/VS工程。
 
 #### scons ####
 
-编译目标。如果执行过scons后修改一些文件，再次执行scons则SCons会增量编译，仅编译修改过的文件并链接。
+    scons 
+
+这个命令用于直接编译目标。如果执行过scons后修改一些文件，再次执行scons时，则SCons会进行增量编译，仅编译修改过的文件并链接。
 
 #### scons -jN ####
 
@@ -146,17 +149,17 @@ elif CROSS_TOOL == 'iar':
 
 可以在当前目录生成一个新的名为project.uvproj文件。双击它打开，就可以使用MDK来编译、调试。不习惯SCons的同学可以使用这种方式。
 
-当修改了rtconfig.h打开或者关闭某些组件时，也需要使用这个命令重新生成工程。 
+当修改了rtconfig.h打开或者关闭某些组件时，也需要使用这个命令重新生成对应的定制化的工程。 
 
 注意：
 
-不要试图打开template.uvproj的文件，这个文件仅是一个模板文件，用于辅助SCons生成project.uvproj。
+要生成Keil MDK的工程文件，前提条件是当前目录存在一个工程模版文件，然后scons才会根据这份模版文件加入相关的源码，头文件搜索路径，编译参数，链接参数等。而至于这个工程是针对哪颗芯片的，则直接由这份工程模版文件指定。所以大多数情况下，这个模版文件是一份空的工程文件，用于辅助SCons生成project.uvproj。
 
-如果打开project.uvproj失败，则删除project.uvopt，然后重新打开project.uvproj。
+如果打开project.uvproj失败，请删除project.uvopt后，重新生成工程。
 
     scons --target=iar -s
 
-自动生成IAR工程
+自动生成IAR工程；
 
     scons --target=vs2012 -s
     Scons --target=vs2005 -s
