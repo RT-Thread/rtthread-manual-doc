@@ -288,7 +288,7 @@ static void thread_entry(void* parameter)
     rt_sem_delete(sem);
 }
 
-    int rt_application_init()
+    int semaphore_dynamic_init()
     {
         /* 创建一个信号量，初始值是0 */
         sem = rt_sem_create("sem", 0, RT_IPC_FLAG_FIFO);
@@ -694,7 +694,7 @@ void producer_thread_entry(void* parameter)
 void consumer_thread_entry(void* parameter)
 {
     rt_uint32_t no;
-    rt_uint32_t sum;
+    rt_uint32_t sum = 0;
 
     /* 第n个线程，由入口参数传进来 */
     no = (rt_uint32_t)parameter;
