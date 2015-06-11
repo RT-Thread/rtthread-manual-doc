@@ -405,7 +405,6 @@ void dir_operation(void* parameter)
 }
 ~~~ 
 
-
 ###读取目录###
 读取目录可使用下面的函数接口： 
 
@@ -516,7 +515,6 @@ void dir_operation(void* parameter)
     closedir (dirp); 
 }
 ~~~
-
 
 ###重设读取目录的位置为开头位置###
 
@@ -635,24 +633,27 @@ dfs_mount 函数用于把以device_name 为名称的设备挂接到path 路径�
 
 ## FatFs ##
 
-FatFs是专为小型嵌入式设备开发的一个兼容微软fat的文件系统，采用ANSI C编写，采用抽象的硬件I/O层，因此具有良好的硬件无关性以及可移植性。
+FatFs是专为小型嵌入式设备开发的一个兼容微软fat的文件系统，采用ANSI C编写，采用抽象的硬件I/O层以及提供持续的维护，因此具有良好的硬件无
+关性以及可移植性。
 
     FatFs官方网址  http://elm-chan.org/fsw/ff/00index_e.html
 
-RT-Thread将FatFs整合为一个RT-Thread组件，并置于DFS层之下。因此可以非常方便的在RT-Thread中使用FatFs。
+RT-Thread将FatFs整合为一个RT-Thread组件，并置于DFS层之下。因此可以
+非常方便的在RT-Thread中使用FatFs。
 
 ### FatFs 相关宏 ###
+
+在RT-Thread中使用Elm FatFs，需要在rtconfig.h打开此宏。
 
 	/* DFS: ELM FATFS options */
 	#define RT_USING_DFS_ELMFAT
 
-在RT-Thread中使用Elm FatFs，需要在rtconfig.h打开此宏。
-
+FAT文件系统扇区大小
 
 	/* Maximum sector size to be handled. */
 	#define RT_DFS_ELM_MAX_SECTOR_SIZE  512
 
-指定FatFs的内部扇区大小，注意，这个宏需要与实际硬件驱动的扇区大小一致。例如，某spi flash芯片扇区为4096字节，则上述宏需要修改为4096，否则FatFs从驱动读入数据时就会发生数组越界而导致系统崩溃。
+这个洪用于指定FatFs的内部扇区大小，注意，这个宏需要大于等于实际硬件驱动的扇区大小。例如，某spi flash芯片扇区为4096字节，则上述宏需要修改为4096，否则FatFs从驱动读入数据时就会发生数组越界而导致系统崩溃（新版本在系统执行时给出警告信息）。
 
 	/* Number of volumes (logical drives) to be used. */
 	#define RT_DFS_ELM_DRIVES                        2
@@ -664,19 +665,20 @@ FatFs支持多分区，默认支持一个分区，如果想要在多个设备上
 
 Elm FatFs充分考虑了多线程安全读写安全的情况，当在多线程中读写FafFs时，为了避免重入带来的问题，需要打开上述宏。如果系统仅有一个线程操作文件系统，不会出现重入问题，则可以关闭上述宏以节省资源。
 
-	#define RT_DFS_ELM_USE_LFN                       1
+	#define RT_DFS_ELM_USE_LFN                       3
 	#define RT_DFS_ELM_MAX_LFN                     255
+	#define RT_DFS_ELM_CODE_PAGE                   437
 
 默认情况下，FatFs使用8.3方式的文件命名规则，这种方式具有如下缺点：
 
--   文件名（不含后缀）最长不超过8个字符，后缀最长不超过3个字符。文件名和后缀超过限制后将会被截断。
--   文件名不支持大小写（显示为大写）
+- 文件名（不含后缀）最长不超过8个字符，后缀最长不超过3个字符。文件名和后缀超过限制后将会被截断。
+- 文件名不支持大小写（显示为大写）
 
 如果需要支持长文件名，则需要打开上述宏。注意，Elm FatFs支持三种方式的长文件名
 
--   1  采用静态缓冲区支持长文件名，多线程操作文件名时将会带来重入问题。
--   2  采用栈内临时缓冲区支持长文件名。对栈空间需求较大。
--   3  使用heap（malloc申请）缓冲区存放长文件名。最安全。
+- 1 采用静态缓冲区支持长文件名，多线程操作文件名时将会带来重入问题。
+- 2 采用栈内临时缓冲区支持长文件名。对栈空间需求较大。
+- 3 使用heap（malloc申请）缓冲区存放长文件名。最安全。
 
 在RT-Thread中，如果对需要使用长文件名，建议使用长文件名模式3，即按照如下方式定义
 
