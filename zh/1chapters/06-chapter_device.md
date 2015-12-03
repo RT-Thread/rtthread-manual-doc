@@ -864,7 +864,7 @@ void device_thread_entry(void* parameter)
 	{
 		/* 设置回调函数及打开设备*/
 		rt_device_set_rx_indicate(device, uart_input);
-		rt_device_open(device, RT_DEVICE_OFLAG_RDWR);
+		rt_device_open(device, RT_DEVICE_OFLAG_RDWR|RT_DEVICE_FLAG_INT_RX);
 	}
 	/* 设置写设备为uart1设备 */
 	write_device = device;
