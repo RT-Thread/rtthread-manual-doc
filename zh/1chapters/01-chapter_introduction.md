@@ -6,7 +6,7 @@
 
 ## RT-Thread 的软件结构 ##
 
-![RT-Thread软件结构](figures/System_Arch.png)
+![RT-Thread软件结构](../../figures/System_Arch.png)
 
 RT-Thread实时操作系统是一个分层的操作系统，它包括了：
 

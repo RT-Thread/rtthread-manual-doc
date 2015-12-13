@@ -322,7 +322,6 @@ def generate_pdf(options)
             abort = false
 
             puts "\tRunning XeTeX:"
-            puts "going to change dir"
             cd(dir)
             3.times do |i|
                 print "\t\tPass #{i + 1}... "
