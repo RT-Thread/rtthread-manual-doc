@@ -86,23 +86,23 @@
 
 在bsp目录下新建project目录。在RealView MDK中新建立一个工程文件（用菜单创建），名称为project，保存在bsp\\your_board目录下。创建工程时一次的选项如 ***MDK CPU 选择示意图***： CPU选择STMicroelectronics的STM32F103ZE：
 
-![MDK CPU 选择示意图](figures/port_mdk_cpu.png)
+![MDK CPU 选择示意图](../../figures/port_mdk_cpu.png)
  
 提问复制STM32的启动代码到工程目录，选择No，我们需要使用库中的启动文件
 
-![MDK增加启动代码](figures/port_mdk_startup.png)
+![MDK增加启动代码](../../figures/port_mdk_startup.png)
 
 然后选择工程的属性，如 ***MDK工程Target设置图***
 
-![MDK工程Target设置图](figures/port_mdk_target.png)
+![MDK工程Target设置图](../../figures/port_mdk_target.png)
 
 Select Folder for Objects目录选择到bsp\\your_board\\build，Name of Executable为rtthread-stm32
 
-![MDK工程OutPut设置图](figures/port_mdk_output.png)
+![MDK工程OutPut设置图](../../figures/port_mdk_output.png)
  
 同样Select Folder for Listings选择bsp\\your_board\\objs目录，如 ***MDK工程Listing设置图*** 所示：
 
-![MDK工程Listing设置图](figures/port_mdk_listing.png)
+![MDK工程Listing设置图](../../figures/port_mdk_listing.png)
 
 如 ***MDK工程编译设置图*** 所示：
  
@@ -122,7 +122,7 @@ C/C++编译选项标签页中，因为在项目中使用了ST的STM32固件库�
 * ..\\..\\include;
 * ..\\..\\libcpu\\arm\\cortex-m3，
 
-![MDK工程编译设置图](figures/port_mdk_c.png)
+![MDK工程编译设置图](../../figures/port_mdk_c.png)
 
 Asm，Linker，Debug和Utilities选项使用初始配置即可。
 
@@ -313,7 +313,7 @@ rt_uint8_t *rt_hw_stack_init(void *tentry, void *parameter,
 
 最终形成的线程栈情况如 ***堆栈压入情况图*** ：
 
-![堆栈压入情况图](figures/port_stack_init.png)
+![堆栈压入情况图](../../figures/port_stack_init.png)
 
 * 上下文切换代码
 
@@ -464,13 +464,13 @@ rt_hw_context_switch_to    PROC
 
 正常模式下的线程上下文切换的过程可以用下 ***正常模式上下文切换图*** 示：
 
-![正常模式上下文切换图](figures/port_thread_switch.png)
+![正常模式上下文切换图](../../figures/port_thread_switch.png)
  
 当要进行切换时（假设从Thread from 切换到Thread to），通过rt_hw_context_switch()函数触发一个PenSV异常。异常产生时，Cortex M3会把PSR，PC，LR，R0 – R3，R12自动压入当前线程的栈中，然后切换到PenSV异常处理。到PenSV异常后，Cortex M3工作模式（从Thread模式）切换到Handler模式，由函数rt_hw_pend_sv进行处理。rt_hw_pend_sv函数会载入切换出线程（Thread from）和切换到线程（Thread to）的栈指针，如果切换出线程的栈指针是0那么表示这是系统启动时的第一次线程上下文切换，不需要对切换出线程做压栈动作。如果切换出线程栈指针非零，则把剩余未压栈的R4 – R11寄存器依次压栈；然后从切换到线程栈中恢复R4 – R11寄存器。当从PendSV异常返回时，PSR，PC，LR，R0 – R3，R12等寄存器由Cortex M3自动恢复。
 
 因为中断而导致的线程切换可用 ***中断模式上下文切换图*** 表示：
 
-![中断模式上下文切换图](figures/port_int_thread.png)
+![中断模式上下文切换图](../../figures/port_int_thread.png)
 
 当中断达到时，当前线程会被中断并把PC，PSR，R0 – R3，R12等压到当前线程栈中，工作模式（从Thread模式）切换到Handler模式。
 
@@ -613,29 +613,29 @@ scons创建MDK工程是以给定的Keil工程的模板为基础，通过SCONS把
 
 同移植Cortex-M3的一些基本步骤，同样创建MDK工程，CPU选择 `freescale Semiconductor`  中的 `MK60FN1M0xxx12`，询问是否添加启动代码 `startup_MK60F12.s` 时选择No，因为所有文件的加入，头文件的Include这些都是根据scons来加入的，不用MDK模板操心，所以，启动文件也应该由我们自己掌控。
 
-![K60 CPU 选择示意图](figures/port_mk60_cpu.png)
+![K60 CPU 选择示意图](../../figures/port_mk60_cpu.png)
 
 在 `Output` 选项卡中，选择工程的属性,Select Folder for Objects目录选择到 `bsp\your_board\build`，`Name of Executable` 为rtthread-mk60f120m
 
 在 `Output` 选项卡中，可以勾选 `Browse Information` 这样可以支持右键函数，宏定义跳转。
 
-![K60 Output 选项卡示意图](figures/port_mk60_output.png)
+![K60 Output 选项卡示意图](../../figures/port_mk60_output.png)
 
 在 `Listing` 选项卡中，同样 `Select Folder for Listings` 选择 `bsp\your_board\build` 目录。
 
-![K60 Listing 选项卡示意图](figures/port_mk60_listing.png)
+![K60 Listing 选项卡示意图](../../figures/port_mk60_listing.png)
 
 在 `Debug` 和 `Utilities` 选项卡中选择K60相应的 `pemicro_OSJtag` 
 
-![K60 Debug 选项卡示意图](figures/port_mk60_debug.png)
+![K60 Debug 选项卡示意图](../../figures/port_mk60_debug.png)
 
-![K60 Utilities 选项卡示意图](figures/port_mk60_utilities.png)
+![K60 Utilities 选项卡示意图](../../figures/port_mk60_utilities.png)
 
 Asm，Linker,选项使用初始配置即可。
 
 删除project目录下所有文件与文件夹，保证所有的文件结构增加由scons管理，保存此模板,确认名称为`template.uvproj`
 
-![K60项目文件示意图](figures/port_mk60_file.png)
+![K60项目文件示意图](../../figures/port_mk60_file.png)
 
 ### 仿照并修改scons相关文件 ###
 
@@ -752,7 +752,7 @@ context_rvds.S中主要包括了一下几个部分：
 
 打开Target Options-Target选项卡,其中Code Generation中有Floating Point Hardware选项,如 ***MDK中FPU设置图*** 所示
 
-![MDK中FPU设置图](figures/port_FPU_Options.png)
+![MDK中FPU设置图](../../figures/port_FPU_Options.png)
 
 有如下2个选项：Not Used和Use FPU选项
 
@@ -778,7 +778,7 @@ ENDIF
 
 当系统产生异常(中断)时，首先会自动进行硬件入栈行为，对于Cortex-M3,会入栈xPSR、PC、LR、R12、R3~R0，这些寄存器被称为basic frame(参考ARMv7-M Architecture Reference Manual第648页)，与于Cortex-M4，在入栈basic frame之前，还会入栈extended frame，即把d0~d8入栈，然后入栈xPSR、PC、LR、R12、R3~R0。所以，如果要完整的保护上下文切换的状态，还需要入栈d8~d15，如 ***启用FPU后自动入栈顺序图*** 所示
 
-![启用FPU后自动入栈顺序图](figures/port_FPU_push_stack.png)
+![启用FPU后自动入栈顺序图](../../figures/port_FPU_push_stack.png)
 
 并且对于FPU需要使用V指令(参考 `ARM Cortex-M4 Processor Technical Reference Manual` 第69页7.2.3 FPU instruction set)
 
