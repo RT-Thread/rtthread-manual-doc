@@ -24,4 +24,3 @@ script:
   - chmod +x mkbok
   - ./mkbok --lang zh --build pdf
   - curl -F "file=@rtthread_manual.zh.pdf;type=application/octet-stream" http://www.rt-thread.org/download/manual/manual_upload.php
-
