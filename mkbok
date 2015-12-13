@@ -322,11 +322,11 @@ def generate_pdf(options)
             abort = false
 
             puts "\tRunning XeTeX:"
-            cd($root)
+            cd($dir)
             3.times do |i|
                 print "\t\tPass #{i + 1}... "
                 line = ""
-                IO.popen("xelatex -output-directory=\"#{dir}\" \"#{dir}/main.tex\" 2>&1") do |pipe|
+                IO.popen("xelatex -output-directory=\".\" \"./main.tex\" 2>&1") do |pipe|
                     unless $DEBUG
                         while line = pipe.gets and not abort
                             # print line.encoding.name
@@ -346,7 +346,7 @@ def generate_pdf(options)
                 break if abort
                 puts "done"
             end
-
+            cd($root)
             unless abort
                 print "\tMoving output to #{options["name"]}.#{lang}.pdf... "
                             mv("#{dir}/main.pdf", "#$root/#{options["name"]}.#{lang}.pdf")
