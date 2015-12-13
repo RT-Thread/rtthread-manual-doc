@@ -145,7 +145,7 @@ IPv6地址可分为三类：
 
 首先，要在串口调试工具中输入list_if()获取开发板的IPv4/IPv6地址。如下图所示：
 
-![IP_Information](figures/ip_information.jpg)
+![IP_Information](../../figures/ip_information.jpg)
 
 IPv4地址为192.168.199.134，IPv6的link-local地址为fe80::200:eff:fe12:3456,IPv6地址为4006:e024:680:c6e:200:eff:fe12:3456。
 
@@ -155,23 +155,23 @@ IPv4地址为192.168.199.134，IPv6的link-local地址为fe80::200:eff:fe12:3456
 
 	IPv4的ping测试十分简单，只需打开命令提示符输入ping 192.168.199.134 -t即可
 	
-	![ping4](figures/ping4.png)
+	![ping4](../../figures/ping4.png)
 
 - IPv6 link-local address ping测试
 	
 	首先需在命令提示符中输入ipconfig，获得以下信息:
 	
-	![Scope ID](figures/scope_id.png)
+	![Scope ID](../../figures/scope_id.png)
 
 	之后在命令行提示符中输入ping fe80::200:eff:fe12:3456%12 -t
 
-	![Link-local Address](figures/link_local.png)
+	![Link-local Address](../../figures/link_local.png)
 
 - IPv6地址的测试
 
 	在命令提示符中输入ping 4006:e024:680:c6e:200:eff:fe12:3456 -t
 	
-	![ping6](figures/ping6.png)
+	![ping6](../../figures/ping6.png)
 
 至此你已进入IPv6的世界了。
 

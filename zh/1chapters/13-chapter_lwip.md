@@ -17,7 +17,7 @@ lwIP结构精简，功能完善，因而用户群较为广泛。RT-Thread实时�
 可能大家对OSI七层模型并不陌生，它将网络协议很细致地从逻辑上分为了7层。但是实际运用中并不是按七层模型，一般大家都只使用5层模型。如下：
  物理层：一般包括物理媒介，电信号，光信号等，主要对应于PHY芯片，PHY芯片将数据传送给物理媒介（RJ45座->双绞线），如图：
 
-![物理层](figures/physical_layer.png)
+![物理层](../../figures/physical_layer.png)
 
 - 数据链路层：一般简单称为MAC层，因为MAC芯片处于这层，对应于代码中的网卡驱动层。数据包在这一层一般称之为“以太网帧”。
 - 网络层：对应于代码中IP层。
@@ -26,7 +26,7 @@ lwIP结构精简，功能完善，因而用户群较为广泛。RT-Thread实时�
 
 对于一个以太网数据包，我们在代码中能真实看到的包括4部分，分别对应链路层、网络层、传输层、应用层，如下图：
 
-![以太网包格式](figures/ethernet_structure.png)
+![以太网包格式](../../figures/ethernet_structure.png)
 
 注：有几个概念需要解释一下，从网卡收到的数据，此时是一个完整的包含各层头的数据包，此时称之为“以太网帧”；当解开以太网帧头到达IP层，称之为“IP Packet（IP数据包）”；当解开IP头到达TCP层，称之为“TCP Segment（TCP分片）”；当解开TCP头时到达应用层，就是我们socket通信看到的数据了。
 
@@ -110,7 +110,7 @@ group = DefineGroup('LwIP', src, depend = ['RT_USING_LWIP', 'RT_USING_LWIP141'],
 
 RT-Thread有一套自己的设备框架，这里只作一个简单的描述，具体请参考《RT-Thread编程指南第六章--I/O设备管理》，可以在[RT-Thread入门帖](http://www.rt-thread.org/node/64)中找到。RT-Thread中包含很多设备，为了更简单的添加或者管理这些设备，使用面向对象的思想将设备抽象成了一个类，基于这个“设备类”，我们派生出不同类型的设备类，如：网络设备类、字符设备类、块设备类、音频设备类等等，它们的关系图如下：
 
-![RTT设备继承关系](figures/device_inheritance.png)
+![RTT设备继承关系](../../figures/device_inheritance.png)
 
 除基类以外，其他继承自基类的类分别加上了与基类不同的属性和接口，比如设备类中就添加了基类没有的设备初始化，打开，关闭的接口和设备类型的属性。
 
@@ -184,7 +184,7 @@ struct rt_object_information rt_object_container[RT_Object_Class_Unknown] =
 ```
 具体地讲，RT-Thread中使用一个链表来维护所有的设备，当需要往系统中注册设备时，需要将设备添加到对应的链表中（当然如何添加，RT-Thread提供了相应的接口）。如果对代码不了解，简单点的理解方式请看下图（图中并不对应实际的代码，代码中用的双向链表）：
 
-![RTT网络设备管理](figures/network_device_manage.png)
+![RTT网络设备管理](../../figures/network_device_manage.png)
 
 从图中可知，当系统需要操作网卡时，直接遍历这个链表即可。
 
@@ -250,7 +250,7 @@ void lwip_system_init(void)
 
 - 单纯在RT-Thread中完成lwIP初始化和创建lwIP线程的工作还是不够的，因为要让协议栈与外界通信，系统必须可以收发数据，所以还需要硬件驱动的支持，这时牵扯到RT-Thread收发包的设计和网卡驱动。这部分的整体框架如下图：
 
-![RTT收发包设计](figures/send_recv_packets.png)
+![RTT收发包设计](../../figures/send_recv_packets.png)
 
 由此可知，RT-Thread中将lwIP应用起来主要包括三个核心步骤：
 1. 创建收发包线程，调用接口eth_system_device_init()。
