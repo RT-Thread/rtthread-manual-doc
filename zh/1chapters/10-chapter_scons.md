@@ -216,7 +216,7 @@ SCons使用SConscript和SConstruct文件来组织源码结构，通常来说一�
 
     rtconfig.py
     SConstruct
-    SConscript文
+    SConscript
 
 大部分组件源码文件夹下存在SConscript文件，这些文件会被BSP目录下的SConscript文件“找到”从而将rtconfig.h中定义的组件加入编译器来。一个BSP中只有一个SConstruct文件，但是却会有多个SConscript文件，可以说SConscript文件是组织源码的主力军。
 
@@ -299,7 +299,7 @@ DefineGroup用于定义一个组件。组件可以是一个目录（下的文件
 
 可见DefineGroup的功能十分强大，实际使用时不需要配置所有参数。
 
-	SConscript（dirs, variant_dir, duplicate)
+	SConscript(dirs, variant_dir, duplicate)
 
 SCons内置函数。其参数包括三个：
 
@@ -361,7 +361,7 @@ component/finsh/SConscript
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-从第7行开始，于示例1有些区别。
+从第7行开始，与示例1有些区别。
 
 	if rtconfig.CROSS_TOOL == 'keil':
 	    LINKFLAGS = ' --keep __fsym_* --keep __vsym_* '
