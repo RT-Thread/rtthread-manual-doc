@@ -322,7 +322,10 @@ def generate_pdf(options)
             abort = false
 
             puts "\tRunning XeTeX:"
-            cd($dir)
+            $wdtmp = Dir.getwd
+            $dirtmp = File.join($wdtmp, dir)
+            cd($dirtmp)
+            puts "current dir is #$dirtmp"
             3.times do |i|
                 print "\t\tPass #{i + 1}... "
                 line = ""
