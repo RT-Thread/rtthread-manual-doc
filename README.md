@@ -1,6 +1,6 @@
 # RT-Thread编程手册 #
 
-[![Build Status](https://travis-ci.org/RT-Thread/rtthread-manual-doc.png?branch=master)](https://travis-ci.org/RT-Thread/rtthread-manual-doc)
+[![Build Status](https://travis-ci.org/gbcwbz/rtthread-manual-doc.svg)](https://travis-ci.org/gbcwbz/rtthread-manual-doc)
 
 本电子书采用markdown语法编写，托管于github上，并由travis-ci.org进行持续集成。
 
