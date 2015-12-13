@@ -6,7 +6,7 @@ SCons是一套由Python语言编写的开源构建系统，类似于GNU Make。�
 
 ## 什么是构建工具(software construction tool) ##
 
-构建工具是一种软件，它可以根据一定的规则或指令，将源代码编译成可执行的二进制程序。这是构建工具最基本也是最重要的功能。实际上，构建工具的功能不至于此，通常这些规则有一定的语法，并组织成文件。这些文件用于来控制构建工具的行为，在完成软件构建之外，也可以做其他事情。
+构建工具是一种软件，它可以根据一定的规则或指令，将源代码编译成可执行的二进制程序。这是构建工具最基本也是最重要的功能。实际上，构建工具的功能不止于此，通常这些规则有一定的语法，并组织成文件。这些文件用于来控制构建工具的行为，在完成软件构建之外，也可以做其他事情。
 
 目前最流行的构建工具是GNU Make。很多知名开源软件，如Linux内核就采用Make构建。Make通过读取Makefile文件来检测文件的组织结构和依赖关系，并完成Makefile中所指定的命令。
 
@@ -16,7 +16,7 @@ SCons是一套由Python语言编写的开源构建系统，类似于GNU Make。�
 
 RT-Thread早期使用Make/Makefile构建。从0.3.x开始，RT-Thread开发团队逐渐引入了SCons构建系统，引入SCons唯一的目是：使大家从复杂的Makefile配置、IDE配置中脱离出来，把精力集中在RT-Thread功能开发上。
 
-有些读者可能会有些疑惑，这里介绍的构建工具有IDE有什么不同。
+有些读者可能会有些疑惑，这里介绍的构建工具与IDE有什么不同。
 
 通常IDE有自己的管理源码的方式，一些IDE使用XML来组织文件，并解决依赖关系。大部分IDE会根据用户所添加的源码生成类似Makefile或SConscript的脚本文件，在底层调用类似Make与SCons的工具来构建源码。IDE通过可以图形化的操作来完成构建。
 
@@ -40,21 +40,21 @@ RT-Thread早期使用Make/Makefile构建。从0.3.x开始，RT-Thread开发团�
 
     C:\Python27
 
-目录下，可以把```C:\\Python27\\Scripts```目录加入到PATH环境变量中。在Windows的我的电脑中，单击右键把系统属性设置窗口点出来，如下图所示：
+目录下，可以把```C:\Python27\Scripts```目录加入到PATH环境变量中。在Windows的我的电脑中，单击右键把系统属性设置窗口点出来，如下图所示：
 
-![我的电脑系统属性设置](figures/scons_SettingENV1.png)
+![我的电脑系统属性设置](../../figures/scons_SettingENV1.png)
 
 点击其中的高级设置
 
-![修改PATH环境变量](figures/scons_SettingENV2.png)
+![修改PATH环境变量](../../figures/scons_SettingENV2.png)
 
-选择PATh项，然后点击编辑按钮，然后把C:\\Python27\\Scripts目录添加到PATH最后的位置。添加完成后，可以按Win键+R，然后输入cmd回车打开Windows命令行窗口，在其中输入：
+选择PATH项，然后点击编辑按钮，然后把C:\\Python27\\Scripts目录添加到PATH最后的位置。添加完成后，可以按Win键+R，然后输入cmd回车打开Windows命令行窗口，在其中输入：
 
     scons
 
 如果能够见到下面的输出，说明Python和SCons安装正确。
 
-![SCons命令行输出](figures/scons_CMD.png)
+![SCons命令行输出](../../figures/scons_CMD.png)
 
 ## SCons基本使用 ##
 
@@ -64,7 +64,7 @@ RT-Thread早期使用Make/Makefile构建。从0.3.x开始，RT-Thread开发团�
 
 rtconfig.py是一个RT-Thread标准的编译器配置文件，主要用于完成以下工作：
 
-- 指定编译器（从支持多个编译器中选择一个你现在使用的编译器）
+- 指定编译器（从支持的多个编译器中选择一个你现在使用的编译器）
 - 指定编译器参数，如编译选项、链接选项等
 
 首先确保你的系统上已经安装了编译器。RT-Thread构建系统支持多种编译器。目前支持的编译器包括arm gcc，MDK，IAR，VisualStudio，Visual DSP。主流的ARM Cortex M0、M3、M4平台，基本上ARM GCC、MDK、IAR都是支持的。有一些bsp可能仅支持一种，读者可以阅读该bsp目录下的rtconfig.py查看当前支持的编译器。
