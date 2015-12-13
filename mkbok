@@ -322,6 +322,7 @@ def generate_pdf(options)
             abort = false
 
             puts "\tRunning XeTeX:"
+            puts "going to change dir"
             $wdtmp = Dir.getwd
             $dirtmp = File.join($wdtmp, dir)
             cd($dirtmp)
