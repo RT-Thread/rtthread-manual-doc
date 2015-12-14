@@ -8,7 +8,7 @@ before_script:
 
   - sudo apt-get install -q wget
   - mkdir -pv ~/.cabal/bin/
-  - wget ftp://104.224.151.64/pub/pandoc.tar.gz -O ~/.cabal/bin/pandoc.tar.gz
+  - curl ftp://104.224.151.64/pub/pandoc.tar.gz -O ~/.cabal/bin/pandoc.tar.gz
   - tar -vxf ~/.cabal/bin/pandoc.tar.gz -C ~/.cabal/bin/
   - chmod +x  ~/.cabal/bin/pandoc
   - ~/.cabal/bin/pandoc -v
