@@ -189,6 +189,7 @@ rt_semaphore对象从rt_ipc_object中派生，由IPC容器所管理。信号量�
 ### 信号量相关接口 ###
 
 #### 创建信号量 ####
+
 当创建一个信号量时，内核首先创建一个信号量控制块，然后对该控制块进行基本的初始化工作，创建信号量使用下面的函数接口：
 
     rt_sem_t rt_sem_create (const char* name, rt_uint32_t value, rt_uint8_t flag);
