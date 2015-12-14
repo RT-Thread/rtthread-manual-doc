@@ -118,9 +118,9 @@ I start my morning with a cup of coffee and
 
 图片的语法和链接很像，同时图也可以选择一个标题，标题序号会在生成PDF时自动加上序号，例如：
 
-	![标题](figures/logo.png)
+	![标题](../../figures/logo.png)
 
-![标题](figures/logo.png)
+![标题](../../figures/logo.png)
 
 其中，请确保指向的图形文件在figures目录下存在，否则在生成PDF文件时会报错。
 

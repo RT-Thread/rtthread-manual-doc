@@ -4,7 +4,7 @@
 
 RT-Thread 的文件系统采用了三层的结构，如图 ***文件系统结构图*** 所示：
 
-![文件系统结构图](figures/rt_fs_structure.png)
+![文件系统结构图](../../figures/rt_fs_structure.png)
 
 最顶层的是一套面向嵌入式系统，专门优化过的虚拟文件系统（接口）。通过它，RT-thread 操作系统能够适配下层不同的文件系统格式，例如个人电脑上常使用的FAT 文件系统，或者是嵌入式设备中常见的flash 文件系统（YAFFS2、JFFS2 等）。
 
@@ -23,7 +23,7 @@ RT-Thread 的文件系统对上层提供的接口主要以POSIX 标准接口为�
 
 在 RT-Thread 中，文件系统名称使用上类似UNIX 文件、文件夹的风格，例如如图 ***目录结构*** 的目录结构：
 
-![目录结构](figures/rt_fs_eg.png)
+![目录结构](../../figures/rt_fs_eg.png)
 
 在RT-Thread 操作系统中，文件系统有统一的根目录，使用’/’来表示。而在根目录下的f1.bin 文件则使用’/f1.bin’来表示，2011 目录下的f1.bin目录则使用’/data/2011/f1.bin’来表示。即目录的分割符号是’/’，这与UNIX/Linux 完全相同的，与Windows 则不相同（Windows 操作系统上使用’\’来作为目录的分割符）。 
 

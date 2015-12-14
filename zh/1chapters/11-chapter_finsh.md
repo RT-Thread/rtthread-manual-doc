@@ -15,13 +15,13 @@ C语言表达式解释模式下, finsh能够解析执行大部分C语言的表�
 
 外界由设备端口输入命令行，finsh 通过对设备输入的读取，解析输入内容，然后自动扫描内部两个段，寻找对应函数名，输出回应。
 
-![finsh的数据流结构](figures/finsh.png)
+![finsh的数据流结构](../../figures/finsh.png)
 
 ## 什么是shell? ##
 
 在计算机发展的早期，图形系统出现之前，没有鼠标，甚至没有键盘。那时候人们如何与计算机交互呢？最早期的计算机使用打孔的纸条向计算机输入命令，编写程序。后来计算机不断发展，显示器、键盘成为计算机的标准配置，但此时的操作系统还不支持图形界面，计算机先驱们开发了一种软件，它接受用户输入的命令，解释之后，传递给操作系统，并将操作系统执行的结果返回给用户。这个程序像一层外壳包裹在操作系统的外面，所以它被称为shell。
 
-![系统结构图](figures/finsh_what_is_shell.png)
+![系统结构图](../../figures/finsh_what_is_shell.png)
 
 在图形界面系统出现之前，shell这个命令行程序曾经统治计算机的交互接口数十年之久，并由大名鼎鼎的Unix系统发扬光大，诞生了多种shell软件，如bsh、bash、csh、ksh、zsh。这些shell功能都非常强大，不仅可以供用户输入命令，它们还都支持shell编程语言，可以完成复杂的操作。这些shell目前都可以在*nix系统上使用。即使后来windows统治PC，对于一般人来说，shell的光彩逐渐暗淡，它并未因此退出操作系统。在windows上，CMD可以认为就是一种shell。
 
@@ -37,11 +37,11 @@ C语言表达式解释模式下, finsh能够解析执行大部分C语言的表�
 
 finsh正是基于这些考虑而诞生的。finsh运行于开发板，它可以使用串口/以太网/USB等与PC机进行通信。其运行时的***finsh工作原理图*** 所示。
 
-![finsh工作原理](figures/finsh-logic.png)
+![finsh工作原理](../../figures/finsh-logic.png)
 
 下图是finsh的实际运行运行效果图。开发板运行RT-Thread，并使能了finsh组件，通过串口与PC机连接，PC上运行Secure CRT。
 
-![finsh运行界面](figures/finsh_run1.png)
+![finsh运行界面](../../figures/finsh_run1.png)
 
 按下回车，然后输入list_thread()将会打印系统当前所有线程，以及状态。关于这个命令的详细解释请参考本章最后一节。
 
