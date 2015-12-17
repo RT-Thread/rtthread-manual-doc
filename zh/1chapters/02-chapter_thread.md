@@ -1153,7 +1153,7 @@ int rt_application_init(void)
 
 可以调用如下的函数，设置空闲线程运行时执行的钩子函数。
 
-        void rt_thread_idle_set_hook(void (*hook)(void));
+        void rt_thread_idle_sethook(void (*hook)(void));
 
 当空闲线程运行时会自动执行设置的钩子函数，由于空闲线程具有系统的最低优先级，所以只有在空闲的时候才会执行此钩子函数。空闲线程是一个线程状态永远为就绪态的线程，因此设置的钩子函数必须保证空闲线程在任何时刻都不会处于挂起状态，例如rt_thread_delay() ， rt_sem_take() 等可能会导致线程挂起的函数都不能使用。
 
