@@ -147,6 +147,8 @@ elif CROSS_TOOL == 'iar':
 
     scons -j4
 
+*** 注：如果你只是想看看编译错误或警告，最好是不使用-j参数，这样错误信息不会因为多个文件并行编译而导致出错信息夹杂在一起 ****
+
 #### scons -c ####
 
 清除编译目标。这个命令会清除执行scons时生成的临时文件和目标文件。
@@ -464,6 +466,27 @@ stm32f10x/drivers/SConscript
 第15行到第33行使用了GetDepend方法检查rtconfig.h中的某个宏是否打开，如果打开，则使用`src += [src_name]`来添加源码。最后使用DefineGroup创建组。
 
 ### 添加库 ###
+
+在进行编译时添加一个额外的库，需要注意不同的工具链对二进制库的命名。例如GCC工具链，它识别的是libabc.a这样的库名称，在指定库时是指定abc，而不是libabc。所以在链接额外库时需要在SConscript文件中特别注意。另外，在指定额外库时，也最好指定相应的库搜索路径，以下是一个示例：
+
+~~~~ {#SConscript .python .numberLines startFrom="1"}
+# RT-Thread building script for component
+
+Import('rtconfig')
+from building import *
+
+cwd = GetCurrentDir()
+src = Split('''
+''')
+
+LIBPATH = [cwd + '/libs']
+LIBS = ['abc']
+
+group = DefineGroup('ABC', src, depend = [''], LIBS = LIBS, LIBPATH=LIBPATH)
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+如果工具链是GCC，则库的名称应该是libabc.a；如果工具链是armcc，则库的名称应该是abc.lib。库的搜索路径是当前目录下的'libs'目录。
 
 ### 增加一个SCons命令 ###
 
