@@ -40,12 +40,12 @@
 
 通常来说，对于一个移植除了bsp、libcpu目录以外，其他的目录和文件不应该被修改,而且对于一种已知完成移植的内核(比如Cortex-M3,Cortex-M4等),其libcpu部分也已经存在,完全没有重写的必要,只要完成相关bsp移植部分即可。
 
-只有在你需要支持一种新的编译器，才可能修改到include\\rtdef.h和finsh等相关的代码。当要支持一种新的编译器，同时希望包括在开发分支内时，请联系内核的维护人以解决相关的问题，或给与适当的指导。
+只有在你需要支持一种新的编译器时，才可能修改到include\\rtdef.h和finsh等相关的代码。当要支持一种新的编译器，同时希望包括在开发分支内时，请联系内核的维护人以解决相关的问题，或给与适当的指导。
 
 在了解了RT-Thread的目录，以及知道自己应该修改哪里的代码后，应该了解RT-Thread移植的两种模式：
 
-* 使用RT-Thread中的libcpu目录；这个时候，和CPU相关的移植放在libcpu目录下的相对应的子目录中，自己的移植通过scons的SConscript脚本或工程文件使用这个目录下的libcpu文件；
-* 不使用RT-Thread中的libcpu目录，例如希望使用自己的CPU移植，或这份CPU移植不会放到开发分支上。
+* 使用RT-Thread中的libcpu目录：这个时候，和CPU相关的移植放在libcpu目录下的相对应的子目录中，自己的移植通过scons的SConscript脚本或工程文件使用这个目录下的libcpu文件；
+* 不使用RT-Thread中的libcpu目录：例如希望使用自己的CPU移植，或这份CPU移植不会放到开发分支上。
 
 对于第二种情况，可以按照如下的方式组织自己的移植：
 
@@ -138,7 +138,7 @@ Asm，Linker，Debug和Utilities选项使用初始配置即可。
 
 对工程中初始添加的Source Group1改名为Applications，并添加Kernel，Cortex-M3，Drivers的Group
 
-在Cortex-M3分组中,加入libcpu\\arm\\cortex-m3里的context_rvds.S和cpuport.c文件,以及libcpu\\arm\\common中的backtrace.c,div0.cshowmem.c
+在Cortex-M3分组中,加入libcpu\\arm\\cortex-m3里的context_rvds.S和cpuport.c文件,以及libcpu\\arm\\common中的backtrace.c，div0.c，showmem.c
 
 Kernel Group中添加所有\\src下的C源文件； 
 
@@ -208,9 +208,9 @@ Drivers Group中添加board.c文件（放于bsp\\your_board\\drivers目录中）
 
 在Keil MDK自动生成的启动代码中，由于STM32的中断处理方式是以中断向量表的方式进行，所以将不再使用中断统一入口的方式进行，启动代码可以大部分使用这份启动代码。主要修改在：
 
-对于大多数已知的CPU,尤其是内核相同的CPU,他们的启动代码非常相似,可以直接使用标准启动代码,比如说STM32F103ZET6是Cortex-M3内核的,那就可以直接使用已有的启动代码,好处是,这些启动代码都是官方给出的,而且,对于同一种内核来说,基本上都是相同的,比如说异常的入口地址,一般的异常Handler名称等.RT-Thread默认这些Handler都是固定(一般来说都是这样),在内核中已经有相关的Handler处理函数,可以被异常直接调用,省去了修改等的麻烦
+对于大多数已知的CPU,尤其是内核相同的CPU,他们的启动代码非常相似,可以直接使用标准启动代码。比如说STM32F103ZET6是Cortex-M3内核的,那就可以直接使用已有的启动代码。好处是,这些启动代码都是官方给出的,而且,对于同一种内核来说,基本上都是相同的。比如说异常的入口地址,一般的异常Handler名称等。RT-Thread默认这些Handler都是固定(一般来说都是这样)在内核中，已经有相关的Handler处理函数,可以被异常直接调用,省去了修改的麻烦。
 
-一般来说,在移植过程中需要用确认几个异常入口以及变量正确:
+一般来说,在移植过程中需要用确认几个异常入口以及变量是否正确:
 
 1. 栈尺寸
 
@@ -219,7 +219,7 @@ Stack_Size      EQU     0x00000200
 
 2. PenSV异常
 
-PendSV_Handler在context_rvds.S中实现,完成上下文切换.
+PendSV_Handler在context_rvds.S中实现,完成上下文切换。
 
 3. HardFault_Handler异常
 
@@ -318,7 +318,7 @@ rt_uint8_t *rt_hw_stack_init(void *tentry, void *parameter,
 * 上下文切换代码
 
 代码清单libcpu\\arm\\cortex-m3\\context_rvds.S：
-在RT-Thread中，中断锁是完全有芯片移植来实现的，参见 线程间同步与通信章节。以下是Cortex-M3上的开关中断实现，它是使用CPSID指令来实现的。
+在RT-Thread中，中断锁是完全由芯片移植来实现的，参见 线程间同步与通信章节。以下是Cortex-M3上的开关中断实现，它是使用CPSID指令来实现的。
 
 ~~~{.c}
 ; rt_base_t rt_hw_interrupt_disable();
@@ -605,7 +605,7 @@ rt_interrupt_enter()函数会通知OS进入到中断处理模式（相应的线�
 
 RT-thread支持scons工具,可以简单的创建工程文件，编译，下面将以移植MK60开发板为目标讲解。
 
-scons创建MDK工程是以给定的Keil工程的模板为基础，通过SCONS把一些配置信息，文件，包含目录等加入到最后生成的工程中。
+scons创建MDK工程是以给定的Keil工程的模板为基础，通过scons把一些配置信息，文件，包含目录等加入到最后生成的工程中。
 
 必要的，首先需要创建一个模板工程，就像创建普通MDK工程那样，但是一定要命名为 `template.uvproj`，作为基础模板
 
@@ -776,7 +776,7 @@ VSTMFDEQ  r1!, {d8 - d15}       ; EXC_RETURN[4]置位则push{d8~d15},!表示自�
 ENDIF
 ~~~
 
-当系统产生异常(中断)时，首先会自动进行硬件入栈行为，对于Cortex-M3,会入栈xPSR、PC、LR、R12、R3~R0，这些寄存器被称为basic frame(参考ARMv7-M Architecture Reference Manual第648页)，与于Cortex-M4，在入栈basic frame之前，还会入栈extended frame，即把d0~d8入栈，然后入栈xPSR、PC、LR、R12、R3~R0。所以，如果要完整的保护上下文切换的状态，还需要入栈d8~d15，如 ***启用FPU后自动入栈顺序图*** 所示
+当系统产生异常(中断)时，首先会自动进行硬件入栈行为，对于Cortex-M3,会入栈xPSR、PC、LR、R12、R3~R0，这些寄存器被称为basic frame(参考ARMv7-M Architecture Reference Manual第648页)，对于Cortex-M4，在入栈basic frame之前，还会入栈extended frame，即把d0~d8入栈，然后入栈xPSR、PC、LR、R12、R3~R0。所以，如果要完整的保护上下文切换的状态，还需要入栈d8~d15，如 ***启用FPU后自动入栈顺序图*** 所示
 
 ![启用FPU后自动入栈顺序图](../../figures/port_FPU_push_stack.png)
 
