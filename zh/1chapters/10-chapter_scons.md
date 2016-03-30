@@ -1,6 +1,6 @@
 # SCons构建系统 #
 
-SCons是一套由Python语言编写的开源构建系统，类似于GNU Make。它采用不同于通常Makefile文件方式，而使用SConstruct和SConscript文件来替代。这些文件也是Python脚本，能够使用标准的Python语法来编写。所以在SConstruct、SConscript文件中可以调用Python标准库进行各类复杂的处理，而不局限于Makefile设定的规则。
+SCons是一套由Python语言编写的开源构建系统，类似于GNU Make。它采用不同于通常Makefile文件的方式，而使用SConstruct和SConscript文件来替代。这些文件也是Python脚本，能够使用标准的Python语法来编写。所以在SConstruct、SConscript文件中可以调用Python标准库进行各类复杂的处理，而不局限于Makefile设定的规则。
 
 在[SCons](http://www.scons.org/doc/production/HTML/scons-user/index.html)的网站上可以找到详细的SCons用户手册，本章节讲述SCons的基本用法，以及如何在RT-Thread中用好SCons工具。
 
@@ -18,11 +18,11 @@ RT-Thread早期使用Make/Makefile构建。从0.3.x开始，RT-Thread开发团�
 
 有些读者可能会有些疑惑，这里介绍的构建工具与IDE有什么不同。
 
-通常IDE有自己的管理源码的方式，一些IDE使用XML来组织文件，并解决依赖关系。大部分IDE会根据用户所添加的源码生成类似Makefile或SConscript的脚本文件，在底层调用类似Make与SCons的工具来构建源码。IDE通过可以图形化的操作来完成构建。
+通常IDE有自己的管理源码的方式，一些IDE使用XML来组织文件，并解决依赖关系。大部分IDE会根据用户所添加的源码生成类似Makefile或SConscript的脚本文件，在底层调用类似Make与SCons的工具来构建源码。IDE通过图形化的操作来完成构建。
 
 ## 安装SCons环境 ##
 
-在使用SCons系统前需要在PC主机中安装它，因为它是Python语言编写的，所以在之前需要安装Python语言环境。需要注意的是，由于目前SCons还不支持Python 3.x，所以需要安装Python 2.x环境，可以选择Python 2.x的最新版本进行安装。
+在使用SCons系统前需要在PC主机中安装它，因为它是Python语言编写的，所以在使用SCons之前需要安装Python运行环境。需要注意的是，由于目前SCons还不支持Python 3.x，所以需要安装Python 2.x环境，可以选择Python 2.x的最新版本进行安装。
 
 ### Linux、BSD环境 ###
 
@@ -103,7 +103,7 @@ elif CROSS_TOOL == 'iar':
 这里有两点需要注意：
 
 1. 安装编译器时（如MDK，GNU GCC，IAR等），不要安装到带有中文或者空格的路径中。否则，某些解析路径时会出现错误。有些程序默认会安装到```C:\Program Files```目录下，中间带有空格。建议安装时选择其他路径，养成良好的开发习惯。
-2. 修改```EXEC_PATH```时，需要注意路径的格式。在windows平台上，默认的路径分割符号是反斜杠```\```,而这个符号在C语言以及Python中都是用于转移字符的。所以修改路径时，可以将```\```改为```/```，或者在前面加r（python特有的语法，表示原始数据）。
+2. 修改```EXEC_PATH```时，需要注意路径的格式。在windows平台上，默认的路径分割符号是反斜杠```\```,而这个符号在C语言以及Python中都是用于转义字符的。所以修改路径时，可以将```\```改为```/```，或者在前面加r（python特有的语法，表示原始数据）。
 
 假如某编译器安装位置为```D:\Dir1\Dir2```下。下面几种是正确的写法:
 
@@ -111,7 +111,7 @@ elif CROSS_TOOL == 'iar':
     EXEC_PATH = 'D:/Dir1/Dir2'   注意，改用“/”，前面没有r
     EXEC_PATH = 'D:\\Dir1\\Dir2' 注意，这里使用“\”的转义性来转义“\”自己。
 
-下面是错误的写法
+下面是错误的写法：
 
     EXEC_PATH = 'D:\Dir1\Dir2'
 
@@ -174,7 +174,7 @@ elif CROSS_TOOL == 'iar':
     scons --target=vs2012 -s
     Scons --target=vs2005 -s
 
-在bsp/simulator下，可以使用这个命令下生成vs2012的工程或vs2005的工程。
+在bsp/simulator下，可以使用这个命令生成vs2012的工程或vs2005的工程。
 
 #### scons --verbose ####
 
