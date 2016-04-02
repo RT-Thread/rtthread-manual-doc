@@ -50,12 +50,6 @@ struct rt_device
     rt_size_t (*write)(rt_device_t dev, rt_off_t pos, const void* buffer, rt_size_t size);
     rt_err_t  (*control)(rt_device_t dev, rt_uint8_t cmd, void *args);
 
-    /* 用于支持电源管理的函数接口 */
-#ifdef RT_USING_DEVICE_SUSPEND
-    rt_err_t (*suspend) (rt_device_t dev);
-    rt_err_t (*resumed) (rt_device_t dev);
-#endif
-
     /* 设备的私有数据 */
     void* user_data;
 };
@@ -84,6 +78,7 @@ enum rt_device_class_type
     RT_Device_Class_PM,               /* 电源管理设备   */
     RT_Device_Class_Pipe,             /* 管道设备       */
     RT_Device_Class_Portal,           /* 双向管道设备   */
+    RT_Device_Class_Timer,
     RT_Device_Class_Miscellaneous,    /* 杂类设备       */
     RT_Device_Class_Unknown           /* 未知设备       */
 };
@@ -156,7 +151,7 @@ flags参数支持下列参数(可以采用或的方式支持多种参数)：
 
 返回RT_EOK
 
-注：卸载设备并不会释放设备控制块所占用的内存。
+* 注：卸载设备并不会释放设备控制块所占用的内存。
 
 ### 初始化所有设备 ###
 
@@ -194,6 +189,24 @@ flags参数支持下列参数(可以采用或的方式支持多种参数)：
 
 查找到对应设备将返回相应的设备句柄；否则返回RT_NULL
 
+### 初始化设备 ###
+
+初始化指定设备，可以通过如下函数接口完成：
+
+    rt_err_t rt_device_init(rt_device_t dev)
+
+**函数参数**
+
+-----------------------------------------------------------------------
+          参数  描述
+--------------  -------------------------------------------------------
+           dev  设备句柄；
+-----------------------------------------------------------------------
+
+**函数返回**
+
+返回驱动的init函数返回值
+
 ### 打开设备 ###
 
 根据设备控制块来打开设备，可以通过如下函数接口完成：
@@ -230,9 +243,9 @@ flags参数支持下列参数(可以采用或的方式支持多种参数)：
 
 返回驱动的open函数返回值
 
-注：如果设备注册时指定的参数中包括RT_DEVICE_FLAG_STANDALONE参数，此设备将不允许重复打开，返回`-RT_EBUSY`。
+* 注：如果设备注册时指定的参数中包括RT_DEVICE_FLAG_STANDALONE参数，此设备将不允许重复打开，返回`-RT_EBUSY`。
 
-注：如果上层应用程序需要设置设备的接收回调函数，则必须以INT_RX或者DMA_RX的方式打开设备，否则不会回调函数。
+* 注：如果上层应用程序需要设置设备的接收回调函数，则必须以INT_RX或者DMA_RX的方式打开设备，否则不会回调函数。
 
 ### 关闭设备 ###
 
@@ -305,7 +318,7 @@ flags参数支持下列参数(可以采用或的方式支持多种参数)：
 
 返回写入数据的实际大小(如果是字符设备，返回大小以字节为单位；如果是块设备，返回的大小以块为单位)；如果返回0，则需要读取当前线程的errno来判断错误状态
 
-* 注：在RT-Thread的块设备中，从1.0.0版本开始，`rt_device_read()/rt_device_write()`接口的pos、size参数按照以块为单位。0.3.x以前的版本则按字节为单位。
+* 注：在RT-Thread的块设备中，从1.0.0版本开始，`rt_device_read()/rt_device_write()`接口的pos、size参数以块为单位。0.3.x以前的版本则以字节为单位。
 
 ### 控制设备 ###
 
@@ -389,12 +402,6 @@ rt_err_t  (*close)(rt_device_t dev);
 rt_size_t (*read) (rt_device_t dev, rt_off_t pos, void* buffer, rt_size_t size);
 rt_size_t (*write)(rt_device_t dev, rt_off_t pos, const void* buffer, rt_size_t size);
 rt_err_t  (*control)(rt_device_t dev, rt_uint8_t cmd, void *args);
-
-/* 用于支持电源管理的函数接口 */
-#ifdef RT_USING_DEVICE_SUSPEND
-rt_err_t (*suspend) (rt_device_t dev);
-rt_err_t (*resumed) (rt_device_t dev);
-#endif
 ~~~
 
 这些接口也是上层应用通过RT-Thread设备接口进行访问的实际底层接口（如 ***设备操作接口与设备驱动程序接口的映射*** ）：
@@ -410,16 +417,13 @@ I/O设备模块提供的这六个接口（rt_device_init/open/read/write/control
 +==============+=======================================================+
 |     init     |设备的初始化。设备初始化完成后，设备控制块的flag会被置 |
 |              |成已激活状态(RT_DEVICE_FLAG_ACTIVATED)。如果设备控制块 |
-|              |的flag不是已激活状态，那么在设备框架调用               |
-|              |rt_device_init_all接口时将调用此设备驱动的init接口进行 |
-|              |设备初始化；如果设备控制块中的flag标志已经设置成激活状 |
-|              |态，那么再运行初始化接口时，会立刻返回，而不会重新进行 |
-|              |初始化。                                               |
+|              |中的flag标志已经设置成激活状态，那么再运行初始化接口时 |
+|              |，会立刻返回，而不会重新进行初始化。                   |
 +--------------+-------------------------------------------------------+
 |     open     |打开设备。有些设备并不是系统一启动就已经打开开始运行； |
 |              |或者设备需要进行数据接收，但如果上层应用还未准备好，设 |
 |              |备也不应默认已经使能并开始接收数据。所以建议在写底层驱 |
-|              |动程序时，应在调用open接口时才使能设备。               |
+|              |动程序时，在调用open接口时才使能设备。                 |
 +--------------+-------------------------------------------------------+
 |    close     |关闭设备。建议在打开设备时，设备驱动自行维护一个打开计 |
 |              |数，在打开设备时进行+1操作，在关闭设备时进行-1操作，   |
