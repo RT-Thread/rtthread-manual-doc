@@ -460,362 +460,780 @@ I/O设备模块提供的这六个接口（rt_device_init/open/read/write/control
 * 根据自己的设备类型定义自己的私有数据域。特别是在可能有多个相类似设备的情况下（例如串口1、2），设备接口可以共用同一套接口，不同的只是各自的数据域(例如寄存器基地址)；
 * 根据设备的类型，注册到RT-Thread设备框架中。
 
-### STM32F103的串口驱动 ###
+### STM32F10x的串口驱动 ###
 
-以下例子详细分析了STM32F103的串口驱动，也包括上层应该如何使用这个设备的代码。STM32F103串口驱动代码，详细的中文注释已经放在其中了。
+以下例子详细分析了STM32F10x的串口驱动，也包括上层应该如何使用这个设备的代码。STM32F10x串口驱动代码，详细的中文注释已经放在其中了。
+
+目前的串口驱动采用了从struct rt_device结构中进行派生的方式，派生出rt_serial_device。STM32F10x的串口驱动包括公用的rt_serial_device串口驱动框架和属于STM32F10x的uart驱动两部分。串口驱动框架位于`components/drivers/serial/serial.c`中，向上层提供如下函数：
+
+ * rt_serial_init
+ * rt_serial_open
+ * rt_serial_close
+ * rt_serial_read
+ * rt_serial_write
+ * rt_serial_control
+
+ uart驱动位于`bsp/stm32f10x/drivers/usart.c`中，向上层提供如下函数：
+
+ * stm32_configure
+ * stm32_control
+ * stm32_putc
+ * stm32_getc
+
+uart驱动位于底层，实际运行中串口驱动框架将调用uart驱动提供的函数。例如：应用程序调用`rt_device_write`时，实际调用关系为：
+
+    rt_device_write ==> rt_serial_write ==> stm32_putc
+
+下面将首先列出串口驱动框架的代码，由于我们仅以中断接收和轮询发送方式来举例，其他接收和发送方式的代码将省略。驱动框架代码如下：
 
 ~~~{.c}
-/*
- * 程序清单：串口设备驱动头文件
- */
-#ifndef __RT_HW_SERIAL_H__
-#define __RT_HW_SERIAL_H__
+/* RT-Thread设备驱动框架接口 */
 
-#include <rthw.h>
-#include <rtthread.h>
+/* serial.h部分内容开始 */
+/* Default config for serial_configure structure */
+#define RT_SERIAL_CONFIG_DEFAULT           \
+{                                          \
+    BAUD_RATE_115200, /* 115200 bits/s */  \
+    DATA_BITS_8,      /* 8 databits */     \
+    STOP_BITS_1,      /* 1 stopbit */      \
+    PARITY_NONE,      /* No parity  */     \
+    BIT_ORDER_LSB,    /* LSB first sent */ \
+    NRZ_NORMAL,       /* Normal mode */    \
+    RT_SERIAL_RB_BUFSZ, /* Buffer size */  \
+    0                                      \
+}
 
-/* STM32F10x library definitions */
-#include <stm32f10x.h>
-
-/* 定义接收ringbuffer缓冲区大小 */
-#define UART_RX_BUFFER_SIZE		64
-
-/* 中断接收时的ringbuffer缓冲区定义 */
-struct stm32_serial_int_rx
+/* 串口配置结构体 */
+struct serial_configure
 {
-	rt_uint8_t  rx_buffer[UART_RX_BUFFER_SIZE];
-	rt_uint32_t read_index, save_index;
+    rt_uint32_t baud_rate;
+
+    rt_uint32_t data_bits               :4;
+    rt_uint32_t stop_bits               :2;
+    rt_uint32_t parity                  :2;
+    rt_uint32_t bit_order               :1;
+    rt_uint32_t invert                  :1;
+    rt_uint32_t bufsz                   :16;
+    rt_uint32_t reserved                :4;
 };
 
-/* 串口设备类 */
-struct stm32_serial_device
+/*
+ * Serial FIFO mode 
+ */
+struct rt_serial_rx_fifo
 {
-	USART_TypeDef* uart_device;
+    /* software fifo */
+    rt_uint8_t *buffer;
 
-	/* 接收结构体 */
-	struct stm32_serial_int_rx* int_rx;
-	/* 打开计数 */
-	rt_uint32_t ref_count;
+    rt_uint16_t put_index, get_index;
 };
 
-/* 注册一个串口设备 */
-rt_err_t rt_hw_serial_register(rt_device_t device, const char* name,
-		rt_uint32_t flag, struct stm32_serial_device *serial);
-void rt_hw_serial_isr(rt_device_t device);
-
-#endif
-
-/*
- * 程序清单：串口驱动实现文件
- */
-#include "serial.h"
-
-/* RT-Thread设备驱动公共接口 */
-static rt_err_t rt_serial_init (rt_device_t dev)
+/* 串口设备结构体 */
+struct rt_serial_device
 {
-	struct stm32_serial_device* uart;
+    struct rt_device          parent;
 
-	/* 获得真实的UART设备对象 */
-	uart = (struct stm32_serial_device*) dev->user_data;
+    const struct rt_uart_ops *ops;
+    struct serial_configure   config;
 
-	/* 判断设备是否已经激活了 */
-	if (!(dev->flag & RT_DEVICE_FLAG_ACTIVATED))
-	{
-		if (dev->flag & RT_DEVICE_FLAG_INT_RX)
-		{
-			/* 如果是中断接收模式，初始化接收的缓冲区 */
-			rt_memset(uart->int_rx->rx_buffer, 0,
-				sizeof(uart->int_rx->rx_buffer));
-			uart->int_rx->read_index = 0;
-			uart->int_rx->save_index = 0;
-		}
+    void *serial_rx;
+    void *serial_tx;
+};
+typedef struct rt_serial_device rt_serial_t;
 
-		/* 使能USART */
-		USART_Cmd(uart->uart_device, ENABLE);
-		/* 设置设备为激活状态 */
-		dev->flag |= RT_DEVICE_FLAG_ACTIVATED;
-	}
+/**
+ * uart operators
+ * 函数的具体实现在bsp/stm32f10x/drivers/usart.c中
+ */
+struct rt_uart_ops
+{
+    rt_err_t (*configure)(struct rt_serial_device *serial, struct serial_configure *cfg);
+    rt_err_t (*control)(struct rt_serial_device *serial, int cmd, void *arg);
 
-	return RT_EOK;
+    int (*putc)(struct rt_serial_device *serial, char c);
+    int (*getc)(struct rt_serial_device *serial);
+
+    rt_size_t (*dma_transmit)(struct rt_serial_device *serial, const rt_uint8_t *buf, rt_size_t size, int direction);
+};
+/* serial.h部分内容结束 */
+
+/* 以下为serial.c的内容 */
+/* 轮询接收 */
+rt_inline int _serial_poll_rx(struct rt_serial_device *serial, rt_uint8_t *data, int length)
+{
+    /* 代码省略 */
+}
+
+/* 轮询发送 */
+rt_inline int _serial_poll_tx(struct rt_serial_device *serial, const rt_uint8_t *data, int length)
+{
+    int size;
+    RT_ASSERT(serial != RT_NULL);
+
+    size = length;
+    while (length)
+    {
+        /*
+         * to be polite with serial console add a line feed
+         * to the carriage return character
+         */
+        if (*data == '\n' && (serial->parent.open_flag & RT_DEVICE_FLAG_STREAM))
+        {
+            serial->ops->putc(serial, '\r');
+        }
+
+        /* 实际调用usart.c中的stm32_putc，
+         * serial->ops中包含uart驱动中的4个函数指针，
+         * 在usart.c的rt_hw_usart_init函数中，向系统注册设备之前对其赋值 。
+         */
+        serial->ops->putc(serial, *data);
+    
+        ++ data;
+        -- length;
+    }
+
+    return size - length;
+}
+
+/* 中断接收
+ * 中断处理函数rt_hw_serial_isr将收到的数据放到接收buffer里，
+ * 此函数从接收buffer里取出数据 
+ */
+rt_inline int _serial_int_rx(struct rt_serial_device *serial, rt_uint8_t *data, int length)
+{
+    int size;
+    struct rt_serial_rx_fifo* rx_fifo;
+
+    RT_ASSERT(serial != RT_NULL);
+    size = length; 
+    
+    rx_fifo = (struct rt_serial_rx_fifo*) serial->serial_rx;
+    RT_ASSERT(rx_fifo != RT_NULL);
+
+    /* read from software FIFO */
+    while (length)
+    {
+        int ch;
+        rt_base_t level;
+
+        /* disable interrupt */
+        level = rt_hw_interrupt_disable();
+        if (rx_fifo->get_index != rx_fifo->put_index)
+        {
+            ch = rx_fifo->buffer[rx_fifo->get_index];
+            rx_fifo->get_index += 1;
+            if (rx_fifo->get_index >= serial->config.bufsz) rx_fifo->get_index = 0;
+        }
+        else
+        {
+            /* no data, enable interrupt and break out */
+            rt_hw_interrupt_enable(level);
+            break;
+        }
+
+        /* enable interrupt */
+        rt_hw_interrupt_enable(level);
+
+        *data = ch & 0xff;
+        data ++; length --;
+    }
+
+    return size - length;
+}
+
+/* 中断发送 */
+rt_inline int _serial_int_tx(struct rt_serial_device *serial, const rt_uint8_t *data, int length)
+{
+    /* 代码省略 */
+}
+
+/* DMA接收 */
+rt_inline int _serial_dma_rx(struct rt_serial_device *serial, rt_uint8_t *data, int length)
+{
+    /* 代码省略 */
+}
+
+/* DMA发送 */
+rt_inline int _serial_dma_tx(struct rt_serial_device *serial, const rt_uint8_t *data, int length)
+{
+    /* 代码省略 */
+}
+
+static rt_err_t rt_serial_init (struct rt_device *dev)
+{
+    rt_err_t result = RT_EOK;
+    struct rt_serial_device *serial;
+
+    RT_ASSERT(dev != RT_NULL);
+    /* 获得真实的serial设备对象 */
+    serial = (struct rt_serial_device *)dev;
+
+    /* initialize rx/tx */
+    serial->serial_rx = RT_NULL;
+    serial->serial_tx = RT_NULL;
+
+    /* 实际调用usart.c中stm32_configure函数，对串口波特率等进行配置。
+     * serial->config包含配置数据，在usart.c的rt_hw_usart_init函数中，向系统注册设备之前进行赋值。
+     */
+    if (serial->ops->configure)
+        result = serial->ops->configure(serial, &serial->config);
+
+    return result;
 }
 
 /* 打开设备 */
-static rt_err_t rt_serial_open(rt_device_t dev, rt_uint16_t oflag)
+static rt_err_t rt_serial_open(struct rt_device *dev, rt_uint16_t oflag)
 {
-	if (dev->flag & RT_DEVICE_FLAG_INT_RX)
-	{
-		/* 中断接收模式，使能中断 */
-	}
-	return RT_EOK;
+    struct rt_serial_device *serial;
+
+    RT_ASSERT(dev != RT_NULL);
+    serial = (struct rt_serial_device *)dev;
+
+    /* check device flag with the open flag */
+    if ((oflag & RT_DEVICE_FLAG_DMA_RX) && !(dev->flag & RT_DEVICE_FLAG_DMA_RX)) 
+        return -RT_EIO;
+    if ((oflag & RT_DEVICE_FLAG_DMA_TX) && !(dev->flag & RT_DEVICE_FLAG_DMA_TX))
+        return -RT_EIO;
+    if ((oflag & RT_DEVICE_FLAG_INT_RX) && !(dev->flag & RT_DEVICE_FLAG_INT_RX))
+        return -RT_EIO;
+    if ((oflag & RT_DEVICE_FLAG_INT_TX) && !(dev->flag & RT_DEVICE_FLAG_INT_TX))
+        return -RT_EIO;
+
+    /* get open flags */
+    dev->open_flag = oflag & 0xff;
+    
+    /* initialize the Rx/Tx structure according to open flag */
+    if (serial->serial_rx == RT_NULL)
+    {
+        if (oflag & RT_DEVICE_FLAG_DMA_RX)
+        {
+            /* 代码省略 */
+        }
+        else if (oflag & RT_DEVICE_FLAG_INT_RX)
+        {
+            struct rt_serial_rx_fifo* rx_fifo;
+            
+            /* 创建中断接收buffer */
+            rx_fifo = (struct rt_serial_rx_fifo*) rt_malloc (sizeof(struct rt_serial_rx_fifo) + 
+                serial->config.bufsz);
+            RT_ASSERT(rx_fifo != RT_NULL);
+            rx_fifo->buffer = (rt_uint8_t*) (rx_fifo + 1);
+            rt_memset(rx_fifo->buffer, 0, serial->config.bufsz);
+            rx_fifo->put_index = 0;
+            rx_fifo->get_index = 0;
+
+            /* 保存指向接收buffer的指针，以便在接收中断函数rt_hw_serial_isr中使用 */
+            serial->serial_rx = rx_fifo;
+            dev->open_flag |= RT_DEVICE_FLAG_INT_RX;
+            /* 调用usart.c中的stm32_control函数 
+             * 开启uart接收中断
+             */
+            serial->ops->control(serial, RT_DEVICE_CTRL_SET_INT, (void *)RT_DEVICE_FLAG_INT_RX);
+        }
+        else
+        {
+            serial->serial_rx = RT_NULL;
+        }
+    }
+
+    if (serial->serial_tx == RT_NULL)
+    {
+        if (oflag & RT_DEVICE_FLAG_DMA_TX)
+        {
+            /* 代码省略 */
+        }
+        else if (oflag & RT_DEVICE_FLAG_INT_TX)
+        {
+            /* 代码省略 */
+        }
+        else
+        {
+            serial->serial_tx = RT_NULL;
+        }
+    }
+
+    return RT_EOK;
 }
 
 /* 关闭设备 */
-static rt_err_t rt_serial_close(rt_device_t dev)
+static rt_err_t rt_serial_close(struct rt_device *dev)
 {
-	if (dev->flag & RT_DEVICE_FLAG_INT_RX)
-	{
-		/* 中断接收模式，关闭中断 */
-	}
-	return RT_EOK;
+    struct rt_serial_device *serial;
+
+    RT_ASSERT(dev != RT_NULL);
+    serial = (struct rt_serial_device *)dev;
+
+    /* 实际上只有ref_count为0时本函数才会被调用到，
+     * 即最后一个打开此设备的应用调用rt_device_close时，本函数才会被调用
+     * 所以下面一条语句并不起作用
+     */
+    if (dev->ref_count > 1) return RT_EOK;
+    
+    if (dev->open_flag & RT_DEVICE_FLAG_INT_RX)
+    {
+        struct rt_serial_rx_fifo* rx_fifo;
+
+        rx_fifo = (struct rt_serial_rx_fifo*)serial->serial_rx;
+        RT_ASSERT(rx_fifo != RT_NULL);
+        /* 释放中断接收buffer */
+        rt_free(rx_fifo);
+        serial->serial_rx = RT_NULL;
+        dev->open_flag &= ~RT_DEVICE_FLAG_INT_RX;
+        /* 关闭接收中断 */
+        serial->ops->control(serial, RT_DEVICE_CTRL_CLR_INT, (void*)RT_DEVICE_FLAG_INT_RX);
+    }
+    else if (dev->open_flag & RT_DEVICE_FLAG_DMA_RX)
+    {
+        /* 代码省略 */
+    }
+
+    if (dev->open_flag & RT_DEVICE_FLAG_INT_TX)
+    {
+        /* 代码省略 */
+    }
+    else if (dev->open_flag & RT_DEVICE_FLAG_DMA_TX)
+    {
+        /* 代码省略 */
+    }
+
+    return RT_EOK;
 }
 
 /* 从设备中读取数据 */
-static rt_size_t rt_serial_read (rt_device_t dev, rt_off_t pos,
-		void* buffer, rt_size_t size)
+static rt_size_t rt_serial_read (struct rt_device  *dev, 
+                                 rt_off_t           pos,
+                                 void              *buffer, 
+                                 rt_size_t          size)
 {
-	rt_base_t level;
-	rt_uint8_t* ptr;
-	rt_err_t err_code;
-	struct stm32_serial_device* uart;
-	struct stm32_serial_int_rx* int_rx;
+    struct rt_serial_device *serial;
 
-	/* 初始化变量 */
-	ptr = buffer;
-	err_code = RT_EOK;
-	uart = (struct stm32_serial_device*)dev->user_data;
-	int_rx = uart->int_rx;
+    RT_ASSERT(dev != RT_NULL);
+    if (size == 0) return 0;
 
-	if (dev->flag & RT_DEVICE_FLAG_INT_RX)
-	{
-		/*
-		 * 中断模式接收，中断模式接收在中断服务例程中已预先收取到缓冲区中，
-		 * 所以这里只需要从缓冲区中复制出数据
-		 */
-		while (size)
-		{
-			/* 涉及到与中断服务例程共享缓冲区操作，需要关闭中断 */
-			level = rt_hw_interrupt_disable();
+    serial = (struct rt_serial_device *)dev;
 
-			/* 先判断缓冲区是否是空的 */
-			if (int_rx->read_index != int_rx->save_index)
-			{
-				/* 缓冲区非空，读取一个字符 */
-				*ptr++ = int_rx->rx_buffer[int_rx->read_index];
-				size--;
+    if (dev->open_flag & RT_DEVICE_FLAG_INT_RX)
+    {
+        /* 调用中断接收函数 */
+        return _serial_int_rx(serial, buffer, size);
+    }
+    else if (dev->open_flag & RT_DEVICE_FLAG_DMA_RX)
+    {
+        return _serial_dma_rx(serial, buffer, size);
+    }
 
-				/* 移动读索引到下一个位置，如果到达末尾，进行复位到0 */
-				int_rx->read_index ++;
-				if (int_rx->read_index >= UART_RX_BUFFER_SIZE)
-					int_rx->read_index = 0;
-			}
-			else
-			{
-				/* 缓冲区空，设置错误号 */
-				err_code = -RT_EEMPTY;
-
-				/* 使能中断 */
-				rt_hw_interrupt_enable(level);
-				break;
-			}
-
-			/* 使能中断 */
-			rt_hw_interrupt_enable(level);
-		}
-	}
-	else
-	{
-		/* 轮询模式，直接从串口设备中读取数据  */
-		while ((rt_uint32_t)ptr - (rt_uint32_t)buffer < size)
-		{
-			while (uart->uart_device->SR & USART_FLAG_RXNE)
-			{
-				*ptr = uart->uart_device->DR & 0xff;
-				ptr ++;
-			}
-		}
-	}
-
-	/* 设置错误号 */
-	rt_set_errno(err_code);
-	/* 返回独到的字节数 */
-	return (rt_uint32_t)ptr - (rt_uint32_t)buffer;
+    return _serial_poll_rx(serial, buffer, size);
 }
 
 /* 向设备中写入数据 */
-static rt_size_t rt_serial_write (rt_device_t dev, rt_off_t pos,
-		const void* buffer, rt_size_t size)
+static rt_size_t rt_serial_write(struct rt_device *dev,
+                                 rt_off_t          pos,
+                                 const void       *buffer,
+                                 rt_size_t         size)
 {
-	rt_uint8_t* ptr;
-	rt_err_t err_code;
-	struct stm32_serial_device* uart;
+    struct rt_serial_device *serial;
 
-	err_code = RT_EOK;
-	ptr = (rt_uint8_t*)buffer;
-	uart = (struct stm32_serial_device*)dev->private;
+    RT_ASSERT(dev != RT_NULL);
+    if (size == 0) return 0;
 
-	if ((dev->flag & RT_DEVICE_FLAG_INT_TX) ||
-		(dev->flag & RT_DEVICE_FLAG_DMA_TX))
-	{
-		/* 不支持中断发送和DMA发送 */
-		RT_ASSERT(0);
-	}
-	else
-	{
-		/* 轮询模式 */
-		if (dev->flag & RT_DEVICE_FLAG_STREAM)
-		{
-			/* 流模式 */
-			while (size)
-			{
-				if (*ptr == '\n')
-				{
-					while (!(uart->uart_device->SR & USART_FLAG_TXE));
-					uart->uart_device->DR = '\r';
-				}
+    serial = (struct rt_serial_device *)dev;
 
-				/* 写入发送字符 */
-				while (!(uart->uart_device->SR & USART_FLAG_TXE));
-				uart->uart_device->DR = (*ptr & 0x1FF);
-
-				++ptr; --size;
-			}
-		}
-		else
-		{
-			/* 直接写入数据 */
-			while (size)
-			{
-				/* 写入发送字符 */
-				while (!(uart->uart_device->SR & USART_FLAG_TXE));
-				uart->uart_device->DR = (*ptr & 0x1FF);
-
-				++ptr; --size;
-			}
-		}
-	}
-
-	/* 设置错误号 */
-	rt_set_errno(err_code);
-
-	/* 返回写入成功的字节数 */
-	return (rt_uint32_t)ptr - (rt_uint32_t)buffer;
+    if (dev->open_flag & RT_DEVICE_FLAG_INT_TX)
+    {
+        return _serial_int_tx(serial, buffer, size);
+    }
+    else if (dev->open_flag & RT_DEVICE_FLAG_DMA_TX)
+    {
+        return _serial_dma_tx(serial, buffer, size);
+    }
+    else
+    {
+        /* 轮询模式发送 */
+        return _serial_poll_tx(serial, buffer, size);
+    }
 }
 
 /* 设备控制操作 */
-static rt_err_t rt_serial_control (rt_device_t dev,
-		rt_uint8_t cmd, void *args)
+static rt_err_t rt_serial_control (struct rt_device *dev,
+                                   rt_uint8_t cmd, 
+                                   void *args)
 {
-	struct stm32_serial_device* uart;
+    struct rt_serial_device *serail;
 
-	RT_ASSERT(dev != RT_NULL);
+    RT_ASSERT(dev != RT_NULL);
 
-	/* 获得真正的串口对象 */
-	uart = (struct stm32_serial_device*)dev->user_data;
-	switch (cmd)
-	{
-	case RT_DEVICE_CTRL_SUSPEND:
-		/* 挂起设备 */
-		dev->flag |= RT_DEVICE_FLAG_SUSPENDED;
-		USART_Cmd(uart->uart_device, DISABLE);
-		break;
+    /* 获得真正的串口对象 */
+    serial = (struct rt_serial_device *)dev;
 
-	case RT_DEVICE_CTRL_RESUME:
-		/* 唤醒设备 */
-		dev->flag &= ~RT_DEVICE_FLAG_SUSPENDED;
-		USART_Cmd(uart->uart_device, ENABLE);
-		break;
-	}
+    switch (cmd)
+    {
+    case RT_DEVICE_CTRL_SUSPEND:
+        /* 挂起设备 */
+        break;
+        dev->flag |= RT_DEVICE_FLAG_SUSPENDED;
 
-	return RT_EOK;
+    case RT_DEVICE_CTRL_RESUME:
+        /* 唤醒设备 */
+        dev->flag &= ~RT_DEVICE_FLAG_SUSPENDED;
+        break;
+    case RT_DEVICE_CTRL_CONFIG:
+        /* 配置设备，设置波特率、数据位数等 */
+        serial->ops->configure(serial, (struct serial_configure *)args);
+        break;
+
+    default :
+        /* control device */
+        serial->ops->control(serial, cmd, args);
+        break;
+    }
+
+    return RT_EOK;
 }
 
 /*
  * 向系统中注册串口设备
  */
-rt_err_t rt_hw_serial_register(rt_device_t device, const char* name,
-		rt_uint32_t flag, struct stm32_serial_device *serial)
+rt_err_t rt_hw_serial_register(struct rt_serial_device *serial, 
+                               const char              *name,
+                               rt_uint32_t              flag, 
+                               void                    *data)
 {
-	RT_ASSERT(device != RT_NULL);
+    struct rt_device *device;
+    RT_ASSERT(serial != RT_NULL);
 
-	/* 当前不支持DMA接收和中断发送 */
-	if ((flag & RT_DEVICE_FLAG_DMA_RX) ||
-		(flag & RT_DEVICE_FLAG_INT_TX))
-	{
-		RT_ASSERT(0);
-	}
+    device = &(serial->parent);
 
-	/* 设置设备驱动类型 */
-	device->type 		= RT_Device_Class_Char;
-	device->rx_indicate = RT_NULL;
-	device->tx_complete = RT_NULL;
-	/* 设置设备驱动公共接口函数 */
-	device->init 		= rt_serial_init;
-	device->open		= rt_serial_open;
-	device->close		= rt_serial_close;
-	device->read 		= rt_serial_read;
-	device->write 		= rt_serial_write;
-	device->control 	= rt_serial_control;
-	device->user_data	= serial;
+    /* 设置设备驱动类型 */
+    device->type        = RT_Device_Class_Char;
+    device->rx_indicate = RT_NULL;
+    device->tx_complete = RT_NULL;
+    /* 设置设备驱动公共接口函数 */
+    device->init        = rt_serial_init;
+    device->open        = rt_serial_open;
+    device->close       = rt_serial_close;
+    device->read        = rt_serial_read;
+    device->write       = rt_serial_write;
+    device->control     = rt_serial_control;
+    /*  在使用stm32f10x时，此处传给data的是指向stm32_uart结构体的指针 */
+    device->user_data   = data;
 
-	/* 注册一个字符设备 */
-	return rt_device_register(device, name, RT_DEVICE_FLAG_RDWR | flag);
+    /* 注册一个字符设备 */
+    return rt_device_register(device, name, flag);
 }
 
 /* ISR for serial interrupt */
-void rt_hw_serial_isr(rt_device_t device)
+void rt_hw_serial_isr(struct rt_serial_device *serial, int event)
 {
-	rt_base_t level;
-	struct stm32_serial_device* uart;
-	struct stm32_serial_int_rx* int_rx;
+    switch (event & 0xff)
+    {
+        /* 接收中断 */
+        case RT_SERIAL_EVENT_RX_IND:
+        {
+            int ch = -1;
+            rt_base_t level;
+            struct rt_serial_rx_fifo* rx_fifo;
 
-	uart = (struct stm32_serial_device*) device->user_data;
-	int_rx = uart->int_rx;
+            /* 获取中断接收buffer，serial->serial_rx在rt_serial_open里进行赋值 */
+            rx_fifo = (struct rt_serial_rx_fifo*)serial->serial_rx;
+            RT_ASSERT(rx_fifo != RT_NULL);
 
-	if(USART_GetITStatus(uart->uart_device, USART_IT_RXNE) != RESET)
-	{
-		/* 中断模式接收 */
-		RT_ASSERT(device->flag & RT_DEVICE_FLAG_INT_RX);
+            while (1)
+            {
+                /* 实际调用stm32_getc */
+                ch = serial->ops->getc(serial);
+                if (ch == -1) break;
 
-		/* 保存在接收缓冲区中 */
-		while (uart->uart_device->SR & USART_FLAG_RXNE)
-		{
-			/* 先关闭中断(由于是与线程做同步，此处也可以不关闭中断) */
-			level = rt_hw_interrupt_disable();
+                
+                /* disable interrupt */
+                level = rt_hw_interrupt_disable();
+                
+                rx_fifo->buffer[rx_fifo->put_index] = ch;
+                rx_fifo->put_index += 1;
+                if (rx_fifo->put_index >= serial->config.bufsz) rx_fifo->put_index = 0;
+                
+                /* if the next position is read index, discard this 'read char' */
+                if (rx_fifo->put_index == rx_fifo->get_index)
+                {
+                    /* 丢弃最旧的数据，buffer里能保存最多bufsz - 1个字节 */
+                    rx_fifo->get_index += 1;
+                    if (rx_fifo->get_index >= serial->config.bufsz) rx_fifo->get_index = 0;
+                }
+                
+                /* enable interrupt */
+                rt_hw_interrupt_enable(level);
+            }
+            
+            /* 调用接收回调函数
+             * rx_indicate在device.c文件rt_device_set_rx_indicate函数中赋值
+             * 对于finsh在finsh_thread_entry中进行设置
+             */
+            if (serial->parent.rx_indicate != RT_NULL)
+            {
+                rt_size_t rx_length;
+            
+                /* get rx length */
+                level = rt_hw_interrupt_disable();
+                rx_length = (rx_fifo->put_index >= rx_fifo->get_index)? (rx_fifo->put_index - rx_fifo->get_index):
+                    (serial->config.bufsz - (rx_fifo->get_index - rx_fifo->put_index));
+                rt_hw_interrupt_enable(level);
 
-			/* 保存一个字符 */
-			int_rx->rx_buffer[int_rx->save_index] =
-					uart->uart_device->DR & 0xff;
-			/* 移动保存索引到下一个位置，如果已经到缓冲区的末端，复位到0 */
-			int_rx->save_index ++;
-			if (int_rx->save_index >= UART_RX_BUFFER_SIZE)
-				int_rx->save_index = 0;
+                serial->parent.rx_indicate(&serial->parent, rx_length);
+            }
+            break;
+        }
+        case RT_SERIAL_EVENT_TX_DONE:
+        {
+            /* 代码省略 */
+        }
+        case RT_SERIAL_EVENT_TX_DMADONE:
+        {
+            /* 代码省略 */
+        }
+        case RT_SERIAL_EVENT_RX_DMADONE:
+        {
+            /* 代码省略 */
+        }
+    }
 
-			/* 如果下一个位置已经达到读索引位置，丢弃读索引位置的字符 */
-			if (int_rx->save_index == int_rx->read_index)
-			{
-				int_rx->read_index ++;
-				if (int_rx->read_index >= UART_RX_BUFFER_SIZE)
-					int_rx->read_index = 0;
-			}
-
-			/* 使能中断 */
-			rt_hw_interrupt_enable(level);
-		}
-
-		/* 清除中断 */
-		USART_ClearITPendingBit(uart->uart_device, USART_IT_RXNE);
-
-		/* 调用接收指示回调函数 */
-		if (device->rx_indicate != RT_NULL)
-		{
-			rt_size_t rx_length;
-
-			/* 获得已接收的长度 */
-			rx_length = int_rx->read_index > int_rx->save_index ?
-				UART_RX_BUFFER_SIZE - int_rx->read_index +
-				int_rx->save_index :
-				int_rx->save_index - int_rx->read_index;
-			/* 执行回调函数 */
-			device->rx_indicate(device, rx_length);
-		}
-	}
-
-	if (USART_GetITStatus(uart->uart_device, USART_IT_TC) != RESET)
-	{
-		/* 清除中断 */
-		USART_ClearITPendingBit(uart->uart_device, USART_IT_TC);
-	}
 }
+~~~
+
+uart驱动位于`bsp/stm32f10x/drivers/usart.c`中，代码如下:
+
+~~~{.c}
+/* STM32 uart driver */
+struct stm32_uart
+{
+    USART_TypeDef* uart_device;
+    IRQn_Type irq;
+};
+
+static rt_err_t stm32_configure(struct rt_serial_device *serial, struct serial_configure *cfg)
+{
+    struct stm32_uart* uart;
+    USART_InitTypeDef USART_InitStructure;
+
+    RT_ASSERT(serial != RT_NULL);
+    RT_ASSERT(cfg != RT_NULL);
+    /* serial->parent.user_data即device->user_data在设备注册时进行赋值 */
+    uart = (struct stm32_uart *)serial->parent.user_data;
+
+    USART_InitStructure.USART_BaudRate = cfg->baud_rate;
+
+    if (cfg->data_bits == DATA_BITS_8){
+        USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+    } else if (cfg->data_bits == DATA_BITS_9) {
+        USART_InitStructure.USART_WordLength = USART_WordLength_9b;
+    }
+
+    if (cfg->stop_bits == STOP_BITS_1){
+        USART_InitStructure.USART_StopBits = USART_StopBits_1;
+    } else if (cfg->stop_bits == STOP_BITS_2){
+        USART_InitStructure.USART_StopBits = USART_StopBits_2;
+    }
+
+    if (cfg->parity == PARITY_NONE){
+        USART_InitStructure.USART_Parity = USART_Parity_No;
+    } else if (cfg->parity == PARITY_ODD) {
+        USART_InitStructure.USART_Parity = USART_Parity_Odd;
+    } else if (cfg->parity == PARITY_EVEN) {
+        USART_InitStructure.USART_Parity = USART_Parity_Even;
+    }
+
+    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+    USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+    USART_Init(uart->uart_device, &USART_InitStructure);
+
+    /* Enable USART */
+    USART_Cmd(uart->uart_device, ENABLE);
+
+    return RT_EOK;
+}
+
+static rt_err_t stm32_control(struct rt_serial_device *serial, int cmd, void *arg)
+{
+    struct stm32_uart* uart;
+
+    RT_ASSERT(serial != RT_NULL);
+    uart = (struct stm32_uart *)serial->parent.user_data;
+
+    switch (cmd)
+    {
+        /* disable interrupt */
+    case RT_DEVICE_CTRL_CLR_INT:
+        /* disable rx irq */
+        UART_DISABLE_IRQ(uart->irq);
+        /* 关闭接收中断 */
+        USART_ITConfig(uart->uart_device, USART_IT_RXNE, DISABLE);
+        break;
+        /* enable interrupt */
+    case RT_DEVICE_CTRL_SET_INT:
+        /* enable rx irq */
+        UART_ENABLE_IRQ(uart->irq);
+        /* 打开接收中断 */
+        USART_ITConfig(uart->uart_device, USART_IT_RXNE, ENABLE);
+        break;
+    }
+
+    return RT_EOK;
+}
+
+static int stm32_putc(struct rt_serial_device *serial, char c)
+{
+    struct stm32_uart* uart;
+
+    RT_ASSERT(serial != RT_NULL);
+    uart = (struct stm32_uart *)serial->parent.user_data;
+
+    uart->uart_device->DR = c;
+    while (!(uart->uart_device->SR & USART_FLAG_TC));
+
+    return 1;
+}
+
+static int stm32_getc(struct rt_serial_device *serial)
+{
+    int ch;
+    struct stm32_uart* uart;
+
+    RT_ASSERT(serial != RT_NULL);
+    uart = (struct stm32_uart *)serial->parent.user_data;
+
+    ch = -1;
+    if (uart->uart_device->SR & USART_FLAG_RXNE)
+    {
+        ch = uart->uart_device->DR & 0xff;
+    }
+
+    return ch;
+}
+
+static const struct rt_uart_ops stm32_uart_ops =
+{
+    stm32_configure,
+    stm32_control,
+    stm32_putc,
+    stm32_getc,
+};
+
+#if defined(RT_USING_UART1)
+/* UART1 device driver structure */
+struct stm32_uart uart1 =
+{
+    USART1,
+    USART1_IRQn,
+};
+struct rt_serial_device serial1;
+
+void USART1_IRQHandler(void)
+{
+    struct stm32_uart* uart;
+
+    uart = &uart1;
+
+    /* enter interrupt */
+    rt_interrupt_enter();
+    /* 接收中断 Read data register not empty */
+    if(USART_GetITStatus(uart->uart_device, USART_IT_RXNE) != RESET)
+    {
+        /* 调用中断处理函数，处理接收中断 */
+        rt_hw_serial_isr(&serial1, RT_SERIAL_EVENT_RX_IND);
+        /* clear interrupt */
+        USART_ClearITPendingBit(uart->uart_device, USART_IT_RXNE);
+    }
+    /* 发送完成中断 Transmission complete */
+    if (USART_GetITStatus(uart->uart_device, USART_IT_TC) != RESET)
+    {
+        /* clear interrupt */
+        USART_ClearITPendingBit(uart->uart_device, USART_IT_TC);
+    }
+    /* Overrun error */
+    if (USART_GetFlagStatus(uart->uart_device, USART_FLAG_ORE) == SET)
+    {
+        stm32_getc(&serial1);
+    }
+    /* leave interrupt */
+    rt_interrupt_leave();
+}
+#endif
+
+/* UART2至UART4相关代码省略 */
+
+static void RCC_Configuration(void)
+{
+#if defined(RT_USING_UART1)
+    /* Enable UART GPIO clocks */
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+    /* Enable UART clock */
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
+#endif /* RT_USING_UART1 */
+
+/* UART2至UART4相关代码省略 */
+}
+
+static void GPIO_Configuration(void)
+{
+    GPIO_InitTypeDef GPIO_InitStructure;
+
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+
+#if defined(RT_USING_UART1)
+    /* Configure USART Rx/tx PIN */
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    GPIO_InitStructure.GPIO_Pin = UART1_GPIO_RX;
+    GPIO_Init(UART1_GPIO, &GPIO_InitStructure);
+
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_InitStructure.GPIO_Pin = UART1_GPIO_TX;
+    GPIO_Init(UART1_GPIO, &GPIO_InitStructure);
+#endif /* RT_USING_UART1 */
+
+/* UART2至UART4相关代码省略 */
+}
+
+static void NVIC_Configuration(struct stm32_uart* uart)
+{
+    NVIC_InitTypeDef NVIC_InitStructure;
+
+    /* Enable the USART Interrupt */
+    NVIC_InitStructure.NVIC_IRQChannel = uart->irq;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+}
+
+void rt_hw_usart_init(void)
+{
+    struct stm32_uart* uart;
+    /* 配置默认波特率、数据位等 */
+    struct serial_configure config = RT_SERIAL_CONFIG_DEFAULT;
+
+    RCC_Configuration();
+    GPIO_Configuration();
+
+#if defined(RT_USING_UART1)
+    uart = &uart1;
+    config.baud_rate = BAUD_RATE_115200;
+
+    /* 接口函数赋值 */
+    serial1.ops    = &stm32_uart_ops;
+    /* 配置赋值 */
+    serial1.config = config;
+
+    NVIC_Configuration(&uart1);
+
+    /* 注册设备uart1
+     * 第4个参数uart最终被传给device->user_data
+     */
+    rt_hw_serial_register(&serial1, "uart1",
+                          RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX ,
+                          uart);
+#endif /* RT_USING_UART1 */
+
+/* UART2至UART4相关代码省略 */
+}
+
 ~~~
 
 对于包含中断发送、接收的情况的驱动程序，以下例子给出了具体的使用代码。在这个例子中，用户线程将从两个设备上(uart1, uart2)读取数据，然后再写到uart1设备中。
@@ -926,3 +1344,74 @@ int rt_application_init()
 
 线程devt启动后，系统将先查找是否存在uart1, uart2这两个设备，如果存在则设置数据接收回调函数。在数据接收回调函数中，系统将对应的设备句柄、接收到的数据长度填充到一个消息结构体（struct rx_msg）上，然后发送到消息队列rx_mq中。devt线程在打开设备后，将在消息队列中等待消息的到来。如果消息队列是空的，devt线程将被阻塞，直到达到唤醒条件被唤醒，被唤醒的条件是devt线程收到消息或0.5秒(50 OS tick, 在RT_TICK_PER_SECOND设置为100时)内都没收到消息。可以根据rt_mq_recv函数返回值的不同，区分出devt线程是因为什么原因而被唤醒。如果devt线程是因为接收到消息而被唤醒（rt_mq_recv函数的返回值是RT_EOK），那么它将主动调用rt_device_read去读取消息，然后写入uart1设备中。
 
+
+###finsh使用uart设备分析###
+
+**1.注册设备**
+
+我们首先要注册设备，才能用rt_device_find查找到设备。然后就可以进行初始化、打开、读取等操作。
+首先在各线程启动之前进行设备注册，函数调用关系如下:
+
+    main ==> rt_thread_startup ==> rt_hw_board_init ==> rt_hw_usart_init ==> rt_hw_serial_register ==> rt_device_register
+
+在函数`rt_thread_startup`中最后才调用了`rt_system_scheduler_start`各线程才开始运行。可以确定线程在查找设备时设备已经存在。
+
+在`rtconfig.h`中有`#define RT_CONSOLE_DEVICE_NAME      "uart1"`,注册完设备后设置了终端设备
+
+    rt_hw_board_init ==> rt_console_set_device(RT_CONSOLE_DEVICE_NAME)
+
+finsh将使用此终端设备。
+
+**2.启动finsh线程**
+
+在`shell.c`中有代码`INIT_COMPONENT_EXPORT(finsh_system_init)`，采用宏`INIT_COMPONENT_EXPORT`导出的函数将在`rt_components_init`函数中被调用。调用关系：
+
+    rt_thread_startup ==> rt_application_init ==> rt_init_thread_entry
+
+启动初始化线程，然后在初始化线程中启动了finsh线程：
+
+    rt_init_thread_entry ==> rt_components_init ==> finsh_system_init ==> finsh_thread_entry
+
+
+**3.打开设备**
+
+在finsh线程中打开设备，相关代码如下：
+~~~{.c}
+
+shell->device = rt_console_get_device();
+RT_ASSERT(shell->device);
+rt_device_set_rx_indicate(shell->device, finsh_rx_ind);
+rt_device_open(shell->device, (RT_DEVICE_OFLAG_RDWR | RT_DEVICE_FLAG_STREAM | RT_DEVICE_FLAG_INT_RX));
+
+~~~
+如果打开时设备没有进行初始化将首先进行初始化
+
+    rt_device_open ==> rt_serial_init ==> stm32_configure
+
+`stm32_configure`进行了波特率等参数的配置。
+
+然后打开设备
+
+    rt_device_open ==> rt_serial_open ==> stm32_control
+
+`stm32_control`中将打开接收中断。
+
+**4.接收数据**
+
+finsh采用了中断接收方式打开设备，当uart收到数据时将产生中断
+
+    USART1_IRQHandler ==> rt_hw_serial_isr ==> stm32_getc
+
+将收到的数据放到接收buffer里，然后调用回调函数`finsh_rx_ind`，`finsh_rx_ind`释放信号量，finsh线程得到信号量后读取数据。
+
+    finsh_thread_entry ==> rt_device_read ==> rt_serial_read ==> _serial_int_rx
+
+`_serial_int_rx`函数从接收buffer中读取数据。
+
+**5.发送数据**
+
+在finsh中调用`rt_kprintf`函数进行输出
+
+    rt_kprintf ==> rt_device_write ==> rt_serial_write ==> _serial_poll_tx ==> stm32_putc
+
+以上即finsh中对uart设备的使用分析。
