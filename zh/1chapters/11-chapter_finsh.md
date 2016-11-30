@@ -675,4 +675,4 @@ finsh有一些宏定义可以简单配置。
 
     #define FINSH_DEFAULT_PASSWORD	"rtthread"
 
-此宏定义在rtconfig.h中，设置finsh在密码验证模式下的默认密码。密码长度大于等于FINSH_PASSWORD_MIN(默认6)，小于等于FINSH_PASSWORD_MAX(默认RT_NAME_MAX)。
+此宏定义在rtconfig.h中，设置finsh在密码验证模式下的默认密码。密码长度大于等于`FINSH_PASSWORD_MIN`（默认6），小于等于`FINSH_PASSWORD_MAX`（默认`RT_NAME_MAX`）。
