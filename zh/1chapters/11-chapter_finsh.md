@@ -667,3 +667,12 @@ finsh有一些宏定义可以简单配置。
     #define DFS_USING_WORKDIR
 
 此宏定义在rtconfig.h中，它实际上是DFS组件的宏，但由于它与finsh有一定关系，因此在这里也介绍一下。打开此宏后finsh可以支持工作目录。当使用msh时，建议打开此宏。
+
+    #define FINSH_USING_AUTH
+
+此宏定义在rtconfig.h中，打开则开启权限验证功能。系统在启动后，只有权限验证（目前仅支持密码验证）通过，才会开启finsh功能，提升系统输入的安全性。
+
+
+    #define FINSH_DEFAULT_PASSWORD	"rtthread"
+
+此宏定义在rtconfig.h中，设置finsh在密码验证模式下的默认密码。密码长度大于等于FINSH_PASSWORD_MIN(默认6)，小于等于FINSH_PASSWORD_MAX(默认RT_NAME_MAX)。
