@@ -17,7 +17,7 @@
     #define RT_USING_DFS
     #define RT_USING_DFS_DEVFS
     #define RT_USING_PTHREADS
-~~
+~~~
 
 ## POSIX Thread介绍 ##
 
