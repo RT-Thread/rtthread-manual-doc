@@ -12,10 +12,12 @@
 
 需要在rtconfig.h中打开相关的选项：
 
+~~~{.c}
     #define RT_USING_LIBC
     #define RT_USING_DFS
     #define RT_USING_DFS_DEVFS
     #define RT_USING_PTHREADS
+~~
 
 ## POSIX Thread介绍 ##
 
@@ -24,7 +26,8 @@
 ### 栏杆: barrier ###
 
 pthread_barrier 系列函数在<pthread.h>中定义，用于多线程的同步，它包含三个函数：
-~~~
+
+~~~{.c}
       --pthread_barrier_init()
       --pthread_barrier_wait()
       --pthread_barrier_destroy()
@@ -44,7 +47,8 @@ pthread_barrier_*实现一个类似栏杆的功能（barrier意为栏杆)。形�
 为了解决上述场景问题，我们可以在init时指定n+1个等待，其中n是线程数。而在每个线程执行函数的首部调用wait()。这样100个pthread_create()结束后所有线程都停下来等待最后一个wait()函数被调用。这个wait()由主进程在它觉得合适的时候调用就好。最后这个wait()就是鸣响的起跑枪。
 
 函数原型：
-~~~
+
+~~~{.c}
 #include <pthread.h>
 
 int pthread_barrier_init(pthread_barrier_t *restrict barrier, const pthread_barrierattr_t *restrict attr, unsigned count);
