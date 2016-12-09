@@ -34,6 +34,7 @@ pthread_barrier 系列函数在<pthread.h>中定义，用于多线程的同步�
 ~~~
 
 pthread_barrier_*实现一个类似栏杆的功能（barrier意为栏杆)。形象的说就是把先后到达的多个线程挡在同一栏杆前，直到所有线程到齐，然后撤下栏杆同时放行。其中:
+
 * pthread_barrier_init函数负责指定要等待的线程个数；
 * pthread_barrier_wait函数由每个线程主动调用，它告诉栏杆“我到起跑线前了”。pthread_barrier_wait函数执行末尾栏杆会检查是否所有人都到栏杆前了，如果是，栏杆就消失所有线程继续执行下一句代码；如果不是，则所有已到pthread_barrier_wait函数的线程停在该函数不动，剩下没执行到pthread_barrier_wait函数的线程继续执行；
 * pthread_barrier_destroy函数释放init申请的资源。
@@ -51,12 +52,14 @@ pthread_barrier_*实现一个类似栏杆的功能（barrier意为栏杆)。形�
 ~~~{.c}
 #include <pthread.h>
 
-int pthread_barrier_init(pthread_barrier_t *restrict barrier, const pthread_barrierattr_t *restrict attr, unsigned count);
+int pthread_barrier_init(pthread_barrier_t *restrict barrier, 
+    const pthread_barrierattr_t *restrict attr, unsigned count);
 int pthread_barrier_wait(pthread_barrier_t *barrier);
 int pthread_barrier_destroy(pthread_barrier_t *barrier);
 ~~~
 
 参数解释：
+
 * pthread_barrier_t，是一个计数锁，对该锁的操作都包含在三个函数内部，我们不用关心也无法直接操作。只需要实例化一个对象丢给它就好。
 * pthread_barrierattr_t，锁的属性设置，设为NULL让函数使用默认属性即可。
 * count，你要指定的等待个数。
