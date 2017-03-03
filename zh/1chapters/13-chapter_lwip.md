@@ -1,7 +1,7 @@
 # lwIP - 轻型TCP/IP协议栈 #
 
 ## 简介 ##
-[lwIP（light-weight IP)](http://savannah.nongnu.org/projects/lwip/)最初由瑞士计算机科学院（Swedish Institute of Computer Science）的Adam Dunkels开发，现在由Kieran Mansley领导的一个全球开发团队开发、维护的一套用于嵌入式系统的开放源代码TCP/IP协议栈，它在包含完整的TCP协议的基础上实现了小型化的资源占用，因此它十分适合于应用到嵌入式设备中，其占用的资源体积RAM大概为几十kB，ROM大概为40KB。
+[lwIP（light-weight IP)](http://savannah.nongnu.org/projects/lwip/)最初由瑞典计算机科学院（Swedish Institute of Computer Science）的Adam Dunkels开发，现在由Kieran Mansley领导的一个全球开发团队开发、维护的一套用于嵌入式系统的开放源代码TCP/IP协议栈，它在包含完整的TCP协议的基础上实现了小型化的资源占用，因此它十分适合于应用到嵌入式设备中，其占用的资源体积RAM大概为几十kB，ROM大概为40KB。
 
 lwIP结构精简，功能完善，因而用户群较为广泛。RT-Thread实时操作系统就采用了lwIP做为默认的TCP/IP协议栈，同时根据小型设备的特点对lwIP进行了再次优化，使其资源占用体积进一步地缩小，RAM 的占用可缩小到5kB附近（未计算上层应用使用TCP/IP协议时的空间占用量）。本章内容将为您讲述lwIP在RT-Thread中的使用方法。
 
