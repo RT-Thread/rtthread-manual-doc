@@ -1376,6 +1376,7 @@ finsh将使用此终端设备。
 **3.打开设备**
 
 在finsh线程中打开设备，相关代码如下：
+
 ~~~{.c}
 
 shell->device = rt_console_get_device();
@@ -1384,6 +1385,7 @@ rt_device_set_rx_indicate(shell->device, finsh_rx_ind);
 rt_device_open(shell->device, (RT_DEVICE_OFLAG_RDWR | RT_DEVICE_FLAG_STREAM | RT_DEVICE_FLAG_INT_RX));
 
 ~~~
+
 如果打开时设备没有进行初始化将首先进行初始化
 
     rt_device_open ==> rt_serial_init ==> stm32_configure
