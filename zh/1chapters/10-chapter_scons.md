@@ -317,17 +317,17 @@ bsp/stm32f10x/application/SConcript
 
 ~~~~ {#SConscript .python .numberLines startFrom="1"}
 
-	Import('RTT_ROOT')
-	Import('rtconfig')
-	from building import *
+Import('RTT_ROOT')
+Import('rtconfig')
+from building import *
 	
-	src	= Glob('*.c')
-	cwd = GetCurrentDir()
-	include_path = [cwd]
+src = Glob('*.c')
+cwd = GetCurrentDir()
+include_path = [cwd]
 	
-	group = DefineGroup('Applications', src, depend = [''], CPPPATH = include_path)
-	
-	Return('group')
+group = DefineGroup('Applications', src, depend = [''], CPPPATH = include_path)
+
+Return('group')
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -346,20 +346,21 @@ component/finsh/SConscript
 
 ~~~~ {#SConscript .python .numberLines startFrom="1"}
 
-	Import('rtconfig')
-	from building import *
+Import('rtconfig')
+from building import *
 	
-	cwd     = GetCurrentDir()
-	src     = Glob('*.c')
-	CPPPATH = [cwd]
-	if rtconfig.CROSS_TOOL == 'keil':
-	    LINKFLAGS = ' --keep __fsym_* --keep __vsym_* '
-	else:
-	    LINKFLAGS = '' 
+cwd     = GetCurrentDir()
+src     = Glob('*.c')
+CPPPATH = [cwd]
+if rtconfig.CROSS_TOOL == 'keil':
+    LINKFLAGS = ' --keep __fsym_* --keep __vsym_* '
+else:
+    LINKFLAGS = '' 
+
+group = DefineGroup('finsh', src, depend = ['RT_USING_FINSH'], CPPPATH = CPPPATH, 
+	LINKFLAGS = LINKFLAGS)
 	
-	group = DefineGroup('finsh', src, depend = ['RT_USING_FINSH'], CPPPATH = CPPPATH, LINKFLAGS = LINKFLAGS)
-	
-	Return('group')
+Return('group')
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -386,20 +387,20 @@ bsp/stm32f10x/SConscript
 
 ~~~~ {#SConscript .python .numberLines startFrom="1"}
 
-	# for module compiling
-	import os
-	Import('RTT_ROOT')
+# for module compiling
+import os
+Import('RTT_ROOT')
+
+cwd = str(Dir('#'))
+objs = []
+list = os.listdir(cwd)
 	
-	cwd = str(Dir('#'))
-	objs = []
-	list = os.listdir(cwd)
+for d in list:
+    path = os.path.join(cwd, d)
+    if os.path.isfile(os.path.join(path, 'SConscript')):
+        objs = objs + SConscript(os.path.join(d, 'SConscript'))
 	
-	for d in list:
-	    path = os.path.join(cwd, d)
-	    if os.path.isfile(os.path.join(path, 'SConscript')):
-	        objs = objs + SConscript(os.path.join(d, 'SConscript'))
-	
-	Return('objs')
+Return('objs')
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -416,46 +417,45 @@ stm32f10x/drivers/SConscript
 
 ~~~~ {#SConscript .python .numberLines startFrom="1"}
 
-	Import('RTT_ROOT')
-	Import('rtconfig')
-	from building import *
+Import('RTT_ROOT')
+Import('rtconfig')
+from building import *
 	
-	cwd  = GetCurrentDir()
+cwd  = GetCurrentDir()
 	
-	# add the general drvers.
-	src = Split('''
-	board.c
-	stm32f10x_it.c
-	led.c
-	usart.c
-	''')
+# add the general drvers.
+src = Split('''
+board.c
+stm32f10x_it.c
+led.c
+usart.c
+''')
 	
-	# add Ethernet drvers.
-	if GetDepend('RT_USING_LWIP'):
-	    src += ['dm9000a.c']
+# add Ethernet drvers.
+if GetDepend('RT_USING_LWIP'):
+    src += ['dm9000a.c']
 	
-	# add Ethernet drvers.
-	if GetDepend('RT_USING_DFS'):
-	    src += ['sdcard.c']
+# add Ethernet drvers.
+if GetDepend('RT_USING_DFS'):
+    src += ['sdcard.c']
 	
-	# add Ethernet drvers.
-	if GetDepend('RT_USING_RTC'):
-	    src += ['rtc.c']
-	
-	# add Ethernet drvers.
-	if GetDepend('RT_USING_RTGUI'):
-	    src += ['touch.c']
-	    if rtconfig.RT_USING_LCD_TYPE == 'ILI932X':
-	        src += ['ili_lcd_general.c']
-	    elif rtconfig.RT_USING_LCD_TYPE == 'SSD1289':
-	        src += ['ssd1289.c']
-	
+# add Ethernet drvers.
+if GetDepend('RT_USING_RTC'):
+    src += ['rtc.c']
+
+# add Ethernet drvers.
+if GetDepend('RT_USING_RTGUI'):
+    src += ['touch.c']
+    if rtconfig.RT_USING_LCD_TYPE == 'ILI932X':
+        src += ['ili_lcd_general.c']
+    elif rtconfig.RT_USING_LCD_TYPE == 'SSD1289':
+        src += ['ssd1289.c']
 	    
-	CPPPATH = [cwd]
-	
-	group = DefineGroup('Drivers', src, depend = [''], CPPPATH = CPPPATH)
-	
-	Return('group')
+CPPPATH = [cwd]
+
+group = DefineGroup('Drivers', src, depend = [''], CPPPATH = CPPPATH)
+
+Return('group')
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
