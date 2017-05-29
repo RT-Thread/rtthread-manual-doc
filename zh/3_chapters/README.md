@@ -15,7 +15,7 @@
 * UART驱动    -- 所长
 * GPIO驱动    -- 唐玉鑫
 * IIC驱动
-* SPI驱动
+* SPI驱动     --张俊
 * RTC驱动
 * EMAC驱动    -- 茶
 * USB驱动
