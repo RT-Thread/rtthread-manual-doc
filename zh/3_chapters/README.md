@@ -7,7 +7,7 @@
 
 ## RT-Thread移植指南
 
-* ARM Cortex-M芯片类型移植
+* ARM Cortex-M芯片类型移植    -- 黑板
 * 新芯片架构移植
 
 ## 驱动外设开发指南
