@@ -1,7 +1,7 @@
 # gpio驱动编写
 
 gpio驱动框架函数调用关系如图所示：
-
+![image](https://github.com/enkiller/rtthread-manual-doc/blob/master/zh/3_chapters/gpio.png)
 根据调用关系图我们可以知道，无论从通用I/O设备管理接口调用还是从开放API调用，都会间接调用底层三个接口函数，所以我们只需要三个底层的接口即可。具体驱动实现，分为五步完成。
 ## 1 pin_read接口实现
 
