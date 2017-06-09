@@ -1,9 +1,9 @@
-#gpio驱动编写
+# gpio驱动编写
 
 gpio驱动框架函数调用关系如图所示：
 
 根据调用关系图我们可以知道，无论从通用I/O设备管理接口调用还是从开放API调用，都会间接调用底层三个接口函数，所以我们只需要三个底层的接口即可。具体驱动实现，分为五步完成。
-##1 pin_read接口实现
+## 1 pin_read接口实现
 
 pin_read接口原型为：
 ``` 
@@ -57,7 +57,7 @@ static const struct _gpio_info gpios[] =
 
 读引脚电平的功能的实现由读者自行完成。
 
-##2 pin_write接口实现
+## 2 pin_write接口实现
 
 pin_write接口原型为：
 ``` 
@@ -88,7 +88,7 @@ void xx_gpio_write(struct rt_device *dev, rt_base_t pin, rt_base_t value )
 pin值与引脚对应方法请看pin_read接口实现。
 写某一电平状态功能，由读者自行完成。
 
-##3 pin_mode接口实现
+## 3 pin_mode接口实现
 
 pin_mode接口原型为:
 ``` 
@@ -134,7 +134,7 @@ void xx_gpio_mode(struct rt_device *dev, rt_base_t pin, rt_base_t mode)
 pin值与引脚对应方法请看pin_read接口实现。
 配置引脚输出输出模式，由读者自行完成。
 
-##4 初始化接口
+## 4 初始化接口
 
 定义一个pin接口类型的结构体，这个结构体可以是全局变量，也可以rt_malloc出来的内存块。并把我们实现的三个接口赋值给这个结构体，完成接口的初始化。举个例子。
 ``` 
@@ -146,7 +146,7 @@ const static struct rt_pin_ops _xx_pin_ops =
 };
 
 ``` 
-##5注册驱动
+## 5注册驱动
 
 最后一步就是注册该引脚驱动,调用rt_device_pin_register()函数即可。
 
