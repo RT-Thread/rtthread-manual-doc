@@ -1,4 +1,4 @@
-一、    RT-Thread的以太网EMAC驱动介绍
+    一、    RT-Thread的以太网EMAC驱动介绍
     1.    初始化工作                                                              
         eth_system_device_init()
         rt_hw_emac_eth_init();
