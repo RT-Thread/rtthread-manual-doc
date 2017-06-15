@@ -353,9 +353,10 @@ RT-Thread为系统本身和驱动程序提供了一种初始化机制,用户只�
     rt_hw_nuc970_eth_init();
     lwip_sys_init();
  以上内容讲述了如何在RT-Thread的以太网框架上实现EMAC的初始化,在这里没有介绍如何初始化PHY和EMAC,也没有详细讲解如何初始化描述符和DMA,因不同的EMAC和PHY它们的初始化方式和流程不一样。
-2.    EMAC ISR How To?
-     EMAC在收到一个packet后会产生一个Rx 中断,在发送完一个packet后会产生一个Tx中断。有的MCU or MPU将这两个IRQ分成两个中断向量来处理,有的MCU or MPU用一个中断向量来处理;但无论是一个IRQ还是两个IRQ向量我们都分成两个部分来讲解RT-Thread框架下的EMAC ISR应该做哪些工作。
+ 
+    2.    EMAC ISR How To?
+        EMAC在收到一个packet后会产生一个Rx 中断,在发送完一个packet后会产生一个Tx中断。有的MCU or MPU将这两个IRQ分成两个中断向量来处理,有的MCU or MPU用一个中断向量来处理;但无论是一个IRQ还是两个IRQ向量我们都分成两个部分来讲解RT-Thread框架下的EMAC ISR应该做哪些工作。
     a.    Rx ISR
-        Rx ISR根据EMAC的架构清除接收中断标志位及相关的状态,这里要注意接收错误中断标志位的处理,以免造成调试上的麻烦。然后根据EMAC的DMA与描述符的数据处理流程在接收到一个有效的包后就调用eth_device_ready(&amp;(emac_eth-&gt;parent))函数,发送一个邮箱通知rt_nuc970_eth_rx函数对描述符里的数据作出处理。
+            Rx ISR根据EMAC的架构清除接收中断标志位及相关的状态,这里要注意接收错误中断标志位的处理,以免造成调试上的麻烦。然后根据EMAC的DMA与描述符的数据处理流程在接收到一个有效的包后就调用eth_device_ready(&amp;(emac_eth-&gt;parent))函数,发送一个邮箱通知rt_nuc970_eth_rx函数对描述符里的数据作出处理。
     b.    Tx ISR
-        rt_nuc970_eth_tx函数在取出lwIP IP层的数据包后存储至发送描述符中,然后启动EMAC的发送功能,EMAC发送完一个数据包后会产生一个中断。在Tx ISR中应该作清除EMAC状态和发送中断标志位的工作，如EMAC允许查询其他描述符是否还有数据未发送,Tx ISR将查询其他描述符是否有未发送的数据,将其发送出去。</code></pre>
+            rt_nuc970_eth_tx函数在取出lwIP IP层的数据包后存储至发送描述符中,然后启动EMAC的发送功能,EMAC发送完一个数据包后会产生一个中断。在Tx ISR中应该作清除EMAC状态和发送中断标志位的工作，如EMAC允许查询其他描述符是否还有数据未发送,Tx ISR将查询其他描述符是否有未发送的数据,将其发送出去。</code></pre>
