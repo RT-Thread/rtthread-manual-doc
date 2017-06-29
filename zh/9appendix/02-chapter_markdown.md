@@ -128,7 +128,7 @@ I start my morning with a cup of coffee and
 
 在电子书中，当转换成PDF时，可以支持代码的语法高亮，可以使用如下的形式（也可以根据实际排版情况，在代码前加入4个或2个空格）：
 
-	~~~{.c}
+	```c
 	#include <stdio.h>
 	
 	int main(int argc, char** argv)
@@ -136,11 +136,11 @@ I start my morning with a cup of coffee and
 		printf("hello\n");
 		return 0;
 	}
-	~~~
+	```
 
 它的效果类似于这样：
 
-~~~{.c}
+```c
     #include <stdio.h>
 
     int main(int argc, char** argv)
@@ -148,7 +148,7 @@ I start my morning with a cup of coffee and
         printf("hello\n");
         return 0;
     }
-~~~
+```
 
 ## API说明 ##
 
@@ -183,12 +183,12 @@ I start my morning with a cup of coffee and
 
 这是一个用于什么的例子，例子的大致描述。
 
-~~~{.c}
+```c
     int result;
 
     /* 调用函数 */
     result = function(1, 2);
-~~~
+```
 
 例子是否需要详细解释。
 
