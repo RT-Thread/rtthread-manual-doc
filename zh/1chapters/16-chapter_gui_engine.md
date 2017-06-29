@@ -4,26 +4,28 @@
 
 GUI engine是一套基本的绘图引擎，由C代码编写而成，代码主要放于`rt-thread/components/gui/`目录中。主要的功能包括：
 
-* （基于绘图设备DC的）绘图，包括点，线，圆，椭圆，多边形（填充）等；
-* 各类图像格式加载（从文件系统中加载，需要DFS）及绘图；
+* 基于绘图设备DC的绘图操作，包括点，线，圆，椭圆，多边形（填充）等；
+* 各类图像格式加载（从文件系统中加载，需要DFS文件系统）及绘图；
 * 各种字体的文本显示；
-* GUI的C/S架构，及基础的事件框架机制
+* GUI的C/S架构及基础的窗口机制，事件框架机制等。
 
 当需要使用GUI engine时，需要在rtconfig.h中定义：
 
-    #define RT_USING_GUIENGINE
+```c
+#define RT_USING_GUIENGINE
+```
 
-打开GUI engine。
-
-在rtconfig.h中打开GUI engine后，可以使用命令行重新生成工程，或使用scons来进行编译。
+打开GUI engine。在rtconfig.h中打开GUI engine后，可以使用命令行重新生成工程，或使用scons来进行编译。
 
 ## 引擎初始化 ##
 
-在打开GUI engine后，需要在启动时对它进行初始化，把UI的服务打开起来，如果程序中已经使用了组件自动初始化，则不再需要额外进行单独的初始化，否则需要在初始化任务中执行：
+在打开GUI engine后，需要在启动时对它进行初始化，把UI的服务打开起来，如果程序中已经使用了组件自动初始化，则不再需要额外进行单独的初始化，否则需要在初始化任务中调用初始化函数：
 
-    rtgui_system_server_init();
+```c
+rtgui_system_server_init();
+```
 
-GUI engine初始化后，它会创建基础的UI服务，包括任务：`rtgui`。虽然GUI engine是基础的引擎，但它依然还带了多窗口系统，绘图主要以GUI应用的模式而存在（创建应用，创建窗口（制定窗口位置，以及大小），在窗口中进行绘图，关闭窗口，删除应用）。
+GUI engine初始化后，它会创建基础的GUI服务，包括任务：`rtgui`。虽然GUI engine是基础的引擎，但它依然还带了多窗口系统，绘图主要以GUI应用的模式而存在（创建应用，创建窗口（制定窗口位置，以及大小），在窗口中进行绘图，关闭窗口，删除应用）。
 
 ## 绘图设备上下文 ##
 
@@ -89,6 +91,11 @@ void rtgui_image_blit(struct rtgui_image *image, struct rtgui_dc *dc, struct rtg
 ```
 
 这个API用于把一副image图像，绘制到dc的rect区域上，如果rect区域超出dc的范围，则会被自动裁剪。
+
+## 基本的GUI引擎应用例子 ##
+
+```c
+```
 
 ## 事件传递机制 ##
 
