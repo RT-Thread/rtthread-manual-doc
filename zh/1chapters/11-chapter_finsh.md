@@ -367,8 +367,8 @@ FINSH_FUNCTION_EXPORT_ALIAS(cmd_ls, __cmd_ls, List information about the FILEs.)
 ```
 
 这里面就是把cmd_ls函数重命名成__cmd_ls导出到shell中。当执行这个命令时，它会被特殊
-对待，只能当成msh命令使用。实际上，纯粹的finsh shell在显示命令时，对`__`开头的函数名并不
-显示，会被当成一类特殊的命令对待（例如提供给msh的函数命令）。
+对待，只能当成msh命令使用。实际上，纯粹的finsh shell在显示命令时，对`__`开头的函数
+名并不显示，会被当成一类特殊的命令对待（例如提供给msh的函数命令）。
 
 ## RT-Thread内置命令 ##
 
