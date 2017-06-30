@@ -20,4 +20,4 @@
 
 ## ESP32芯片
 
-* rt-iot audio开发板，GNU GCC Windows环境
+* [rt-iot audio开发板，GNU GCC Windows环境](https://github.com/RT-Thread/rtthread-manual-doc/blob/master/zh/4chapters/quickstart_esp32.md)
