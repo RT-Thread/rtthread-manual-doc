@@ -3,14 +3,14 @@
 ## 简介
 LCD属于RT-Thread的一个设备，LCD设备具备一般RT-Thread设备的所有属性：init/open/close/read/write/control。其设备结构体rt_lcd_device由struct rt_device派生而来。此外，LCD还具备特有的属性：绘图操作。要在RT-Thread中正常使用LCD，需要按照RT-Thread的设备框架编写LCD设备驱动程序，同时也是使用UIENGINE的基础。
 ## lcd设备接口
-    RT-Thread的LCD设备驱动由以下4个内容组成。
+RT-Thread的LCD设备驱动由以下4个内容组成。
 
     I>>  1个结构体
         rt_lcd_device
     Ⅱ>> 2个硬件接口函数
         lcd_init();
         lcd_control();
-    Ⅲ>> 5个基础绘图函数，用于初始化rt_device_graphic_ops
+    Ⅲ>> 5个基础绘图函数，用于初始化rt_device_graphic_ops(这一步只有pixel像素屏用到，frambuffer帧缓冲屏驱动程序忽略此步)
         void rt_hw_lcd_set_pixel(const char *pixel, int x, int y);
         void rt_hw_lcd_get_pixel(char *pixel, int x, int y);
         void rt_hw_lcd_draw_hline(const char *pixel, int x1, int x2, int y);
@@ -375,5 +375,168 @@ LCD模块：原子哥的2.4/2.8寸液晶，液晶驱动芯片ILI9341
 将程序下载到测试板上，可以在LCD中看到绘制好的窗口：
 
 ### framebuffer帧缓冲屏驱动
+RT_Thread对天生具备支持frambuffer帧缓冲屏的功能。在RT-Thread下编写frambuffer帧缓冲屏的驱动程序需要遵循以下框架。
+
+**LCD设备结构体rt_lcd_device**
+
+framebuffer帧缓冲屏的rt_lcd_device结构体包含LCD的基本信息，其原型如下：
+~~~
+    struct rt_lcd_device
+    {
+        rt_uint8_t   pixel_format;       /*像素格式*/
+        rt_uint8_t   bits_per_pixel;     /*每个像素占用位数*/
+        rt_uint16_t  width;              /*LCD宽度，横向像素个数*/
+        rt_uint16_t  height;             /*LCD高度，纵向像素个数*/
+        
+        void *framebuffer;               /*帧缓存*/
+    };
+    typedef struct rt_lcd_device rt_lcd_t;
+    
+    struct rt_lcd_device  lcd_device;
+~~~
+
+**硬件接口函数**
+
+    这两个接口函数是所有RTT管理的设备都具备的公共函数，RTT的设备还具备其它的公共函数，但对于LCD设备，我们只需要填充这两个函数。
+
+    函数功能：①.初始化和lcd连接的处理器的接口；②.初始化液晶硬件。
+    函数定义：static rt_err_t lcd_init(rt_device_t dev)。
+    参数说明：dev，lcd设备。
+
+    函数功能：设置lcd的基本参数。
+    函数定义：static rt_err_t lcd_control(rt_device_t dev, rt_uint8_t cmd, void *args)。
+    参数说明：dev，lcd设备；
+             cmd，操作命令；
+             args，操作参数。
+
+**向RTT注册LCD设备，初始化并打开LCD设备**
+
+    写完以上3个内容以后，调用rt_hw_lcd_init()，向RTT注册LCD设备，初始化并打开LCD设备，便可以在RT-Thread中正常的使用LCD了。
+~~~
+    void rt_hw_lcd_init(void)
+    {
+        rt_device_t lcd ;
+
+        lcd_device.bits_per_pixel = 16;
+        lcd_device.pixel_format = RTGRAPHIC_PIXEL_FORMAT_RGB565P;
+        lcd_device.framebuffer = (void*)rt_lcd_framebuffer;
+        lcd_device.width = LCD_WIDTH;
+        lcd_device.height = LCD_HEIGHT;
+
+        /* init device structure */
+        lcd->type = RT_Device_Class_Graphic;
+        lcd->init = rt_lcd_init;
+        lcd->open = RT_NULL;
+        lcd->close = RT_NULL;
+        lcd->control = rt_lcd_control;
+        lcd->user_data = (void*)&lcd_device;
+
+        /* register lcd device to RT-Thread */
+        rt_device_register(lcd, "lcd", RT_DEVICE_FLAG_RDWR);
+
+
+        lcd = rt_device_find("lcd");  /*查找LCD设备               */
+
+        /*初始化*/
+        rt_device_init(lcd);
+        rt_device_open(lcd,RT_DEVICE_OFLAG_RDWR);
+    }
+~~~
+
+**以S3C2440为例，编写一个LCD驱动程序**
+
+按照上述操作步骤，编写一个RT-Thread的LCD驱动程序。
+
+开发板：JZ2440V2，4.3寸LCD
+
+***定义LCD帧缓存***
+~~~
+    #define LCD_WIDTH 480   // xres
+    #define LCD_HEIGHT 272  // yres
+    static volatile rt_uint16_t rt_lcd_framebuffer[LCD_WITH][LCD_HEIGHT];
+~~~
+
+***初始化lcd设备结构体***
+~~~
+    struct rt_lcd_device
+    {
+        rt_uint8_t  pixel_format;
+        rt_uint8_t  bits_per_pixel;
+        rt_uint16_t width;
+        rt_uint16_t height;
+        
+        void *framebuffer;
+    };
+    struct rt_lcd_device  lcd_device;
+~~~
+***编写2个硬件接口函数***
+~~~
+    /*  LCD设备初始化  */
+    static rt_err_t rt_lcd_init(rt_device_t dev)
+    {
+        LCD_Port_Configuration();  //配置LCD屏幕连接的引脚端口
+        LCD_Ctrl_Configuration();  //配置LCD控制器
+        
+        LCD_Enable();  //使能LCD显示
+        
+        return (RT_EOK);
+    }
+    
+    /*  LCD设备控制  */
+    static rt_err_t rt_lcd_control(rt_device_t dev, rt_uint8_t cmd, void *args)
+    {
+        switch (cmd)
+        {
+        case RTGRAPHIC_CTRL_RECT_UPDATE:
+            break;
+        case RTGRAPHIC_CTRL_POWERON:
+            break;
+        case RTGRAPHIC_CTRL_POWEROFF:
+            break;
+        case RTGRAPHIC_CTRL_GET_INFO:		
+            rt_memcpy(args, &lcd_device, sizeof(lcd_device));
+            break;
+        case RTGRAPHIC_CTRL_SET_MODE:
+            break;
+        }
+        
+        return (RT_EOK);
+    }
+~~~
+***调用rt_hw_lcd_init()向RTT注册LCD设备，初始化并打开LCD设备***
+~~~
+    Void  rt_hw_lcd_init(void)
+    {
+        rt_device_t lcd ;
+
+        lcd_device.bits_per_pixel = 16;
+        lcd_device.pixel_format = RTGRAPHIC_PIXEL_FORMAT_RGB565P;
+        lcd_device.framebuffer = (void*)rt_lcd_framebuffer;
+        lcd_device.width = LCD_WIDTH;
+        lcd_device.height = LCD_HEIGHT;
+
+        /* init device structure */
+        lcd->type = RT_Device_Class_Graphic;
+        lcd->init = rt_lcd_init;
+        lcd->open = RT_NULL;
+        lcd->close = RT_NULL;
+        lcd->control = rt_lcd_control;
+        lcd->user_data = (void*)&lcd_device;
+
+        /* register lcd device to RT-Thread */
+        rt_device_register(lcd, "lcd", RT_DEVICE_FLAG_RDWR);
+
+
+        lcd = rt_device_find("lcd");  /*查找LCD设备               */
+
+        /*初始化*/
+        rt_device_init(lcd);
+        rt_device_open(lcd,RT_DEVICE_OFLAG_RDWR);
+    }
+~~~
+***验证LCD设备驱动程序***
+验证驱动程序和pixel像素屏驱动的验证程序一样，如果屏幕尺寸不一样，只需要调整屏幕的显示范围即可。
+
+
 
 ## 注意事项
