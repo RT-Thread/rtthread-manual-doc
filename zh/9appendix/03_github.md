@@ -1,6 +1,8 @@
 # 在github上为RT-Thread贡献代码
 
-首先解释一下pull request这个词，意思是推送请求，实际意思是我发现你的git仓库代码中有不完善的bugs，我想修改这些bugs,我就把你的代码下载到我的本地进行修改，修改过后我想把我的代码提交给你，让你把我修改的代码更新到你的git仓库中，这时候我就需要发起一个pull request。当然仓库的管理者可以决定是否接受我的请求，如果同意，那么这份代码就会被merge（合并）到原来的git仓库中。如果不同意，那么这次请求就作废了。继续努力做新的贡献吧。
+首先解释一下pull request这个词，pull request是一个request，它的目的是请求仓库管理人采用你提交的东西。
+
+比如说我发现你的git仓库代码中有不完善的bugs，而我想来修改这些bugs。在把你的代码fork到我的git仓库进行修改之后，我就需要发起一个pull request来提交我的修改让你看到。如果你同意接受我的request，那么这份代码就会被merge（合并）到原来的你的git仓库中。如果不同意，这次请求就作废了。
 
 下面是摘自[知乎](https://www.zhihu.com/question/21682976) 网友的一段解释：
 
@@ -18,7 +20,7 @@
 
 ![avatar](../../figures/fork.png)
 
-2. 其次将rt-thread仓库clone到自己的本地PC。
+2. 其次将rt-thread仓库clone到自己的本地PC，在本地对想要修改的内容进行修改，修改完毕后push到自己的git仓库中。
 
 ![image](../../figures/cloneformgit.png)
 
@@ -26,9 +28,11 @@
 
 ![image](../../figures/cloneformgit3.png)
 
-3. 在本地修改后提交到自己仓库，并发起pull request.
+3. 在git仓库中选择自己修改了的分支，点击create pull request按钮发起pull request.
 
 ![image](../../figures/pullrequest.png)
+![image](../../figures/create_pull_request.png)
+
 
 4. 发起请求成功后，RT-Thread维护人可以看到你的修改，如果同意你的代码就会被合并到仓库中，这样一次pull request就结束了。
 
