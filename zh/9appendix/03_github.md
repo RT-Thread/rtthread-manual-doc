@@ -1,8 +1,8 @@
 # 在github上为RT-Thread贡献代码
 
-首先解释一下pull request这个词，pull request是一个request，它的目的是请求仓库管理人采用你提交的东西。
+首先解释一下pull request这个词，pull request是一个request，开发者发起pull request 的目的是请求仓库维护人采用开发者提交的代码。
 
-比如说我发现你的git仓库代码中有不完善的bugs，而我想来修改这些bugs。在把你的代码fork到我的git仓库进行修改之后，我就需要发起一个pull request来提交我的修改让你看到。如果你同意接受我的request，那么这份代码就会被merge（合并）到原来的你的git仓库中。如果不同意，这次请求就作废了。
+开发者如果想要向项目仓库中贡献代码，首先需要将项目仓库fork到开发者自己的git仓库，然后在自己的仓库中对项目进行修改。当开发者修改完毕后想要将修改提交给项目仓库时，就需要发起一个pull request来让仓库维护人看到开发者修改的内容。如果仓库维护人同意接受开发者的request，那么这份代码就会被merge（合并）到项目仓库中。如果不同意，这次请求就作废了。
 
 下面是摘自[知乎](https://www.zhihu.com/question/21682976) 网友的一段解释：
 
@@ -34,6 +34,6 @@
 ![image](../../figures/create_pull_request.png)
 
 
-4. 发起请求成功后，RT-Thread维护人可以看到你的修改，如果同意你的代码就会被合并到仓库中，这样一次pull request就结束了。
+4. 发起请求成功后，RT-Thread维护人就可以看到你提交的代码。pull request如果被同意，你的代码就会被合并到仓库中。这样一次pull request就成功了。
 
 这就是向rt-thread提交代码的方法。
