@@ -21,7 +21,9 @@
 2. 其次将rt-thread仓库clone到自己的本地PC。
 
 ![image](../../figures/cloneformgit.png)
+
 ![image](../../figures/cloneformgit2.png)
+
 ![image](../../figures/cloneformgit3.png)
 
 3. 在本地修改后提交到自己仓库，并发起pull request.
