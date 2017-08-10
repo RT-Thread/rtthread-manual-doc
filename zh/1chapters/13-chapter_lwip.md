@@ -481,6 +481,7 @@ void tcpserv(void* parameter)
 	rt_uint32_t sin_size;
 	int sock, connected, bytes_received;
 	struct sockaddr_in server_addr, client_addr;
+	int ret;
 	rt_bool_t stop = RT_FALSE; /* 停止标志 */
 
 	recv_data = rt_malloc(1024); /* 分配接收用的数据缓冲 */
@@ -546,7 +547,20 @@ void tcpserv(void* parameter)
 		while (1)
 		{
 			/* 发送数据到connected socket */
-			send(connected, send_data, strlen(send_data), 0);
+			ret = send(connected, send_data, strlen(send_data), 0);
+			if (ret < 0)
+        	{
+            /* 接收失败，关闭这个连接 */
+                lwip_close(sock);
+                rt_kprintf("\nsend error,close the socket.\r\n");		
+                break;
+        	}else if (ret == 0)
+			{
+                /* 打印send函数返回值为0的警告信息 */
+                rt_kprintf("\n Send warning,send function return 0.\r\n");						
+			}	
+			
+			
 
 			/*
 			 * 从connected socket中接收数据，接收buffer是1024大小，
@@ -558,7 +572,11 @@ void tcpserv(void* parameter)
 				/* 接收失败，关闭这个connected socket */
 				lwip_close(connected);
 				break;
-			}
+			}else if (bytes_received == 0)
+            {
+                /* 打印recv函数返回值为0的警告信息 */
+                rt_kprintf("\nReceived warning,recv function return 0.\r\n");						
+            }
 
 			/* 有接收到数据，把末端清零 */
 			recv_data[bytes_received] = '\0';
@@ -619,6 +637,7 @@ void tcpclient(const char* url, int port)
 	struct hostent *host;
 	int sock, bytes_received;
 	struct sockaddr_in server_addr;
+	int ret;
 
 	/* 通过函数入口参数url获得host地址（如果是域名，会做域名解析） */
 	host = gethostbyname(url);
@@ -672,6 +691,10 @@ void tcpclient(const char* url, int port)
 			/* 释放接收缓冲 */
 			rt_free(recv_data);
 			break;
+		}else if (bytes_received == 0)
+		{
+            /* 打印recv函数返回值为0的警告信息 */
+            rt_kprintf("\nReceived warning,recv function return 0. \r\n");						
 		}
 
 		/* 有接收到数据，把末端清零 */
@@ -693,7 +716,18 @@ void tcpclient(const char* url, int port)
 		}
 
 		/* 发送数据到sock连接 */
-		send(sock, send_data, strlen(send_data), 0);
+		ret = send(sock, send_data, strlen(send_data), 0);
+		if (ret < 0)
+        {
+            /* 接收失败，关闭这个连接 */
+            lwip_close(sock);
+            rt_kprintf("\nsend error,close the socket.\r\n");		
+            break;
+        }else if (ret == 0)
+		{
+			/* 打印send函数返回值为0的警告信息 */
+            rt_kprintf("\n Send warning,send function return 0. \r\n");						
+		}		
 	}
 
 	return;
