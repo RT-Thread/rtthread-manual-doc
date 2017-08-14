@@ -66,6 +66,7 @@ struct rt_watchdog_ops
 **3.2.代码框架与函数调用关系**
 
 wdt整体框架与函数调用关系如下图：
-![image](https://github.com/liu2guang/rtthread-manual-doc/tree/master/zh/3chapters)
+![image](https://github.com/liu2guang/rtthread-manual-doc/tree/master/zh/3chapters/wdt.png)
 
+## 3.介绍watchdog框架
 
