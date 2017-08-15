@@ -17,7 +17,7 @@ struct **rt_watchdog_device**结构体是从**rt_device**结构体继承而来�
 struct rt_watchdog_device
 {
     struct rt_device parent;		/* 继承rt_device */
-    struct rt_watchdog_ops *ops;		/* 看门狗底层操作函数 */
+    struct rt_watchdog_ops *ops;	/* 看门狗底层操作函数 */
 };
 typedef struct rt_watchdog_device rt_watchdog_t;
 ~~~
@@ -37,9 +37,9 @@ struct rt_watchdog_ops
 1. RT_DEVICE_CTRL_WDT_GET_TIMEOUT		/* 获取超时时间 */
 2. RT_DEVICE_CTRL_WDT_SET_TIMEOUT		/* 设置超时时间 */
 3. RT_DEVICE_CTRL_WDT_GET_TIMELEFT		/* 获取超时剩余时间 */
-4. RT_DEVICE_CTRL_WDT_KEEPALIVE		/* 喂狗*/
-5. RT_DEVICE_CTRL_WDT_START		/* 驱动看门狗 */
-6. RT_DEVICE_CTRL_WDT_STOP		/* 停止看门狗 */
+4. RT_DEVICE_CTRL_WDT_KEEPALIVE			/* 喂狗*/
+5. RT_DEVICE_CTRL_WDT_START			/* 驱动看门狗 */
+6. RT_DEVICE_CTRL_WDT_STOP			/* 停止看门狗 */
 ~~~
 
 对于以上看门狗控制命令**RT_DEVICE_CTRL_WDT_KEEPALIVE**必须实现，其他命令可以选择实现。
@@ -184,6 +184,7 @@ int stm32_hw_iwdg_init(void)
 	
 	iwdg_device.ops = &ops;
 	
+	/* 注册看门狗 */
 	err_code = rt_hw_watchdog_register(
 		&iwdg_device, "iwdg", RT_DEVICE_FLAG_WRONLY, RT_NULL);
 
@@ -193,6 +194,7 @@ int stm32_hw_iwdg_init(void)
 		return err_code;
 	}
 
+	/* 初始化看门狗 */
 	err_code = iwdg_device.parent.init(&iwdg_device);
 
 	if(err_code != RT_EOK)
