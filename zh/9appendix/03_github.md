@@ -3,7 +3,7 @@
 我们真诚地感谢您的贡献，欢迎通过 GitHub 的 fork 和 pull request 流程来提交代码。
 代码要求请参考rt_thread项目documentation目录下的coding_style_cn.txt文件。
 
-##以下教程将指导您提交代码。
+## 以下教程将指导您提交代码。
 首先解释一下pull request这个词，pull request的意思是推送请求，开发者发起pull request 的目的是请求仓库维护人采用开发者提交的代码。
 
 下面是摘自[知乎](https://www.zhihu.com/question/21682976) 网友的一段解释：
