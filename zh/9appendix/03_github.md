@@ -19,13 +19,13 @@
 现在以rt-thread仓库为例说明贡献代码的流程：
 
 ##  1. fork
-首先要将rt-thread仓库fork到自己的git仓库中。
+将rt-thread仓库fork到自己的git仓库中。
 
 ![avatar](../../figures/fork.png)
 
 
 ##  2. 克隆（clone）
-2. 其次将rt-thread仓库clone到自己的本地PC，在本地对想要修改的内容进行修改，修改完毕后push到自己的git仓库中。
+将rt-thread仓库clone到自己的本地PC。
 
 ![image](../../figures/cloneformgit.png)
 
