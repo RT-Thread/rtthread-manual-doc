@@ -2,10 +2,14 @@
 
 RT-Thread软件包环境是RT-Thread源代码的软件包开发环境，包管理系统等。提供了RT-Thread
 下所需要到配置，编译等环境。
+
 ## 准备工作
+
 * env环境编译器默认配置为GNU GCC，工具链目录指向 `env\tools\gnu_gcc`，如果未安装交叉工具链，请放置于这个目录下，如果使用其他编译方式则无需设置。
 * 在电脑上装好git，因为有一些组件包是通过git来下载管理的，git的下载地址为`https://git-scm.com/downloads`，请根据向导正确安装git。
+
 ## 打开控制台
+
 RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型界面来进行辅助，使得尽量减少修改配置文件的方式即可搭建好RT-Thread开发环境的方式。
 
 ![image](./figures/console.png)
@@ -22,7 +26,7 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 如果设备工程目录中未包含RT-Thread代码，可以通过命令行：
 
     set RTT_ROOT=your_rtthread
-    
+
 的方式设置RT-Thread目录（其中your_rtthread请填写你的RT-Thread根目录位置，记住RT-Thread别放于带空格或中文字符的目录路径下）。
 
 ![image](./figures/set_rtt_root.png)
@@ -70,9 +74,13 @@ env 系统配置主要使用system命令，可以使用 system -h来获取使用
     system --update                    从repo源更新packages后使用此命令更新menuconfig在线包目录的选项。
 
 ## 包管理器
+
 ###包管理器介绍
+
 包管理是一个软件包的平台，用户可以通过包管理器来获取，添加或者删除自己所需要的组件包。用户可以通过包管理器的wizard包制作向导功能来制作软件包并提交到rtt。目前支持的组件包格式有：.zip,.rar.gz,rar.bz2,同时支持托管在git上，并且附带有submudule的组件包。
+
 ###包管理器命令
+
 包管理器的操作主要使用pkgs命令，可以使用 pkgs -h来获取使用帮助。 注意：在使用menuconfig选择在线包之前，需要先使用 pkgs --upgrade 命令更新env的packages文件夹。请预先在电脑上装好git工具。
 
     pkgs --list            列出当前使用的组件包列表
