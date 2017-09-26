@@ -75,11 +75,11 @@ env 系统配置主要使用system命令，可以使用 system -h来获取使用
 
 ## 包管理器
 
-###包管理器介绍
+### 包管理器介绍
 
 包管理是一个软件包的平台，用户可以通过包管理器来获取，添加或者删除自己所需要的组件包。用户可以通过包管理器的wizard包制作向导功能来制作软件包并提交到rtt。目前支持的组件包格式有：.zip,.rar.gz,rar.bz2,同时支持托管在git上，并且附带有submudule的组件包。
 
-###包管理器命令
+### 包管理器命令
 
 包管理器的操作主要使用pkgs命令，可以使用 pkgs -h来获取使用帮助。 注意：在使用menuconfig选择在线包之前，需要先使用 pkgs --upgrade 命令更新env的packages文件夹。请预先在电脑上装好git工具。
 
@@ -89,12 +89,12 @@ env 系统配置主要使用system命令，可以使用 system -h来获取使用
     pkgs --upgrade         从reposource更新env的本地packages文件夹
     example：
     使用pkgs --upgrade命令后，env环境会自动从默认git地址： https://github.com/RT-Thread/packages.git 来更新本地包。后续会支持更新源列表。
-    
-##如何制作一个组件包
 
-###制作一个压缩包形式的组件包
+## 如何制作一个组件包
 
-###制作一个git地址形式的组件包
+### 制作一个压缩包形式的组件包
+
+### 制作一个git地址形式的组件包
 
 使用menuconfig来配置项目所需要的组件包，然后通过pkgs --update命令来更新项目中的组件包。如果不想要某个组件包，可以在menuconfig的配置中去掉包选项，然后再次使用`pkgs --update`命令更新即可。
 
