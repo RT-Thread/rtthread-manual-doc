@@ -83,8 +83,6 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 env 系统配置主要使用system命令，可以使用 system -h来获取使用帮助。
 
-    system --update                    从repo源更新packages后使用此命令更新menuconfig在线包目录的选项。
-
 ## 包管理器
 
 ### 包管理器介绍
