@@ -6,7 +6,8 @@ RT-Thread软件包环境是RT-Thread源代码的软件包开发环境，包管�
 ## 准备工作
 
 * env环境编译器默认配置为GNU GCC，工具链目录指向 `env\tools\gnu_gcc`，如果未安装交叉工具链，请放置于这个目录下，如果使用其他编译方式则无需设置。
-* 在电脑上装好git，因为有一些组件包是通过git来下载管理的，git的下载地址为`https://git-scm.com/downloads`，请根据向导正确安装git。
+* 在电脑上装好git，因为有一些组件包是通过git来下载管理的，git的下载地址为
+  `https://git-scm.com/downloads`,请根据向导正确安装git。
 
 ## 打开控制台
 
@@ -14,7 +15,7 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 ![image](./figures/console.png)
 
-进入env目录，可以运行本目录下的 `console.exe` 程序，它会弹出控制台窗口，并默认配置好一些环境变量，对软件包的操作都是在控制台环境下进行的，下图为控制台窗口：
+进入env目录，可以运行本目录下的 `console.exe` 程序，它会弹出控制台窗口，并默认配置好一些环境变量。接下来对软件包的操作都是在控制台环境下进行的，下图为控制台窗口：
 
 ![image](./figures/console_window.png)
 
@@ -27,11 +28,11 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
     set RTT_ROOT=your_rtthread
 
-的方式设置RT-Thread目录（其中your_rtthread请填写你的RT-Thread根目录位置，记住RT-Thread别放于带空格或中文字符的目录路径下）。
+的方式设置RT-Thread目录（其中your_rtthread请填写你的RT-Thread根目录位置，记住RT-Thread不要放于带空格或中文字符的目录路径下）。
 
 ![image](./figures/set_rtt_root.png)
 
-在使用env的menuconfig配置功能前，如果设备工程目录(bsp)中没有相应的kconfig文件，可将env目录下的KConfig_bsp文件复制到bsp根目录中并改名为KConfig。
+在使用env的`menuconfig`命令配置功能前，如果设备工程目录(bsp)中没有相应的`KConfig`文件，可将`env`目录下的`KConfig_bsp`文件复制到bsp根目录中并改名为`KConfig`。
 
 ![image](./figures/copy2bsp.png)
 
@@ -39,15 +40,30 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 ![image](./figures/renamekconfig.png)
 
+在使用`menuconfig`命令之前还需要使用
+
+    pkgs --upgrade
+
+命令来更新我们env的组件包仓库列表
+
+![image](./figures/upgrade_from_gitpackages.png)
+
 现在就可以在设备工程目录中使用：
 
     menuconfig
 
-命令来对项目进行RT-Thread特性配置了，接下来就可以看到menuconfig的配置界面了，如下图：
+命令来对项目进行配置，如果没有出错接下来就可以看到`menuconfig`的界面了，如下图：
 
 ![image](./figures/menuconfig_window.png)
 
-###menuconfig的简单使用方法如下：
+### 错误提示
+如果没有使用`pkgs --upgrade`来更新列表就会出现如下错误：
+
+![image](./figures/no_pkgs_upgrade_error.png)
+
+重新使用`pkgs --upgrade`命令即可解决这个问题。
+
+### menuconfig的简单使用方法如下：
 
 - 上下键：选择不同的行，移动到不同的（每一行的）选项上。
 
