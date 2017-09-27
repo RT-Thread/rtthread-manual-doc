@@ -48,16 +48,12 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 ![image](./figures/upgrade_from_gitpackages.png)
 
-现在就可以在设备工程目录中使用：
-
-    menuconfig
-
-命令来对项目进行配置，如果没有出错接下来就可以看到`menuconfig`的界面了，如下图：
+现在就可以在设备工程目录中使用`menuconfig`命令开始进行项目配置，如果没有出错接下来就可以看到`menuconfig`的界面了，如下图：
 
 ![image](./figures/menuconfig_window.png)
 
 ### 错误提示
-如果没有使用`pkgs --upgrade`来更新列表就会出现如下错误：
+如果没有使用`pkgs --upgrade`来更新列表就使用`menuconfig`命令会出现如下错误：
 
 ![image](./figures/no_pkgs_upgrade_error.png)
 
