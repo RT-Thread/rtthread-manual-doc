@@ -5,17 +5,22 @@ RT-Thread软件包环境是RT-Thread源代码的软件包开发环境，包管�
 
 ## 1.准备工作
 
-* env环境编译器默认配置为GNU GCC，工具链目录指向 `env\tools\gnu_gcc`，如果未安装交叉工具链，请放置于这个目录下，如果使用其他编译方式则无需设置。
-* 在电脑上装好git，因为有一些组件包是通过git来下载管理的，git的下载地址为
-  `https://git-scm.com/downloads`,请根据向导正确安装git。
+* env环境编译器默认配置为GNU GCC，工具链目录指向 `env\tools\gnu_gcc`，如果不使用GCC编译器则无需配置。请将交叉编译工具链放置于 `env\tools\gnu_gcc`目录下,或者使用以下命令设置工具链地址：
+
+
+    set RTT_EXEC_PATH=your_Cross_Compilation_tool_chain_path
+* 在电脑上装好git，git的下载地址为`https://git-scm.com/downloads`,根据向导正确安装git。一些组件包是通过git下载管理的。
+
+* 注意在工作环境中，所有的路径都不可以有中文字符或者空格。
+
 
 ## 2.打开控制台
 
 RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型界面来进行辅助，使得尽量减少修改配置文件的方式即可搭建好RT-Thread开发环境的方式。
 
-![image](./figures/console.png)
+![image](./figures/console_bat.png)
 
-进入env目录，可以运行本目录下的 `console.exe` 程序，它会弹出控制台窗口，并默认配置好一些环境变量。接下来对软件包的操作都是在控制台环境下进行的，下图为控制台窗口：
+进入env目录，可以运行本目录下的 `console.bat `程序，它会配置一些环境变量，然后弹出控制台窗口。接下来对软件包的操作都是在控制台环境下进行的，下图为控制台窗口：
 
 ![image](./figures/console_window.png)
 
@@ -23,16 +28,21 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 ### 3.1 环境变量的设置
 
-打开控制台后，可以在命令行模式下使用cd命令切换到对应的设备工程目录。
+#### 第一步：切换到工程目录
+
+打开控制台后，可以在命令行模式下使用cd命令切换到你想要配置的工程目录。
 例如工程目录为`F:\git_repositories\ART_wifi\firmware\app`，先进入工程根目录。
 
-如果设备工程目录中未包含RT-Thread代码，可以通过命令行：
+#### 第二步：设置RTT_ROOT根目录
+可以通过命令：
 
     set RTT_ROOT=your_rtthread
 
 的方式设置RT-Thread目录（其中your_rtthread请填写你的RT-Thread根目录位置，记住RT-Thread不要放于带空格或中文字符的目录路径下）。
 
 ![image](./figures/set_rtt_root.png)
+
+#### 第三步：复制KConfig_bsp到工程目录并改名为KConfig
 
 在使用env的`menuconfig`命令配置功能前，如果设备工程目录(bsp)中没有相应的`KConfig`文件，可将`env`目录下的`KConfig_bsp`文件复制到bsp根目录中并改名为`KConfig`。
 
@@ -42,13 +52,17 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 ![image](./figures/renamekconfig.png)
 
+#### 第四步：更新env的在线组件包仓库列表
+
 在使用`menuconfig`命令之前还需要使用
 
     pkgs --upgrade
 
-命令来更新我们env的组件包仓库列表
+命令来更新env的组件包仓库列表
 
 ![image](./figures/upgrade_from_gitpackages.png)
+
+#### 第五步：使用menuconfig开始配置项目
 
 现在就可以在设备工程目录中使用`menuconfig`命令开始进行项目配置，如果没有出错接下来就可以看到`menuconfig`的界面了，如下图：
 
