@@ -1,4 +1,5 @@
-﻿# RT-Thread 软件包环境
+[TOC]
+# RT-Thread 软件包环境
 
 RT-Thread软件包环境是RT-Thread源代码的软件包开发环境，包管理系统等。提供了RT-Thread
 下所需要到配置，编译等环境。
@@ -21,6 +22,8 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 ![image](./figures/console_bat.png)
 
 进入env目录，可以运行本目录下的 `console.bat `程序，它会配置一些环境变量，然后弹出控制台窗口。接下来对软件包的操作都是在控制台环境下进行的，下图为控制台窗口：
+
+    因为需要设置env进程的环境变量，第一次启动可能会出现杀毒软件误报的情况，如果遇到了杀毒软件误报，允许console运行，然后将console添加至白名单即可。这个问题正在修复当中。
 
 ![image](./figures/console_window.png)
 
