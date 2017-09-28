@@ -117,13 +117,30 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 包管理器的操作主要使用pkgs命令，可以使用 `pkgs -h`来获取使用帮助。 注意：在使用menuconfig选择在线包之前，需要先使用` pkgs --upgrade` 命令更新env的packages文件夹。请预先在电脑上装好git工具。
 
     pkgs --list            列出当前使用的组件包列表
-    pkgs --update          读取目前menuconfig对项目的配置，和旧的项目配置做对比，进而更新包
+    pkgs --update          读取目前menuconfig对项目的配置，和旧的项目配置做对比，然后更新组件包
     pkgs --wizard          组件包制作向导，根据提示输入来制作包向导文件夹
     pkgs --upgrade         从reposource更新env的本地packages文件夹
+    pkgs --printenv        打印出当前环境的环境变量，可以检查是否配置正确
     example：
-    使用pkgs --upgrade命令后，env环境会自动从默认git地址： https://github.com/RT-Thread/packages.git 来更新本地包。后续会支持更新源列表。
+    使用pkgs --upgrade命令后，env环境会自动从默认git地址： `https://github.com/RT-Thread/packages.git` 来更新本地包。后续会支持更新源列表。
 
 使用menuconfig来配置项目所需要的组件包，然后通过pkgs --update命令来更新项目中的组件包。如果不想要某个组件包，可以在menuconfig的配置中去掉包选项，然后再次使用`pkgs --update`命令更新即可。
+
+#### 1.选中所需组件包：
+
+![image](./figures/select_package.png)
+
+#### 2.按下esc键退出选择yes按下回车即可保存本次配置：
+
+![image](./figures/confirm_select.png)
+
+#### 3.使用pkgs --update命令进行更新：
+
+![image](./figures/pkgs_update_packages.png)
+
+此时bsp中的packages文件夹里就会配置里选择下载的组件了，尝试使用scons工具编译或者生成工程吧。
+
+如果想要去除某个组件包，只需要重新进入`menuconfig`，去掉软件包的勾选，然后再次使用`pkgs --update`命令更新即可。
 
 如果解压出的组件包被人为修改，那么在删除组件包的时候会提示是否要删除被修改的文件。如果选择保留文件，那么请自行保存好这些文件，避免在下次更新包时被覆盖。
 
