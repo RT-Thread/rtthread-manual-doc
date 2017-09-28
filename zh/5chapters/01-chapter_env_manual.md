@@ -5,17 +5,22 @@ RT-Thread软件包环境是RT-Thread源代码的软件包开发环境，包管�
 
 ## 1.准备工作
 
-* env环境编译器默认配置为GNU GCC，工具链目录指向 `env\tools\gnu_gcc`，如果未安装交叉工具链，请放置于这个目录下，如果使用其他编译方式则无需设置。
-* 在电脑上装好git，因为有一些组件包是通过git来下载管理的，git的下载地址为
-  `https://git-scm.com/downloads`,请根据向导正确安装git。
+* env环境编译器默认配置为GNU GCC，工具链目录指向 `env\tools\gnu_gcc`，如果不使用GCC编译器则无需配置。请将交叉编译工具链放置于 `env\tools\gnu_gcc`目录下,或者使用以下命令设置工具链地址：
+
+
+    set RTT_EXEC_PATH=your_Cross_Compilation_tool_chain_path
+* 在电脑上装好git，git的下载地址为`https://git-scm.com/downloads`,根据向导正确安装git。一些组件包是通过git下载管理的。
+
+* 注意在工作环境中，所有的路径都不可以有中文字符或者空格。
+
 
 ## 2.打开控制台
 
 RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型界面来进行辅助，使得尽量减少修改配置文件的方式即可搭建好RT-Thread开发环境的方式。
 
-![image](./figures/console.png)
+![image](./figures/console_bat.png)
 
-进入env目录，可以运行本目录下的 `console.exe` 程序，它会弹出控制台窗口，并默认配置好一些环境变量。接下来对软件包的操作都是在控制台环境下进行的，下图为控制台窗口：
+进入env目录，可以运行本目录下的 `console.bat `程序，它会配置一些环境变量，然后弹出控制台窗口。接下来对软件包的操作都是在控制台环境下进行的，下图为控制台窗口：
 
 ![image](./figures/console_window.png)
 
@@ -23,16 +28,21 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 ### 3.1 环境变量的设置
 
-打开控制台后，可以在命令行模式下使用cd命令切换到对应的设备工程目录。
+#### 第一步：切换到工程目录
+
+打开控制台后，可以在命令行模式下使用cd命令切换到你想要配置的工程目录。
 例如工程目录为`F:\git_repositories\ART_wifi\firmware\app`，先进入工程根目录。
 
-如果设备工程目录中未包含RT-Thread代码，可以通过命令行：
+#### 第二步：设置RTT_ROOT根目录
+可以通过命令：
 
     set RTT_ROOT=your_rtthread
 
 的方式设置RT-Thread目录（其中your_rtthread请填写你的RT-Thread根目录位置，记住RT-Thread不要放于带空格或中文字符的目录路径下）。
 
 ![image](./figures/set_rtt_root.png)
+
+#### 第三步：复制KConfig_bsp到工程目录并改名为KConfig
 
 在使用env的`menuconfig`命令配置功能前，如果设备工程目录(bsp)中没有相应的`KConfig`文件，可将`env`目录下的`KConfig_bsp`文件复制到bsp根目录中并改名为`KConfig`。
 
@@ -42,13 +52,17 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 ![image](./figures/renamekconfig.png)
 
+#### 第四步：更新env的在线组件包仓库列表
+
 在使用`menuconfig`命令之前还需要使用
 
     pkgs --upgrade
 
-命令来更新我们env的组件包仓库列表
+命令来更新env的组件包仓库列表
 
 ![image](./figures/upgrade_from_gitpackages.png)
+
+#### 第五步：使用menuconfig开始配置项目
 
 现在就可以在设备工程目录中使用`menuconfig`命令开始进行项目配置，如果没有出错接下来就可以看到`menuconfig`的界面了，如下图：
 
@@ -103,13 +117,30 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 包管理器的操作主要使用pkgs命令，可以使用 `pkgs -h`来获取使用帮助。 注意：在使用menuconfig选择在线包之前，需要先使用` pkgs --upgrade` 命令更新env的packages文件夹。请预先在电脑上装好git工具。
 
     pkgs --list            列出当前使用的组件包列表
-    pkgs --update          读取目前menuconfig对项目的配置，和旧的项目配置做对比，进而更新包
+    pkgs --update          读取目前menuconfig对项目的配置，和旧的项目配置做对比，然后更新组件包
     pkgs --wizard          组件包制作向导，根据提示输入来制作包向导文件夹
     pkgs --upgrade         从reposource更新env的本地packages文件夹
+    pkgs --printenv        打印出当前环境的环境变量，可以检查是否配置正确
     example：
-    使用pkgs --upgrade命令后，env环境会自动从默认git地址： https://github.com/RT-Thread/packages.git 来更新本地包。后续会支持更新源列表。
+    使用pkgs --upgrade命令后，env环境会自动从默认git地址： `https://github.com/RT-Thread/packages.git` 来更新本地包。后续会支持更新源列表。
 
 使用menuconfig来配置项目所需要的组件包，然后通过pkgs --update命令来更新项目中的组件包。如果不想要某个组件包，可以在menuconfig的配置中去掉包选项，然后再次使用`pkgs --update`命令更新即可。
+
+#### 1.选中所需组件包：
+
+![image](./figures/select_package.png)
+
+#### 2.按下esc键退出选择yes按下回车即可保存本次配置：
+
+![image](./figures/confirm_select.png)
+
+#### 3.使用pkgs --update命令进行更新：
+
+![image](./figures/pkgs_update_packages.png)
+
+此时bsp中的packages文件夹里就会配置里选择下载的组件了，尝试使用scons工具编译或者生成工程吧。
+
+如果想要去除某个组件包，只需要重新进入`menuconfig`，去掉软件包的勾选，然后再次使用`pkgs --update`命令更新即可。
 
 如果解压出的组件包被人为修改，那么在删除组件包的时候会提示是否要删除被修改的文件。如果选择保留文件，那么请自行保存好这些文件，避免在下次更新包时被覆盖。
 
