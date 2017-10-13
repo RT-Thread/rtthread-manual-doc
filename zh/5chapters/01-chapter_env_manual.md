@@ -11,7 +11,7 @@ RT-Thread软件包环境包含RT-Thread源代码开发编译环境，组件包�
 
     set RTT_EXEC_PATH=your_Cross_Compilation_tool_chain_path
 
-* 在电脑上装好git，git的下载地址为`https://git-scm.com/downloads`,根据向导正确安装git。一些组件包是通过git下载管理的。
+* 在电脑上装好git，git的下载地址为`https://git-scm.com/downloads`,根据向导正确安装git，并将git添加到系统环境变量。一些组件包是通过git下载管理的。
 
 * 注意在工作环境中，所有的路径都不可以有中文字符或者空格。
 
