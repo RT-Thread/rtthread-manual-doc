@@ -1,15 +1,17 @@
-﻿# RT-Thread 软件包环境
+[TOC]
+# RT-Thread 软件包环境
 
-RT-Thread软件包环境是RT-Thread源代码的软件包开发环境，包管理系统等。提供了RT-Thread
-下所需要到配置，编译等环境。
+RT-Thread软件包环境包含RT-Thread源代码开发编译环境，组件包管理系统。
+
+提供了RT-Thread下所需要到配置，编译等环境。本环境可以用来配置RT-Thread需要用到的组件包及组件的参数，图形化画配置，自动生成rtconfig.h文件，然后再通过scons编译成工程。
 
 ## 1.准备工作
 
-* env环境编译器默认配置为GNU GCC，工具链目录指向 `env\tools\gnu_gcc`，如果不使用GCC编译器则无需配置。请将交叉编译工具链放置于 `env\tools\gnu_gcc`目录下,或者使用以下命令设置工具链地址：
-
+* env环境编译器默认使用GNU GCC，工具链目录默认设置为 `env\tools\gnu_gcc`，如果使用gcc作为编译器，请将交叉编译工具链放置于 `env\tools\gnu_gcc`目录下,或者使用以下命令设置工具链地址，如果不使用GCC编译器则无需对这一项进行配置：
 
     set RTT_EXEC_PATH=your_Cross_Compilation_tool_chain_path
-* 在电脑上装好git，git的下载地址为`https://git-scm.com/downloads`,根据向导正确安装git。一些组件包是通过git下载管理的。
+
+* 在电脑上装好git，git的下载地址为`https://git-scm.com/downloads`,根据向导正确安装git，并将git添加到系统环境变量。一些组件包是通过git下载管理的。
 
 * 注意在工作环境中，所有的路径都不可以有中文字符或者空格。
 
@@ -21,6 +23,8 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 ![image](./figures/console_bat.png)
 
 进入env目录，可以运行本目录下的 `console.bat `程序，它会配置一些环境变量，然后弹出控制台窗口。接下来对软件包的操作都是在控制台环境下进行的，下图为控制台窗口：
+
+    因为需要设置env进程的环境变量，第一次启动可能会出现杀毒软件误报的情况，如果遇到了杀毒软件误报，允许console运行，然后将console添加至白名单即可。这个问题正在修复当中。
 
 ![image](./figures/console_window.png)
 
@@ -36,9 +40,9 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 #### 第二步：设置RTT_ROOT根目录
 可以通过命令：
 
-    set RTT_ROOT=your_rtthread
+    set RTT_ROOT=your_rtthread_root_path
 
-的方式设置RT-Thread目录（其中your_rtthread请填写你的RT-Thread根目录位置，记住RT-Thread不要放于带空格或中文字符的目录路径下）。
+的方式设置RT-Thread目录（其中your_rtthread_root_path请填写你的RT-Thread根目录位置，记住RT-Thread不要放于带空格或中文字符的目录路径下）。
 
 ![image](./figures/set_rtt_root.png)
 
@@ -68,12 +72,20 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 ![image](./figures/menuconfig_window.png)
 
-### 3.2 错误提示
+### 3.2 常见错误提示
+
+#### 常见错误1
 如果没有使用`pkgs --upgrade`来更新列表就使用`menuconfig`命令会出现如下错误：
 
 ![image](./figures/no_pkgs_upgrade_error.png)
 
 重新使用`pkgs --upgrade`命令即可解决这个问题。
+
+#### 常见错误2
+设置了错误的RTT_ROOT，RTT_ROOT应该是rt-thread代码的根目录，而不是bsp的目录，重新使用set RTT_ROOT=your_rtthread_root_path设置RTT_ROOT即可。
+
+![image](./figures/error_cuowu_rttroot.png)
+
 
 ### 3.3 menuconfig的简单使用方法：
 
@@ -89,10 +101,38 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 - 回车键：左右键切换到了某个键上，此时回车键，就执行相应的动作：
 
   - Select：此时一般都是所在（的行的）选项，后面有三个短横线加上一个右箭头，即 —>，表示此项下面还有子选项，即进入子菜单
-
   - Exit：直接退出当前的配置，当你更改了一些配置，但是又没有保存，此时会询问你是否要保存当前（已修改后的最新的）配置，然后再退出。
-
   - Help：针对你当前所在某个（行的）选项，查看其帮助信息。如果你对某个选项的功能不是很清楚就可以查看其Help，也可以可能查到写出到配置文件中的宏。
+
+### 3.4 修改工程配置
+
+#### 3.4.1 构建工程流程
+
+第一步：根据Kconfig的内容生成可视化配置菜单（使用menuconfig命令）。
+
+第二步：配置完毕，保存退出可视化菜单生成.config文件。
+
+第三步：根据.config的内容生成rtconfig.h文件。
+
+第四步：SConscript根据rtconfig.h中定义的宏决定哪些文件参与工程构建。
+
+#### 3.4.2 修改Kconfig 添加可视化配置选项
+
+修改Kconfig的过程，可以认为是构建流程的逆向过程。
+
+第一步：从SConscript中查找需要添加进工程的文件对应的控制宏，修改Kconfig时会用到。
+
+以stm32f10x工程为例：需要添加core_cm3.c到工程，该文件由宏`RT_USING_BSP_CMSIS`所控制（见rt-thread\bsp\stm32f10x\Libraries\SConscript）。
+
+第二步：确定修改哪个目录下的Kconfig文件。
+
+以stm32f10x工程为例：core_cm3.c属于BSP中的文件，期待配置选项出现在`BSP DRIVERS`配置目录下，则需要修改rt-thread\bsp\Kconfig。
+
+第三步：修改Kconfig。
+
+以stm32f10x工程为例：打开rt-thread\bsp\Kconfig文件，找到`menu "BSP DRIVERS"`,在下一行填写`config RT_USING_BSP_CMSIS`和`其他的配置辅助信息`（见下图），重新menuconfig则可视化配置界面出现刚才添加的配置选项。
+
+![image](./figures/menu_bsp_cmsis.png)
 
 ## 4.包管理器
 
@@ -146,10 +186,22 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 支持在线下载的组件包在RT-thread online packages选项中，根据项目需要来选择所需的组件。目前提供了不同类型的组件包以供测试。
 
-## 5.如何制作一个组件包
-## 6.如何制作一个组件包下载索引
+## 5.编译RT-Thread
 
-### 6.1 制作一个git形式的组件包下载索引
+### 5.1 scons编译工具链的配置
+
+### 5.2 开始编译工程吧
+
+RT-Thread 软件包环境也携带了Python & scons环境，所以只需要在设备工程目录中运行：
+
+    scons
+
+就可以编译RT-Thread了。一般来说，工程所需要的环境变量都会在控制台环境中已经配置好。
+
+## 6.高级篇
+### 6.1如何制作一个组件包
+### 6.2如何制作一个组件包下载索引
+#### 6.2.1 制作一个git形式的组件包下载索引
 使用命令`pkgs --wizard`开始制作组件包下载索引：
 
 ![image](./figures/pkgs_wizard.png)
@@ -199,7 +251,7 @@ package.json文件内容如下：
 使用git进行PR的方法请参考：
     https://github.com/RTThread/rtthreadmanualdoc/blob/master/zh/9appendix/03_github.md
 
-### 6.2 制作一个压缩包形式的组件包下载索引
+#### 6.2.2 制作一个压缩包形式的组件包下载索引
 
 制作一个压缩包形式的组件包下载索引大体上和上面的操作步骤是相同的。唯一不同的地方在于json文件，一个压缩包形式的组件包json文件如下：
 
@@ -207,14 +259,4 @@ package.json文件内容如下：
 
 这样我们就制作好一个下载索引包了，如果还有不懂的地方可以参考已有的组件包，或者及时在群里提出来，我们会第一时间回答你的疑问，并且对env中存在的问题进行优化。谢谢你的参与。
 
-## 7.编译RT-Thread
 
-### 7.1 scons编译工具链的配置
-
-### 7.2 开始编译工程吧
-
-RT-Thread 软件包环境也携带了Python & scons环境，所以只需要在设备工程目录中运行：
-
-    scons
-
-就可以编译RT-Thread了。一般来说，工程所需要的环境变量都会在控制台环境中已经配置好。
