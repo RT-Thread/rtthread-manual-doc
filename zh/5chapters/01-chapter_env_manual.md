@@ -1,9 +1,9 @@
 [TOC]
-# RT-Thread 软件包环境
+# env工具
 
-RT-Thread软件包环境包含RT-Thread源代码开发编译环境，组件包管理系统。
+env工具包含了RT-Thread源代码开发编译环境和组件包管理系统。
 
-提供了RT-Thread下所需要到配置，编译等环境。本环境可以用来配置RT-Thread需要用到的组件包及组件的参数，图形化画配置，自动生成rtconfig.h文件，然后再通过scons编译成工程。
+env提供了RT-Thread操作系统所需要到配置，编译等环境。env工具可以用来配置RT-Thread操作系统所需要用到的组件包及组件的参数。通过简单的图形化配置，即可自动生成rtconfig.h文件，然后再通过scons编译成工程。
 
 ## 1.准备工作
 
@@ -46,9 +46,9 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 ![image](./figures/set_rtt_root.png)
 
-#### 第三步：复制KConfig_bsp到工程目录并改名为KConfig
+#### 第三步：复制Kconfig文件到工程目录
 
-在使用env的`menuconfig`命令配置功能前，如果设备工程目录(bsp)中没有相应的`KConfig`文件，可将`env`目录下的`KConfig_bsp`文件复制到bsp根目录中并改名为`KConfig`。
+在使用env的`menuconfig`命令配置功能前，如果设备工程目录(bsp)中没有相应的`Kconfig`文件，可将`env`目录下的`Kconfig_bsp`文件复制到bsp根目录中。
 
 ![image](./figures/copy2bsp.png)
 
