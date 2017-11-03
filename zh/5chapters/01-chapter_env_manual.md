@@ -1,22 +1,33 @@
 [TOC]
-# RT-Thread 软件包环境
+# env工具使用手册
 
-RT-Thread软件包环境包含RT-Thread源代码开发编译环境，组件包管理系统。
+---
 
-提供了RT-Thread下所需要到配置，编译等环境。本环境可以用来配置RT-Thread需要用到的组件包及组件的参数，图形化画配置，自动生成rtconfig.h文件，然后再通过scons编译成工程。
+## 1.介绍
 
-## 1.准备工作
+env是RT-Thread推出的辅助工具，用来配置基于RT-Thread操作系统开发的项目工程。
 
-* env环境编译器默认使用GNU GCC，工具链目录默认设置为 `env\tools\gnu_gcc`，如果使用gcc作为编译器，请将交叉编译工具链放置于 `env\tools\gnu_gcc`目录下,或者使用以下命令设置工具链地址，如果不使用GCC编译器则无需对这一项进行配置：
+env工具提供了简单易用的配置剪裁工具，用来对内核和组件的功能进行配置，对组件进行自由裁剪，使系统以搭积木的方式进行构建。
 
-    set RTT_EXEC_PATH=your_Cross_Compilation_tool_chain_path
+## 1.1 主要特性
+- menuconfig图形化配置界面，交互性好，操作逻辑强；
+- 丰富的文字帮助说明，配置无需查阅文档；
+- 使用灵活，自动处理依赖，功能开关彻底；
+- 自动生成rtconfig.h，无需手动修改；
+- 使用scons工具生成工程，提供编译环境，操作简单；
+- 提供多种组件包，模块化组件包耦合关联少，可维护性好；
+- 组件包可在线下载，软件包持续集成，包可靠性高；
+## 1.2 准备工作
+env工具包含了RT-Thread源代码开发编译环境和组件包管理系统。
 
-* 在电脑上装好git，git的下载地址为`https://git-scm.com/downloads`,根据向导正确安装git，并将git添加到系统环境变量。一些组件包是通过git下载管理的。
+* env环境编译器默认使用GNU GCC，工具链目录默认设置为 `env\tools\gnu_gcc\arm_gcc\mingw\bin`。版本为：gcc version 5.4.1 20160919 (release)。
+
+* 在电脑上装好git，git的下载地址为`https://git-scm.com/downloads`,根据向导正确安装git，并将git添加到系统环境变量。env工具提供的git安装包路径为：env\tools\git。组件包管理功能需要git的支持。
 
 * 注意在工作环境中，所有的路径都不可以有中文字符或者空格。
 
 
-## 2.打开控制台
+## 2.使用方法
 
 RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型界面来进行辅助，使得尽量减少修改配置文件的方式即可搭建好RT-Thread开发环境的方式。
 
@@ -46,9 +57,9 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 ![image](./figures/set_rtt_root.png)
 
-#### 第三步：复制KConfig_bsp到工程目录并改名为KConfig
+#### 第三步：复制Kconfig文件到工程目录
 
-在使用env的`menuconfig`命令配置功能前，如果设备工程目录(bsp)中没有相应的`KConfig`文件，可将`env`目录下的`KConfig_bsp`文件复制到bsp根目录中并改名为`KConfig`。
+在使用env的`menuconfig`命令配置功能前，如果设备工程目录(bsp)中没有相应的`Kconfig`文件，可将`env`目录下的`Kconfig_bsp`文件复制到bsp根目录中。
 
 ![image](./figures/copy2bsp.png)
 
