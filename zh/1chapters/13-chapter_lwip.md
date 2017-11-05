@@ -5,7 +5,7 @@
 
 lwIP结构精简，功能完善，因而用户群较为广泛。RT-Thread实时操作系统就采用了lwIP做为默认的TCP/IP协议栈，同时根据小型设备的特点对lwIP进行了再次优化，使其资源占用体积进一步地缩小，RAM 的占用可缩小到5kB附近（未计算上层应用使用TCP/IP协议时的空间占用量）。本章内容将为您讲述lwIP在RT-Thread中的使用方法。
 
-主要特性（摘自lwIP官方网站，翻译如有错误请指正）：
+主要特性（摘自lwIP官方网站）：
 
 - 协议：IP，ICMP，UDP，TCP，IGMP，ARP，PPPoS，PPPoE
 - DHCP client，DNS client，AutoIP/APIPA(Zeroconf)，SNMP agent(private MIB support)
@@ -89,7 +89,7 @@ RT-Thread操作系统中的lwIP是从lwIP发布原始版本移植过来，然后
 
 ### lwIP版本 ###
 
-[RT-Thread lwIP](https://github.com/RT-Thread/rt-thread/tree/master/components/net)包含三个版本，分别为：“1.3.2”，“1.4.0”，“1.4.1”，其中“1.4.0”的文件夹没有标名版本号，查看具体的版本号可以在src/include/lwip/init.h中查询。如下：
+[RT-Thread lwIP](https://github.com/RT-Thread/rt-thread/tree/master/components/net)包含三个版本，分别为：“1.3.2”，“1.4.1”，“2.0.2”，在RT-Thread 3.0版本中默认会选择“2.0.2”版本，lwIP的具体版本号信息可以在src/include/lwip/init.h中查询。如下：
 ```c
 /** X.x.x: Major version of the stack */
 #define LWIP_VERSION_MAJOR      1U
@@ -104,11 +104,11 @@ RT-Thread通过宏去指定使用哪个版本的lwIP，熟悉RT-Thread的朋友�
 group = DefineGroup('LwIP', src, depend = ['RT_USING_LWIP', 'RT_USING_LWIP141'], CPPPATH = path)
 ```
 
-大家可以看到加入该版本下的所有文件依赖与（RT_USING_LWIP、RT_USING_LWIP141）两个宏，这两个宏在RT-Thread源码的[rtconfig.h](https://github.com/RT-Thread/rt-thread/tree/master/bsp)中，这个文件与实际的项目（或者说BSP、开发板相关），点开“bsp”目录下任何一个文件夹都可以找到rtconfig.h。因为这些宏是自己定义的，所以你可能在这个文件中找不到这些宏，如果你需要使用，请自行添加吧，然后使用scons重新生成工程。
+大家可以看到加入该版本下的所有文件依赖与（RT_USING_LWIP、RT_USING_LWIP141）两个宏，这两个宏在RT-Thread源码的[rtconfig.h](https://github.com/RT-Thread/rt-thread/tree/master/bsp)中，这个文件与实际的项目（或者说BSP、开发板相关），点开“bsp”目录下任何一个文件夹都可以找到rtconfig.h，也可以由menuconfig配置后生成对应的rtconfig.h头文件。
 
 ### RT-Thread 网络设备管理 ###
 
-RT-Thread有一套自己的设备框架，这里只作一个简单的描述，具体请参考《RT-Thread编程指南第六章--I/O设备管理》，可以在[RT-Thread入门帖](http://www.rt-thread.org/node/64)中找到。RT-Thread中包含很多设备，为了更简单的添加或者管理这些设备，使用面向对象的思想将设备抽象成了一个类，基于这个“设备类”，我们派生出不同类型的设备类，如：网络设备类、字符设备类、块设备类、音频设备类等等，它们的关系图如下：
+RT-Thread有一套自己的设备框架，这里只作一个简单的描述，具体请参考《RT-Thread编程指南第六章--I/O设备管理》，可以在[RT-Thread入门帖](http://www.rt-thread.org/node/64)中找到。RT-Thread中包含很多设备，为了更简单的添加或者管理这些设备，使用面向对象的思想将设备抽象成了一个类，基于这个“设备类”，派生出不同类型的设备类，如：网络设备类、字符设备类、块设备类、音频设备类等等，它们的关系图如下：
 
 ![RTT设备继承关系](../../figures/device_inheritance.png)
 
@@ -127,60 +127,81 @@ struct rt_object_information
 struct rt_object_information rt_object_container[RT_Object_Class_Unknown] =
 {
     /* initialize object container - thread */
-    {RT_Object_Class_Thread, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_Thread), 
-		sizeof(struct rt_thread)},
+    {
+        RT_Object_Class_Thread, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_Thread),
+        sizeof(struct rt_thread)
+    },
 #ifdef RT_USING_SEMAPHORE
     /* initialize object container - semaphore */
-    {RT_Object_Class_Semaphore,
-		_OBJ_CONTAINER_LIST_INIT(RT_Object_Class_Semaphore), 
-		sizeof(struct rt_semaphore)},
+    {
+        RT_Object_Class_Semaphore,
+        _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_Semaphore),
+        sizeof(struct rt_semaphore)
+    },
 #endif
 #ifdef RT_USING_MUTEX
     /* initialize object container - mutex */
-    {RT_Object_Class_Mutex, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_Mutex), 
-		sizeof(struct rt_mutex)},
+    {
+        RT_Object_Class_Mutex, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_Mutex),
+        sizeof(struct rt_mutex)
+    },
 #endif
 #ifdef RT_USING_EVENT
     /* initialize object container - event */
-    {RT_Object_Class_Event, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_Event), 
-		sizeof(struct rt_event)},
+    {
+        RT_Object_Class_Event, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_Event),
+        sizeof(struct rt_event)
+    },
 #endif
 #ifdef RT_USING_MAILBOX
     /* initialize object container - mailbox */
-    {RT_Object_Class_MailBox, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_MailBox), 
-		sizeof(struct rt_mailbox)},
+    {
+        RT_Object_Class_MailBox, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_MailBox),
+        sizeof(struct rt_mailbox)
+    },
 #endif
 #ifdef RT_USING_MESSAGEQUEUE
     /* initialize object container - message queue */
-    {RT_Object_Class_MessageQueue, 
-		_OBJ_CONTAINER_LIST_INIT(RT_Object_Class_MessageQueue), 
-		sizeof(struct rt_messagequeue)},
+    {
+        RT_Object_Class_MessageQueue,
+        _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_MessageQueue),
+        sizeof(struct rt_messagequeue)
+    },
 #endif
 #ifdef RT_USING_MEMHEAP
     /* initialize object container - memory heap */
-    {RT_Object_Class_MemHeap, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_MemHeap), 
-		sizeof(struct rt_memheap)},
+    {
+        RT_Object_Class_MemHeap, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_MemHeap),
+        sizeof(struct rt_memheap)
+    },
 #endif
 #ifdef RT_USING_MEMPOOL
     /* initialize object container - memory pool */
-    {RT_Object_Class_MemPool, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_MemPool), 
-		sizeof(struct rt_mempool)},
+    {
+        RT_Object_Class_MemPool, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_MemPool),
+        sizeof(struct rt_mempool)
+    },
 #endif
 #ifdef RT_USING_DEVICE
     /* initialize object container - device */
-    {RT_Object_Class_Device, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_Device), 
-		sizeof(struct rt_device)},
+    {
+        RT_Object_Class_Device, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_Device),
+        sizeof(struct rt_device)
+    },
 #endif
     /* initialize object container - timer */
-    {RT_Object_Class_Timer, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_Timer), 
-		sizeof(struct rt_timer)},
+    {
+        RT_Object_Class_Timer, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_Timer),
+        sizeof(struct rt_timer)
+    },
 #ifdef RT_USING_MODULE
     /* initialize object container - module */
-    {RT_Object_Class_Module, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_Module), 
-		sizeof(struct rt_module)},
+    {
+        RT_Object_Class_Module, _OBJ_CONTAINER_LIST_INIT(RT_Object_Class_Module),
+        sizeof(struct rt_module)
+    },
 #endif
 };
-
 ```
 具体地讲，RT-Thread中使用一个链表来维护所有的设备，当需要往系统中注册设备时，需要将设备添加到对应的链表中（当然如何添加，RT-Thread提供了相应的接口）。如果对代码不了解，简单点的理解方式请看下图（图中并不对应实际的代码，代码中用的双向链表）：
 
@@ -261,7 +282,7 @@ void lwip_system_init(void)
 
 ### RT-Thread lwIP相关代码补充说明
 
-前面我们讲解过lwip_system_init()中，当系统中没有网卡设备时，有一部分初始化工作（为网卡初始化IP、子网掩码、网关等）是不会进行的。此时lwIP线程已经创建，如果需要和外界通讯，那么必须为系统添加网卡设备，而在网卡驱动中，网卡设备初始化时，会向系统注册，此时网卡设备就添加到系统中了。以[RT-Thread双网口开发板网卡驱动例程](http://www.rt-thread.com/download/fm3/examples/)为例，参考以下代码：
+前面已经提及过lwip_system_init()中，当系统中没有网卡设备时，有一部分初始化工作（为网卡初始化IP、子网掩码、网关等）是不会进行的。此时lwIP线程已经创建，如果需要和外界通讯，那么必须为系统添加网卡设备，而在网卡驱动中，网卡设备初始化时，会向系统注册，此时网卡设备就添加到系统中了。以[RT-Thread双网口开发板网卡驱动例程](http://www.rt-thread.com/download/fm3/examples/)为例，参考以下代码：
 
 ```c
 #ifdef USING_MAC0
@@ -279,12 +300,12 @@ void lwip_system_init(void)
     fm3_emac_device0.dev_addr[4] = 0x34;
     fm3_emac_device0.dev_addr[5] = 0x56;
 
-    fm3_emac_device0.parent.parent.init = fm3_emac_init;
-    fm3_emac_device0.parent.parent.open = fm3_emac_open;
+    fm3_emac_device0.parent.parent.init  = fm3_emac_init;
+    fm3_emac_device0.parent.parent.open  = fm3_emac_open;
     fm3_emac_device0.parent.parent.close = fm3_emac_close;
-    fm3_emac_device0.parent.parent.read = fm3_emac_read;
+    fm3_emac_device0.parent.parent.read  = fm3_emac_read;
     fm3_emac_device0.parent.parent.write = fm3_emac_write;
-    fm3_emac_device0.parent.parent.control = fm3_emac_control;
+    fm3_emac_device0.parent.parent.control   = fm3_emac_control;
     fm3_emac_device0.parent.parent.user_data = RT_NULL;
 
     fm3_emac_device0.parent.eth_rx = fm3_emac_rx;
@@ -306,7 +327,7 @@ eth_device_init()调用eth_device_init_with_flag()接口初始化网卡设备（
 
 当服务端接收到数据时，它将把数据打印到控制终端中；如果服务端接收到exit字符串时，那么服务端将退出服务。
 
-~~~{.c}
+```c
 /*
  * 代码清单：UDP服务端例子
  */
@@ -315,78 +336,78 @@ eth_device_init()调用eth_device_init_with_flag()接口初始化网卡设备（
 
 void udpserv(void* paramemter)
 {
-  int sock;
-	int bytes_read;
-	char *recv_data;
-	rt_uint32_t addr_len;
-	struct sockaddr_in server_addr, client_addr;
+    int sock;
+    int bytes_read;
+    char *recv_data;
+    rt_uint32_t addr_len;
+    struct sockaddr_in server_addr, client_addr;
 
-	/* 分配接收用的数据缓冲 */
-	recv_data = rt_malloc(1024);
-	if (recv_data == RT_NULL)
-	{
-		/* 分配内存失败，返回 */
-		rt_kprintf("No memory\n");
-		return;
-	}
+    /* 分配接收用的数据缓冲 */
+    recv_data = rt_malloc(1024);
+    if (recv_data == RT_NULL)
+    {
+        /* 分配内存失败，返回 */
+        rt_kprintf("No memory\n");
+        return;
+    }
 
-	/* 创建一个socket，类型是SOCK_DGRAM，UDP类型 */
-	if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
-	{
-		rt_kprintf("Socket error\n");
+    /* 创建一个socket，类型是SOCK_DGRAM，UDP类型 */
+    if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+    {
+        rt_kprintf("Socket error\n");
 
-		/* 释放接收用的数据缓冲 */
-		rt_free(recv_data);
-		return;
-	}
+        /* 释放接收用的数据缓冲 */
+        rt_free(recv_data);
+        return;
+    }
 
-	/* 初始化服务端地址 */
-	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(5000);
-	server_addr.sin_addr.s_addr = INADDR_ANY;
-	rt_memset(&(server_addr.sin_zero), 0, sizeof(server_addr.sin_zero));
+    /* 初始化服务端地址 */
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(5000);
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    rt_memset(&(server_addr.sin_zero), 0, sizeof(server_addr.sin_zero));
 
-	/* 绑定socket到服务端地址 */
-	if (bind(sock, (struct sockaddr *) &server_addr, sizeof(struct sockaddr))
-			== -1)
-	{
-		/* 绑定地址失败 */
-		rt_kprintf("Bind error\n");
+    /* 绑定socket到服务端地址 */
+    if (bind(sock, (struct sockaddr *) &server_addr, sizeof(struct sockaddr))
+            == -1)
+    {
+        /* 绑定地址失败 */
+        rt_kprintf("Bind error\n");
 
-		/* 释放接收用的数据缓冲 */
-		rt_free(recv_data);
-		return;
-	}
+        /* 释放接收用的数据缓冲 */
+        rt_free(recv_data);
+        return;
+    }
 
-	addr_len = sizeof(struct sockaddr);
-	rt_kprintf("UDPServer Waiting for client on port 5000...\n");
+    addr_len = sizeof(struct sockaddr);
+    rt_kprintf("UDPServer Waiting for client on port 5000...\n");
 
-	while (1)
-	{
-		/* 从sock中收取最大1024字节数据 */
-		bytes_read = recvfrom(sock, recv_data, 1024, 0,
-				(struct sockaddr *) &client_addr, &addr_len);
-		/* UDP不同于TCP，它基本不会出现收取的数据失败的情况，除非设置了超时等待 */
+    while (1)
+    {
+        /* 从sock中收取最大1024字节数据 */
+        bytes_read = recvfrom(sock, recv_data, 1024, 0,
+                              (struct sockaddr *) &client_addr, &addr_len);
+        /* UDP不同于TCP，它基本不会出现收取的数据失败的情况，除非设置了超时等待 */
 
-		recv_data[bytes_read] = '\0'; /* 把末端清零 */
+        recv_data[bytes_read] = '\0'; /* 把末端清零 */
 
-		/* 输出接收的数据 */
-		rt_kprintf("\n(%s , %d) said : ", inet_ntoa(client_addr.sin_addr),
-				ntohs(client_addr.sin_port));
-		rt_kprintf("%s", recv_data);
+        /* 输出接收的数据 */
+        rt_kprintf("\n(%s , %d) said : ", inet_ntoa(client_addr.sin_addr),
+                   ntohs(client_addr.sin_port));
+        rt_kprintf("%s", recv_data);
 
-		/* 如果接收数据是exit，退出 */
-		if (strcmp(recv_data, "exit") == 0)
-		{
-			lwip_close(sock);
+        /* 如果接收数据是exit，退出 */
+        if (strcmp(recv_data, "exit") == 0)
+        {
+            lwip_close(sock);
 
-			/* 释放接收用的数据缓冲 */
-			rt_free(recv_data);
-			break;
-		}
-	}
+            /* 释放接收用的数据缓冲 */
+            rt_free(recv_data);
+            break;
+        }
+    }
 
-	return;
+    return;
 }
 
 #ifdef RT_USING_FINSH
@@ -394,18 +415,18 @@ void udpserv(void* paramemter)
 /* 输出udpserv函数到finsh shell中 */
 FINSH_FUNCTION_EXPORT(udpserv, startup udp server);
 #endif
-~~~
+```
 
 下面是另一个在RT-Thread上使用BSD socket接口的UDP客户端例子。当把这个代码加入到RT-Thread时，它会自动向finsh命令行添加一个udpclient命令，在finsh上执行udpclient(url,port)函数即可启动这个UDP客户端，url指定了这个客户端连接到的服务端地址或域名，port是相应的端口号。
 
 当UDP客户端启动后，它将连续发送5次“This is UDP Client from RT-Thread.”的字符串给服务端，然后退出。
 
-~~~{.c}
+```c
 /*
  * 程序清单：UDP客户端例子
  */
 #include <rtthread.h>
-#include <lwip/netdb.h> /* 为了解析主机名，需要包含netdb.h头文件 */
+#include <lwip/netdb.h>   /* 为了解析主机名，需要包含netdb.h头文件 */
 #include <lwip/sockets.h> /* 使用BSD socket，需要包含sockets.h头文件 */
 
 /* 发送用到的数据 */
@@ -413,42 +434,42 @@ ALIGN(4)
 const char send_data[] = "This is UDP Client from RT-Thread.\n";
 void udpclient(const char* url, int port, int count)
 {
-	int sock;
-	struct hostent *host;
-	struct sockaddr_in server_addr;
+    int sock;
+    struct hostent *host;
+    struct sockaddr_in server_addr;
 
-	/* 通过函数入口参数url获得host地址（如果是域名，会做域名解析） */
-	host = (struct hostent *) gethostbyname(url);
+    /* 通过函数入口参数url获得host地址（如果是域名，会做域名解析） */
+    host = (struct hostent *) gethostbyname(url);
 
-	/* 创建一个socket，类型是SOCK_DGRAM，UDP类型 */
-	if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
-	{
-		rt_kprintf("Socket error\n");
-		return;
-	}
+    /* 创建一个socket，类型是SOCK_DGRAM，UDP类型 */
+    if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+    {
+        rt_kprintf("Socket error\n");
+        return;
+    }
 
-	/* 初始化预连接的服务端地址 */
-	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(port);
-	server_addr.sin_addr = *((struct in_addr *) host->h_addr);
-	rt_memset(&(server_addr.sin_zero), 0, sizeof(server_addr.sin_zero));
+    /* 初始化预连接的服务端地址 */
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(port);
+    server_addr.sin_addr = *((struct in_addr *) host->h_addr);
+    rt_memset(&(server_addr.sin_zero), 0, sizeof(server_addr.sin_zero));
 
-	/* 总计发送count次数据 */
-	while (count)
-	{
-		/* 发送数据到服务远端 */
-		sendto(sock, send_data, strlen(send_data), 0,
-				(struct sockaddr *) &server_addr, sizeof(struct sockaddr));
+    /* 总计发送count次数据 */
+    while (count)
+    {
+        /* 发送数据到服务远端 */
+        sendto(sock, send_data, strlen(send_data), 0,
+               (struct sockaddr *) &server_addr, sizeof(struct sockaddr));
 
-		/* 线程休眠一段时间 */
-		rt_thread_delay(50);
+        /* 线程休眠一段时间 */
+        rt_thread_delay(50);
 
-		/* 计数值减一 */
-		count--;
-	}
+        /* 计数值减一 */
+        count--;
+    }
 
-	/* 关闭这个socket */
-	lwip_close(sock);
+    /* 关闭这个socket */
+    lwip_close(sock);
 }
 
 #ifdef RT_USING_FINSH
@@ -456,7 +477,7 @@ void udpclient(const char* url, int port, int count)
 /* 输出udpclient函数到finsh shell中 */
 FINSH_FUNCTION_EXPORT(udpclient, startup udp client);
 #endif
-~~~
+```
 
 ### TCP使用示例 ###
 
@@ -465,7 +486,7 @@ FINSH_FUNCTION_EXPORT(udpclient, startup udp client);
 
 如果服务端接收到q或Q字符串时，服务器将主动关闭这个TCP连接。如果服务端接收到exit字符串时，那么将退出服务。
 
-~~~{.c}
+```c
 /*
  * 程序清单：TCP服务端例子
  */
@@ -477,137 +498,139 @@ ALIGN(4)
 static const char send_data[] = "This is TCP Server from RT-Thread.";
 void tcpserv(void* parameter)
 {
-	char *recv_data; /* 用于接收的指针，后面会做一次动态分配以请求可用内存 */
-	rt_uint32_t sin_size;
-	int sock, connected, bytes_received;
-	struct sockaddr_in server_addr, client_addr;
-	int ret;
-	rt_bool_t stop = RT_FALSE; /* 停止标志 */
+    char *recv_data; /* 用于接收的指针，后面会做一次动态分配以请求可用内存 */
+    rt_uint32_t sin_size;
+    int sock, connected, bytes_received;
+    struct sockaddr_in server_addr, client_addr;
+    int ret;
+    rt_bool_t stop = RT_FALSE; /* 停止标志 */
 
-	recv_data = rt_malloc(1024); /* 分配接收用的数据缓冲 */
-	if (recv_data == RT_NULL)
-	{
-		rt_kprintf("No memory\n");
-		return;
-	}
+    recv_data = rt_malloc(1024); /* 分配接收用的数据缓冲 */
+    if (recv_data == RT_NULL)
+    {
+        rt_kprintf("No memory\n");
+        return;
+    }
 
-	/* 一个socket在使用前，需要预先创建出来，指定SOCK_STREAM为TCP的socket */
-	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-	{
-		/* 创建失败的错误处理 */
-		rt_kprintf("Socket error\n");
+    /* 一个socket在使用前，需要预先创建出来，指定SOCK_STREAM为TCP的socket */
+    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+    {
+        /* 创建失败的错误处理 */
+        rt_kprintf("Socket error\n");
 
-		/* 释放已分配的接收缓冲 */
-		rt_free(recv_data);
-		return;
-	}
+        /* 释放已分配的接收缓冲 */
+        rt_free(recv_data);
+        return;
+    }
 
-	/* 初始化服务端地址 */
-	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(5000); /* 服务端工作的端口 */
-	server_addr.sin_addr.s_addr = INADDR_ANY;
-	rt_memset(&(server_addr.sin_zero), 8, sizeof(server_addr.sin_zero));
+    /* 初始化服务端地址 */
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(5000); /* 服务端工作的端口 */
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    rt_memset(&(server_addr.sin_zero), 8, sizeof(server_addr.sin_zero));
 
-	/* 绑定socket到服务端地址 */
-	if (bind(sock, (struct sockaddr *) &server_addr, sizeof(struct sockaddr))
-			== -1)
-	{
-		/* 绑定失败 */
-		rt_kprintf("Unable to bind\n");
+    /* 绑定socket到服务端地址 */
+    if (bind(sock, (struct sockaddr *) &server_addr, sizeof(struct sockaddr))
+            == -1)
+    {
+        /* 绑定失败 */
+        rt_kprintf("Unable to bind\n");
 
-		/* 释放已分配的接收缓冲 */
-		rt_free(recv_data);
-		return;
-	}
+        /* 释放已分配的接收缓冲 */
+        rt_free(recv_data);
+        return;
+    }
 
-	/* 在socket上进行监听 */
-	if (listen(sock, 5) == -1)
-	{
-		rt_kprintf("Listen error\n");
+    /* 在socket上进行监听 */
+    if (listen(sock, 5) == -1)
+    {
+        rt_kprintf("Listen error\n");
 
-		/* release recv buffer */
-		rt_free(recv_data);
-		return;
-	}
+        /* release recv buffer */
+        rt_free(recv_data);
+        return;
+    }
 
-	rt_kprintf("\nTCPServer Waiting for client on port 5000...\n");
-	while (stop != RT_TRUE)
-	{
-		sin_size = sizeof(struct sockaddr_in);
+    rt_kprintf("\nTCPServer Waiting for client on port 5000...\n");
+    while (stop != RT_TRUE)
+    {
+        sin_size = sizeof(struct sockaddr_in);
 
-		/* 接受一个客户端连接socket的请求，这个函数调用是阻塞式的 */
-		connected = accept(sock, (struct sockaddr *) &client_addr, &sin_size);
-		/* 返回的是连接成功的socket */
+        /* 接受一个客户端连接socket的请求，这个函数调用是阻塞式的 */
+        connected = accept(sock, (struct sockaddr *) &client_addr, &sin_size);
+        /* 返回的是连接成功的socket */
 
-		/* 接受返回的client_addr指向了客户端的地址信息 */
-		rt_kprintf("I got a connection from (%s , %d)\n", inet_ntoa(
-				client_addr.sin_addr), ntohs(client_addr.sin_port));
+        /* 接受返回的client_addr指向了客户端的地址信息 */
+        rt_kprintf("I got a connection from (%s , %d)\n", inet_ntoa(
+                       client_addr.sin_addr), ntohs(client_addr.sin_port));
 
-		/* 客户端连接的处理 */
-		while (1)
-		{
-			/* 发送数据到connected socket */
-			ret = send(connected, send_data, strlen(send_data), 0);
-			if (ret < 0)
-	        	{
-		            /* 接收失败，关闭这个连接 */
-		            lwip_close(sock);
-		            rt_kprintf("\nsend error,close the socket.\r\n");		
-		            break;
-	        	}else if (ret == 0)
-			{
-		            /* 打印send函数返回值为0的警告信息 */
-		            rt_kprintf("\n Send warning,send function return 0.\r\n");						
-			}	
-			
-			
+        /* 客户端连接的处理 */
+        while (1)
+        {
+            /* 发送数据到connected socket */
+            ret = send(connected, send_data, strlen(send_data), 0);
+            if (ret < 0)
+            {
+                /* 接收失败，关闭这个连接 */
+                lwip_close(sock);
+                rt_kprintf("\nsend error,close the socket.\r\n");
+                break;
+            }
+            else if (ret == 0)
+            {
+                /* 打印send函数返回值为0的警告信息 */
+                rt_kprintf("\n Send warning,send function return 0.\r\n");
+            }
 
-			/*
-			 * 从connected socket中接收数据，接收buffer是1024大小，
-			 * 但并不一定能够收到1024大小的数据
-			 */
-			bytes_received = recv(connected, recv_data, 1024, 0);
-			if (bytes_received < 0)
-			{
-				/* 接收失败，关闭这个connected socket */
-				lwip_close(connected);
-				break;
-			}else if (bytes_received == 0)
-          		{
-		                /* 打印recv函数返回值为0的警告信息 */
-		                rt_kprintf("\nReceived warning,recv function return 0.\r\n");						
-                        }
 
-			/* 有接收到数据，把末端清零 */
-			recv_data[bytes_received] = '\0';
-			if (strcmp(recv_data, "q") == 0 || strcmp(recv_data, "Q") == 0)
-			{
-				/* 如果是首字母是q或Q，关闭这个连接 */
-				lwip_close(connected);
-				break;
-			}
-			else if (strcmp(recv_data, "exit") == 0)
-			{
-				/* 如果接收的是exit，则关闭整个服务端 */
-				lwip_close(connected);
-				stop = RT_TRUE;
-				break;
-			}
-			else
-			{
-				/* 在控制终端显示收到的数据 */
-				rt_kprintf("RECIEVED DATA = %s \n", recv_data);
-			}
-		}
-	}
 
-	/* 退出服务 */
-	lwip_close(sock);
+            /*
+             * 从connected socket中接收数据，接收buffer是1024大小，
+             * 但并不一定能够收到1024大小的数据
+             */
+            bytes_received = recv(connected, recv_data, 1024, 0);
+            if (bytes_received < 0)
+            {
+                /* 接收失败，关闭这个connected socket */
+                lwip_close(connected);
+                break;
+            }
+            else if (bytes_received == 0)
+            {
+                /* 打印recv函数返回值为0的警告信息 */
+                rt_kprintf("\nReceived warning,recv function return 0.\r\n");
+            }
 
-	/* 释放接收缓冲 */
-	rt_free(recv_data);
+            /* 有接收到数据，把末端清零 */
+            recv_data[bytes_received] = '\0';
+            if (strcmp(recv_data, "q") == 0 || strcmp(recv_data, "Q") == 0)
+            {
+                /* 如果是首字母是q或Q，关闭这个连接 */
+                lwip_close(connected);
+                break;
+            }
+            else if (strcmp(recv_data, "exit") == 0)
+            {
+                /* 如果接收的是exit，则关闭整个服务端 */
+                lwip_close(connected);
+                stop = RT_TRUE;
+                break;
+            }
+            else
+            {
+                /* 在控制终端显示收到的数据 */
+                rt_kprintf("RECIEVED DATA = %s \n", recv_data);
+            }
+        }
+    }
 
-	return;
+    /* 退出服务 */
+    lwip_close(sock);
+
+    /* 释放接收缓冲 */
+    rt_free(recv_data);
+
+    return;
 }
 
 #ifdef RT_USING_FINSH
@@ -615,17 +638,17 @@ void tcpserv(void* parameter)
 /* 输出tcpserv函数到finsh shell中 */
 FINSH_FUNCTION_EXPORT(tcpserv, startup tcp server);
 #endif
-~~~
+```
 
 下面则是另一个如在RT-Thread上使用BSD socket接口的TCP客户端例子。当把这个代码加入到RT-Thread时，它会自动向finsh 命令行添加一个tcpclient命令，在finsh上执行tcpclient(url,port)函数即可启动这个TCP服务端，url指定了这个客户端连接到的服务端地址或域名，port是相应的端口号。
 当TCP客户端连接成功时，它会接收服务端传过来的数据。当有数据接收到时，如果是以q或Q开头，它将主动断开这个连接；否则会把接收的数据在控制终端中打印出来，然后发送“This is TCP Client from RT-Thread.”的字符串。
 
-~~~{.c}
+```c
 /*
  * 程序清单：TCP客户端例子
  */
 #include <rtthread.h>
-#include <lwip/netdb.h> /* 为了解析主机名，需要包含netdb.h头文件 */
+#include <lwip/netdb.h>   /* 为了解析主机名，需要包含netdb.h头文件 */
 #include <lwip/sockets.h> /* 使用BSD socket，需要包含sockets.h头文件 */
 
 /* 发送用到的数据 */
@@ -633,104 +656,106 @@ ALIGN(4)
 static const char send_data[] = "This is TCP Client from RT-Thread.";
 void tcpclient(const char* url, int port)
 {
-	char *recv_data;
-	struct hostent *host;
-	int sock, bytes_received;
-	struct sockaddr_in server_addr;
-	int ret;
+    char *recv_data;
+    struct hostent *host;
+    int sock, bytes_received;
+    struct sockaddr_in server_addr;
+    int ret;
 
-	/* 通过函数入口参数url获得host地址（如果是域名，会做域名解析） */
-	host = gethostbyname(url);
+    /* 通过函数入口参数url获得host地址（如果是域名，会做域名解析） */
+    host = gethostbyname(url);
 
-	/* 分配用于存放接收数据的缓冲 */
-	recv_data = rt_malloc(1024);
-	if (recv_data == RT_NULL)
-	{
-		rt_kprintf("No memory\n");
-		return;
-	}
+    /* 分配用于存放接收数据的缓冲 */
+    recv_data = rt_malloc(1024);
+    if (recv_data == RT_NULL)
+    {
+        rt_kprintf("No memory\n");
+        return;
+    }
 
-	/* 创建一个socket，类型是SOCKET_STREAM，TCP类型 */
-	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-	{
-		/* 创建socket失败 */
-		rt_kprintf("Socket error\n");
+    /* 创建一个socket，类型是SOCKET_STREAM，TCP类型 */
+    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+    {
+        /* 创建socket失败 */
+        rt_kprintf("Socket error\n");
 
-		/* 释放接收缓冲 */
-		rt_free(recv_data);
-		return;
-	}
+        /* 释放接收缓冲 */
+        rt_free(recv_data);
+        return;
+    }
 
-	/* 初始化预连接的服务端地址 */
-	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(port);
-	server_addr.sin_addr = *((struct in_addr *) host->h_addr);
-	rt_memset(&(server_addr.sin_zero), 0, sizeof(server_addr.sin_zero));
+    /* 初始化预连接的服务端地址 */
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(port);
+    server_addr.sin_addr = *((struct in_addr *) host->h_addr);
+    rt_memset(&(server_addr.sin_zero), 0, sizeof(server_addr.sin_zero));
 
-	/* 连接到服务端 */
-	if (connect(sock, (struct sockaddr *) &server_addr, 
-		sizeof(struct sockaddr)) == -1)
-	{
-		/* 连接失败 */
-		rt_kprintf("Connect error\n");
+    /* 连接到服务端 */
+    if (connect(sock, (struct sockaddr *) &server_addr,
+                sizeof(struct sockaddr)) == -1)
+    {
+        /* 连接失败 */
+        rt_kprintf("Connect error\n");
 
-		/*释放接收缓冲 */
-		rt_free(recv_data);
-		return;
-	}
+        /*释放接收缓冲 */
+        rt_free(recv_data);
+        return;
+    }
 
-	while (1)
-	{
-		/* 从sock连接中接收最大1024字节数据 */
-		bytes_received = recv(sock, recv_data, 1024, 0);
-		if (bytes_received < 0)
-		{
-			/* 接收失败，关闭这个连接 */
-			lwip_close(sock);
+    while (1)
+    {
+        /* 从sock连接中接收最大1024字节数据 */
+        bytes_received = recv(sock, recv_data, 1024, 0);
+        if (bytes_received < 0)
+        {
+            /* 接收失败，关闭这个连接 */
+            lwip_close(sock);
 
-			/* 释放接收缓冲 */
-			rt_free(recv_data);
-			break;
-		}else if (bytes_received == 0)
-		{
-			/* 打印recv函数返回值为0的警告信息 */
-			rt_kprintf("\nReceived warning,recv function return 0. \r\n");						
-		}
+            /* 释放接收缓冲 */
+            rt_free(recv_data);
+            break;
+        }
+        else if (bytes_received == 0)
+        {
+            /* 打印recv函数返回值为0的警告信息 */
+            rt_kprintf("\nReceived warning,recv function return 0. \r\n");
+        }
 
-		/* 有接收到数据，把末端清零 */
-		recv_data[bytes_received] = '\0';
+        /* 有接收到数据，把末端清零 */
+        recv_data[bytes_received] = '\0';
 
-		if (strcmp(recv_data, "q") == 0 || strcmp(recv_data, "Q") == 0)
-		{
-			/* 如果是首字母是q或Q，关闭这个连接 */
-		    lwip_close(sock);
+        if (strcmp(recv_data, "q") == 0 || strcmp(recv_data, "Q") == 0)
+        {
+            /* 如果是首字母是q或Q，关闭这个连接 */
+            lwip_close(sock);
 
-			/* 释放接收缓冲 */
-			rt_free(recv_data);
-			break;
-		}
-		else
-		{
-			/* 在控制终端显示收到的数据 */
-			rt_kprintf("\nRecieved data = %s ", recv_data);
-		}
+            /* 释放接收缓冲 */
+            rt_free(recv_data);
+            break;
+        }
+        else
+        {
+            /* 在控制终端显示收到的数据 */
+            rt_kprintf("\nRecieved data = %s ", recv_data);
+        }
 
-		/* 发送数据到sock连接 */
-		ret = send(sock, send_data, strlen(send_data), 0);
-		if (ret < 0)
-	        {
-	            /* 接收失败，关闭这个连接 */
-	            lwip_close(sock);
-	            rt_kprintf("\nsend error,close the socket.\r\n");		
-	            break;
-	        }else if (ret == 0)
-		{
-	            /* 打印send函数返回值为0的警告信息 */
-	            rt_kprintf("\n Send warning,send function return 0. \r\n");						
-		}		
-	}
+        /* 发送数据到sock连接 */
+        ret = send(sock, send_data, strlen(send_data), 0);
+        if (ret < 0)
+        {
+            /* 接收失败，关闭这个连接 */
+            lwip_close(sock);
+            rt_kprintf("\nsend error,close the socket.\r\n");
+            break;
+        }
+        else if (ret == 0)
+        {
+            /* 打印send函数返回值为0的警告信息 */
+            rt_kprintf("\n Send warning,send function return 0. \r\n");
+        }
+    }
 
-	return;
+    return;
 }
 
 #ifdef RT_USING_FINSH
@@ -738,4 +763,4 @@ void tcpclient(const char* url, int port)
 /* 输出tcpclient函数到finsh shell中 */
 FINSH_FUNCTION_EXPORT(tcpclient, startup tcp client);
 #endif
-~~~
+```
