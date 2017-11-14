@@ -79,8 +79,11 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 env也携带了`Python & scons`环境，只需在`rt-thread\bsp\stm32f429-apollo` 目录中运行：
 
     scons
-
 即可使用默认的ARM_GCC工具链编译RT-Thread了,scons操作和常规使用方法是相同的。
+
+![image](./figures/use_scons.png)
+编译成功：
+![image](./figures/scons_done.png)
 
 ### 3.2 menuconfig的简单使用方法：
 
