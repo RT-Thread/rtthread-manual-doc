@@ -22,83 +22,72 @@ env工具包含了RT-Thread源代码开发编译环境和组件包管理系统�
 
 * env环境编译器默认使用GNU GCC，工具链目录默认设置为 `env\tools\gnu_gcc\arm_gcc\mingw\bin`。版本为：gcc version 5.4.1 20160919 (release)。
 
-* 在电脑上装好git，git的下载地址为`https://git-scm.com/downloads`,根据向导正确安装git，并将git添加到系统环境变量。env工具提供的git安装包路径为：env\tools\git。组件包管理功能需要git的支持。
+* 在电脑上装好git，git的下载地址为`https://git-scm.com/downloads`,根据向导正确安装git，并将git添加到系统环境变量。组件包管理功能需要git的支持。
 
 * 注意在工作环境中，所有的路径都不可以有中文字符或者空格。
 
 
-## 2.使用方法
+## 2.打开env控制台
 
 RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型界面来进行辅助，使得尽量减少修改配置文件的方式即可搭建好RT-Thread开发环境的方式。
 
-![image](./figures/console_bat.png)
+![image](./figures/console_exe.png)
 
-进入env目录，可以运行本目录下的 `console.bat `程序，它会配置一些环境变量，然后弹出控制台窗口。接下来对软件包的操作都是在控制台环境下进行的，下图为控制台窗口：
+进入env目录，可以运行本目录下的`console.exe`，如果打开失败可以尝试使用`console.bat`，它会配置一些环境变量，然后弹出控制台窗口。接下来对软件包的操作都是在控制台环境下进行的，下图为控制台窗口：
 
     因为需要设置env进程的环境变量，第一次启动可能会出现杀毒软件误报的情况，如果遇到了杀毒软件误报，允许console运行，然后将console添加至白名单即可。这个问题正在修复当中。
 
 ![image](./figures/console_window.png)
 
-## 3.针对BSP的配置
-
-### 3.1 环境变量的设置
+## 3.env的使用方法
+### 3.1 使用步骤
 
 #### 第一步：切换到工程目录
 
 打开控制台后，可以在命令行模式下使用cd命令切换到你想要配置的工程目录。
-例如工程目录为`F:\git_repositories\ART_wifi\firmware\app`，先进入工程根目录。
 
-#### 第二步：设置RTT_ROOT根目录
-可以通过命令：
+例如工程目录为:`rt-thread\bsp\stm32f429-apollo`，在命令行下使用cd命令切换到的bsp根目录。如果env和rt-thread不在一个盘符，可以先使用`e:`或者`d:`命令切换盘符，然后再使用cd命令。
 
-    set RTT_ROOT=your_rtthread_root_path
+![image](./figures/cd_stm32f429_apollo.png)
 
-的方式设置RT-Thread目录（其中your_rtthread_root_path请填写你的RT-Thread根目录位置，记住RT-Thread不要放于带空格或中文字符的目录路径下）。
 
-![image](./figures/set_rtt_root.png)
 
-#### 第三步：复制Kconfig文件到工程目录
-
-在使用env的`menuconfig`命令配置功能前，如果设备工程目录(bsp)中没有相应的`Kconfig`文件，可将`env`目录下的`Kconfig_bsp`文件复制到bsp根目录中。
-
-![image](./figures/copy2bsp.png)
-
-在bsp根目录中改名为：
-
-![image](./figures/renamekconfig.png)
-
-#### 第四步：更新env的在线组件包仓库列表
+#### 第二步：更新env的在线组件包仓库列表
 
 在使用`menuconfig`命令之前还需要使用
 
     pkgs --upgrade
 
-命令来更新env的组件包仓库列表
+命令来更新env的组件包仓库列表。（无需每次更新，需要查看最新包列表时更新即可。）
 
 ![image](./figures/upgrade_from_gitpackages.png)
 
-#### 第五步：使用menuconfig开始配置项目
+#### 第三步：使用menuconfig开始配置项目
 
 现在就可以在设备工程目录中使用`menuconfig`命令开始进行项目配置，如果没有出错接下来就可以看到`menuconfig`的界面了，如下图：
 
 ![image](./figures/menuconfig_window.png)
 
-### 3.2 常见错误提示
+使用`menuconfig`命令打开配置图形界面来配置rt-thread，可以在界面中可以看到和RT-Thread相关的配置项。
 
-#### 常见错误1
-如果没有使用`pkgs --upgrade`来更新列表就使用`menuconfig`命令会出现如下错误：
+选择好配置项之后按ESC键退出，选择保存修改即可自动生成rtconfig.h文件。
 
-![image](./figures/no_pkgs_upgrade_error.png)
+如果修改了`RT-Thread online packages`内的选项，想要下载在线组件包，可以使用`pkgs --update`命令来下载或者更新设置。
 
-重新使用`pkgs --upgrade`命令即可解决这个问题。
+### #第四步：BSP的编译
 
-#### 常见错误2
-设置了错误的RTT_ROOT，RTT_ROOT应该是rt-thread代码的根目录，而不是bsp的目录，重新使用set RTT_ROOT=your_rtthread_root_path设置RTT_ROOT即可。
+env也携带了`Python & scons`环境，只需在`rt-thread\bsp\stm32f429-apollo` 目录中运行：
 
-![image](./figures/error_cuowu_rttroot.png)
+    scons
+即可使用默认的ARM_GCC工具链编译RT-Thread了,scons操作和常规使用方法是相同的。
 
+![image](./figures/use_scons.png)
 
-### 3.3 menuconfig的简单使用方法：
+编译成功：
+
+![image](./figures/scons_done.png)
+
+### 3.2 menuconfig的简单使用方法：
 
 - 上下键：选择不同的行，移动到不同的（每一行的）选项上。
 
@@ -115,9 +104,11 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
   - Exit：直接退出当前的配置，当你更改了一些配置，但是又没有保存，此时会询问你是否要保存当前（已修改后的最新的）配置，然后再退出。
   - Help：针对你当前所在某个（行的）选项，查看其帮助信息。如果你对某个选项的功能不是很清楚就可以查看其Help，也可以可能查到写出到配置文件中的宏。
 
-### 3.4 修改工程配置
+### 3.3 使用menuconfig配置自己工程的方法
 
-#### 3.4.1 构建工程流程
+本章描述如何使用menuconfig来配置自己工程，正在完善中。
+
+#### 3.3.1 构建工程流程
 
 第一步：根据Kconfig的内容生成可视化配置菜单（使用menuconfig命令）。
 
@@ -127,7 +118,7 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 第四步：SConscript根据rtconfig.h中定义的宏决定哪些文件参与工程构建。
 
-#### 3.4.2 修改Kconfig 添加可视化配置选项
+#### 3.3.2 修改Kconfig 添加可视化配置选项
 
 修改Kconfig的过程，可以认为是构建流程的逆向过程。
 
