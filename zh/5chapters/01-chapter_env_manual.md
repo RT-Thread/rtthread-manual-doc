@@ -27,7 +27,7 @@ env工具包含了RT-Thread源代码开发编译环境和组件包管理系统�
 * 注意在工作环境中，所有的路径都不可以有中文字符或者空格。
 
 
-## 2.使用方法
+## 2.打开env控制台
 
 RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型界面来进行辅助，使得尽量减少修改配置文件的方式即可搭建好RT-Thread开发环境的方式。
 
@@ -39,9 +39,8 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 ![image](./figures/console_window.png)
 
-## 3.针对BSP的配置
-
-### 3.1 环境变量的设置
+## 3.env的使用方法
+### 3.1 使用步骤
 
 #### 第一步：切换到工程目录
 
@@ -75,9 +74,7 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 如果修改了`RT-Thread online packages`内的选项，想要下载在线组件包，可以使用`pkgs --update`命令来下载或者更新设置。
 
-
-
-#### 第四步：BSP的编译
+### #第四步：BSP的编译
 
 env也携带了`Python & scons`环境，只需在`rt-thread\bsp\stm32f429-apollo` 目录中运行：
 
@@ -85,22 +82,7 @@ env也携带了`Python & scons`环境，只需在`rt-thread\bsp\stm32f429-apollo
 
 即可使用默认的ARM_GCC工具链编译RT-Thread了,scons操作和常规使用方法是相同的。
 
-### 3.2 常见错误提示
-
-#### 常见错误1
-如果没有使用`pkgs --upgrade`来更新列表就使用`menuconfig`命令会出现如下错误：
-
-![image](./figures/no_pkgs_upgrade_error.png)
-
-重新使用`pkgs --upgrade`命令即可解决这个问题。
-
-#### 常见错误2
-设置了错误的RTT_ROOT，RTT_ROOT应该是rt-thread代码的根目录，而不是bsp的目录，重新使用set RTT_ROOT=your_rtthread_root_path设置RTT_ROOT即可。
-
-![image](./figures/error_cuowu_rttroot.png)
-
-
-### 3.3 menuconfig的简单使用方法：
+### 3.2 menuconfig的简单使用方法：
 
 - 上下键：选择不同的行，移动到不同的（每一行的）选项上。
 
