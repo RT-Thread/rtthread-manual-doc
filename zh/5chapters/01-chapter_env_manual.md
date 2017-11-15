@@ -74,7 +74,7 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 如果修改了`RT-Thread online packages`内的选项，想要下载在线组件包，可以使用`pkgs --update`命令来下载或者更新设置。
 
-####第四步：BSP的编译
+#### 第四步：BSP的编译
 
 - env也携带了`Python & scons`环境，只需在`rt-thread\bsp\stm32f429-apollo` 目录中运行：
 
