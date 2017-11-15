@@ -44,9 +44,9 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 #### 第一步：切换到BSP根目录
 
-打开控制台后，可以在命令行模式下使用cd命令切换到你想要配置的BSP根目录中。
+- 打开控制台后，可以在命令行模式下使用cd命令切换到你想要配置的BSP根目录中。
 
-例如工程目录为:`rt-thread\bsp\stm32f429-apollo`，在命令行下使用cd命令切换到的bsp根目录。如果env和rt-thread不在一个盘符，可以先使用`e:`或者`d:`命令切换盘符，然后再使用cd命令。
+例如工程目录为:`rt-thread\bsp\stm32f429-apollo`，在命令行下使用cd命令切换到的BSP根目录。如果env和rt-thread不在一个盘符，可以先使用`e:`或者`d:`命令切换盘符，然后再使用cd命令。
 
 ![image](./figures/cd_stm32f429_apollo.png)
 
@@ -54,7 +54,7 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 #### 第二步：更新env的在线组件包仓库列表
 
-在使用`menuconfig`命令之前还需要使用
+- 在使用`menuconfig`命令之前还需要使用
 
     pkgs --upgrade
 
@@ -62,9 +62,9 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 ![image](./figures/pkgs_upgrade.png)
 
-#### 第三步：使用menuconfig开始配置项目
+#### 第三步：使用menuconfig配置BSP
 
-现在就可以在设备工程目录中使用`menuconfig`命令开始进行项目配置，如果没有出错接下来就可以看到`menuconfig`的界面了，如下图：
+- 现在就可以在设备工程目录中使用`menuconfig`命令开始进行项目配置，如果没有出错接下来就可以看到`menuconfig`的界面了，如下图：
 
 ![image](./figures/menuconfig_window.png)
 
@@ -76,7 +76,7 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 ####第四步：BSP的编译
 
-env也携带了`Python & scons`环境，只需在`rt-thread\bsp\stm32f429-apollo` 目录中运行：
+- env也携带了`Python & scons`环境，只需在`rt-thread\bsp\stm32f429-apollo` 目录中运行：
 
     scons
 即可使用默认的ARM_GCC工具链编译RT-Thread了,scons操作和常规使用方法是相同的。
@@ -87,7 +87,7 @@ env也携带了`Python & scons`环境，只需在`rt-thread\bsp\stm32f429-apollo
 
 ![image](./figures/scons_done.png)
 
-### 3.2 menuconfig的简单使用方法：
+### 3.2 menuconfig的操作介绍
 
 - 上下键：选择不同的行，移动到不同的（每一行的）选项上。
 
@@ -104,37 +104,7 @@ env也携带了`Python & scons`环境，只需在`rt-thread\bsp\stm32f429-apollo
   - Exit：直接退出当前的配置，当你更改了一些配置，但是又没有保存，此时会询问你是否要保存当前（已修改后的最新的）配置，然后再退出。
   - Help：针对你当前所在某个（行的）选项，查看其帮助信息。如果你对某个选项的功能不是很清楚就可以查看其Help，也可以可能查到写出到配置文件中的宏。
 
-### 3.3 使用menuconfig配置自己工程的方法
 
-本章描述如何使用menuconfig来配置自己工程，正在完善中。目前RT-Thread还没有对所有的bsp做menuconfig的支持
-
-#### 3.3.1 构建工程流程
-
-第一步：根据Kconfig的内容生成可视化配置菜单（使用menuconfig命令）。
-
-第二步：配置完毕，保存退出可视化菜单生成.config文件。
-
-第三步：根据.config的内容生成rtconfig.h文件。
-
-第四步：SConscript根据rtconfig.h中定义的宏决定哪些文件参与工程构建。
-
-#### 3.3.2 修改Kconfig 添加可视化配置选项
-
-修改Kconfig的过程，可以认为是构建流程的逆向过程。
-
-第一步：从SConscript中查找需要添加进工程的文件对应的控制宏，修改Kconfig时会用到。
-
-以stm32f10x工程为例：需要添加core_cm3.c到工程，该文件由宏`RT_USING_BSP_CMSIS`所控制（见rt-thread\bsp\stm32f10x\Libraries\SConscript）。
-
-第二步：确定修改哪个目录下的Kconfig文件。
-
-以stm32f10x工程为例：core_cm3.c属于BSP中的文件，期待配置选项出现在`BSP DRIVERS`配置目录下，则需要修改rt-thread\bsp\Kconfig。
-
-第三步：修改Kconfig。
-
-以stm32f10x工程为例：打开rt-thread\bsp\Kconfig文件，找到`menu "BSP DRIVERS"`,在下一行填写`config RT_USING_BSP_CMSIS`和`其他的配置辅助信息`（见下图），重新menuconfig则可视化配置界面出现刚才添加的配置选项。
-
-![image](./figures/menu_bsp_cmsis.png)
 
 ## 4.包管理器
 
@@ -186,24 +156,47 @@ env也携带了`Python & scons`环境，只需在`rt-thread\bsp\stm32f429-apollo
 
 如果解压出的组件包被人为修改，那么在删除组件包的时候会提示是否要删除被修改的文件。如果选择保留文件，那么请自行保存好这些文件，避免在下次更新包时被覆盖。
 
-支持在线下载的组件包在RT-thread online packages选项中，根据项目需要来选择所需的组件。目前提供了不同类型的组件包以供测试。
+支持在线下载的组件包在RT-thread online packages选项中，根据项目需要来选择所需的组件。
 
-## 5.编译RT-Thread
+## 5.高级篇
+### 5.1如何使用menuconfig来配置自己的工程
 
-### 5.1 scons编译工具链的配置
+- 目前RT-Thread还没有对所有的bsp做menuconfig的支持。
 
-### 5.2 开始编译工程吧
+已经支持的bsp有`stm32f429-apollo,stm32f429-disco,lpc54608-LPCXpresso`等。用户可以将env根目录下的Kconfig文件拷贝到自己的工程中，参考这些已经做好menuconfig支持的BSP来构建自己的项目工程。
 
-RT-Thread 软件包环境也携带了Python & scons环境，所以只需要在设备工程目录中运行：
+本章就来介绍如何给自己的工程添加menuconfig支持，让自己的项目可以像上面的那些bsp一样可以使用图形化的配置方式。
 
-    scons
+#### 3.3.1 构建工程流程
 
-就可以编译RT-Thread了。一般来说，工程所需要的环境变量都会在控制台环境中已经配置好。
+第一步：根据Kconfig的内容生成可视化配置菜单（使用menuconfig命令）。
 
-## 6.高级篇
-### 6.1如何制作一个组件包
-### 6.2如何制作一个组件包下载索引
-#### 6.2.1 制作一个git形式的组件包下载索引
+第二步：配置完毕，保存退出可视化菜单生成.config文件。
+
+第三步：根据.config的内容生成rtconfig.h文件。
+
+第四步：SConscript根据rtconfig.h中定义的宏决定哪些文件参与工程构建。
+
+#### 3.3.2 修改Kconfig 添加可视化配置选项
+
+修改Kconfig的过程，可以认为是构建流程的逆向过程。
+
+第一步：从SConscript中查找需要添加进工程的文件对应的控制宏，修改Kconfig时会用到。
+
+以stm32f10x工程为例：需要添加core_cm3.c到工程，该文件由宏`RT_USING_BSP_CMSIS`所控制（见rt-thread\bsp\stm32f10x\Libraries\SConscript）。
+
+第二步：确定修改哪个目录下的Kconfig文件。
+
+以stm32f10x工程为例：core_cm3.c属于BSP中的文件，期待配置选项出现在`BSP DRIVERS`配置目录下，则需要修改rt-thread\bsp\Kconfig。
+
+第三步：修改Kconfig。
+
+以stm32f10x工程为例：打开rt-thread\bsp\Kconfig文件，找到`menu "BSP DRIVERS"`,在下一行填写`config RT_USING_BSP_CMSIS`和`其他的配置辅助信息`（见下图），重新menuconfig则可视化配置界面出现刚才添加的配置选项。
+
+![image](./figures/menu_bsp_cmsis.png)
+### 5.2如何制作一个组件包
+### 5.3如何制作一个组件包下载索引
+#### 5.3.1 制作一个git形式的组件包下载索引
 使用命令`pkgs --wizard`开始制作组件包下载索引：
 
 ![image](./figures/pkgs_wizard.png)
@@ -253,7 +246,7 @@ package.json文件内容如下：
 使用git进行PR的方法请参考：
     https://github.com/RTThread/rtthreadmanualdoc/blob/master/zh/9appendix/03_github.md
 
-#### 6.2.2 制作一个压缩包形式的组件包下载索引
+#### 5.3.2 制作一个压缩包形式的组件包下载索引
 
 制作一个压缩包形式的组件包下载索引大体上和上面的操作步骤是相同的。唯一不同的地方在于json文件，一个压缩包形式的组件包json文件如下：
 
