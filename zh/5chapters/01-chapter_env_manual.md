@@ -49,15 +49,7 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 ![image](./figures/cd_stm32f429_apollo.png)
 
-### 第二步：选定BSP配置文件
-
-- 使用`menuconfig --config stm32f429_apollo_config`命令来选定配置文件并生成rtconfig.h文件，
-
-- 如果bsp中有默认的`.config`文件可以跳过这一步。
-
-  ![image](./figures/menuconfig_config_xx.png)
-
-### 第三步：BSP的编译
+### 第二步：BSP的编译
 
 - env中携带了`Python & scons`环境，只需在`rt-thread\bsp\stm32f429-apollo` 目录中运行`scons`命令即可根据`rtconfig.h`中的配置使用默认的ARM_GCC工具链编译BSP。
 
@@ -68,6 +60,7 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 ![image](./figures/scons_done.png)
 
 ## 4.menuconfig的操作介绍
+### 4.1使用menuconfig配置工程
 
 - 在设备工程目录中可以使用`menuconfig`命令对BSP的配置进行修改，可以看到`menuconfig`的界面，如下图：
 
@@ -90,6 +83,14 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
   - Select：此时一般都是所在（的行的）选项，后面有三个短横线加上一个右箭头，即 —>，表示此项下面还有子选项，即进入子菜单
   - Exit：直接退出当前的配置，当你更改了一些配置，但是又没有保存，此时会询问你是否要保存当前（已修改后的最新的）配置，然后再退出。
   - Help：针对你当前所在某个（行的）选项，查看其帮助信息。如果你对某个选项的功能不是很清楚就可以查看其Help，也可以可能查到写出到配置文件中的宏。
+
+### 4.2选定BSP配置文件
+
+- 使用`menuconfig --config`命令后面加上存储的配置项可以选定配置文件并生成rtconfig.h文件。
+
+- 如果bsp中有默认可用的`.config`文件可以跳过这一步。
+
+  ![image](./figures/menuconfig_config_xx.png)
 
 ## 5.包管理器
 
