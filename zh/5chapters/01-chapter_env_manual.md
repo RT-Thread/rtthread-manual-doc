@@ -42,9 +42,9 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 ## 3.env的使用方法
 ### 3.1 使用步骤
 
-#### 第一步：切换到工程目录
+#### 第一步：切换到BSP根目录
 
-打开控制台后，可以在命令行模式下使用cd命令切换到你想要配置的工程目录。
+打开控制台后，可以在命令行模式下使用cd命令切换到你想要配置的BSP根目录中。
 
 例如工程目录为:`rt-thread\bsp\stm32f429-apollo`，在命令行下使用cd命令切换到的bsp根目录。如果env和rt-thread不在一个盘符，可以先使用`e:`或者`d:`命令切换盘符，然后再使用cd命令。
 
@@ -60,7 +60,7 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 命令来更新env的组件包仓库列表。（无需每次更新，需要查看最新包列表时更新即可。）
 
-![image](./figures/upgrade_from_gitpackages.png)
+![image](./figures/pkgs_upgrade.png)
 
 #### 第三步：使用menuconfig开始配置项目
 
@@ -74,7 +74,7 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 如果修改了`RT-Thread online packages`内的选项，想要下载在线组件包，可以使用`pkgs --update`命令来下载或者更新设置。
 
-### #第四步：BSP的编译
+####第四步：BSP的编译
 
 env也携带了`Python & scons`环境，只需在`rt-thread\bsp\stm32f429-apollo` 目录中运行：
 
@@ -106,7 +106,7 @@ env也携带了`Python & scons`环境，只需在`rt-thread\bsp\stm32f429-apollo
 
 ### 3.3 使用menuconfig配置自己工程的方法
 
-本章描述如何使用menuconfig来配置自己工程，正在完善中。
+本章描述如何使用menuconfig来配置自己工程，正在完善中。目前RT-Thread还没有对所有的bsp做menuconfig的支持
 
 #### 3.3.1 构建工程流程
 
