@@ -40,46 +40,26 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 ![image](./figures/console_window.png)
 
 ## 3.env的使用方法
-### 3.1 使用步骤
 
-#### 第一步：切换到工程目录
+### 第一步：切换到BSP根目录
 
-打开控制台后，可以在命令行模式下使用cd命令切换到你想要配置的工程目录。
+- 打开控制台后，可以在命令行模式下使用cd命令切换到你想要配置的BSP根目录中。
 
-例如工程目录为:`rt-thread\bsp\stm32f429-apollo`，在命令行下使用cd命令切换到的bsp根目录。如果env和rt-thread不在一个盘符，可以先使用`e:`或者`d:`命令切换盘符，然后再使用cd命令。
+例如工程目录为:`rt-thread\bsp\stm32f429-apollo`，在命令行下使用cd命令切换到的BSP根目录。如果env和rt-thread不在一个盘符，可以先使用`e:`或者`d:`命令切换盘符，然后再使用cd命令。
 
 ![image](./figures/cd_stm32f429_apollo.png)
 
+### 第二步：选定BSP配置文件
 
+- 使用`menuconfig --config stm32f429_apollo_config`命令来选定配置文件并生成rtconfig.h文件，
 
-#### 第二步：更新env的在线组件包仓库列表
+- 如果bsp中有默认的`.config`文件可以跳过这一步。
 
-在使用`menuconfig`命令之前还需要使用
+  ![image](./figures/menuconfig_config_xx.png)
 
-    pkgs --upgrade
+### 第三步：BSP的编译
 
-命令来更新env的组件包仓库列表。（无需每次更新，需要查看最新包列表时更新即可。）
-
-![image](./figures/upgrade_from_gitpackages.png)
-
-#### 第三步：使用menuconfig开始配置项目
-
-现在就可以在设备工程目录中使用`menuconfig`命令开始进行项目配置，如果没有出错接下来就可以看到`menuconfig`的界面了，如下图：
-
-![image](./figures/menuconfig_window.png)
-
-使用`menuconfig`命令打开配置图形界面来配置rt-thread，可以在界面中可以看到和RT-Thread相关的配置项。
-
-选择好配置项之后按ESC键退出，选择保存修改即可自动生成rtconfig.h文件。
-
-如果修改了`RT-Thread online packages`内的选项，想要下载在线组件包，可以使用`pkgs --update`命令来下载或者更新设置。
-
-### #第四步：BSP的编译
-
-env也携带了`Python & scons`环境，只需在`rt-thread\bsp\stm32f429-apollo` 目录中运行：
-
-    scons
-即可使用默认的ARM_GCC工具链编译RT-Thread了,scons操作和常规使用方法是相同的。
+- env中携带了`Python & scons`环境，只需在`rt-thread\bsp\stm32f429-apollo` 目录中运行`scons`命令即可根据`rtconfig.h`中的配置使用默认的ARM_GCC工具链编译BSP。
 
 ![image](./figures/use_scons.png)
 
@@ -87,58 +67,33 @@ env也携带了`Python & scons`环境，只需在`rt-thread\bsp\stm32f429-apollo
 
 ![image](./figures/scons_done.png)
 
-### 3.2 menuconfig的简单使用方法：
+## 4.menuconfig的操作介绍
 
+- 在设备工程目录中可以使用`menuconfig`命令对BSP的配置进行修改，可以看到`menuconfig`的界面，如下图：
+
+![image](./figures/menuconfig_window.png)
+
+使用`menuconfig`命令会读取当前目录下的`.config`文件，打开图形界面将`.config`文件中来配置项显示出来，可以在界面中可以看到和RT-Thread相关的配置项，此时的默认配置就是存储在`.config`文件中的。
+
+选择好配置项之后按ESC键退出，选择保存修改即可自动生成rtconfig.h文件。
+
+- 对于某个特定的BSP可能会有多种配置，比如最小版本或者全功能版本，所以有多个不同的配置文件。不同配置文件的文件名为`xxx_config`格式，可以为当前BSP选择一个配置文件。
+- 使用上面第二步中的命令，可以将写好并存储起来的配置文件，如`stm32f429_apollo_config`里面的内容复制到bsp目录下的`.config`文件中，并根据`.config`文件中的内容来生成`rtconfig.h`文件。
 - 上下键：选择不同的行，移动到不同的（每一行的）选项上。
-
 - 空格键：用于在选择该选项，取消选择该选项，之间来回切换。
 
   - 选择该（行所在的）选项：对应的该选项前面就变成了，中括号里面一个星号，即 **[ \* ]**，表示被选中了。
   - 如果是取消该选项，就变成了，只有一个中括号，里面是空的，即：[   ]
-
 - 左右键：用于在Select/Exit/Help之前切换
-
 - 回车键：左右键切换到了某个键上，此时回车键，就执行相应的动作：
 
   - Select：此时一般都是所在（的行的）选项，后面有三个短横线加上一个右箭头，即 —>，表示此项下面还有子选项，即进入子菜单
   - Exit：直接退出当前的配置，当你更改了一些配置，但是又没有保存，此时会询问你是否要保存当前（已修改后的最新的）配置，然后再退出。
   - Help：针对你当前所在某个（行的）选项，查看其帮助信息。如果你对某个选项的功能不是很清楚就可以查看其Help，也可以可能查到写出到配置文件中的宏。
 
-### 3.3 使用menuconfig配置自己工程的方法
+## 5.包管理器
 
-本章描述如何使用menuconfig来配置自己工程，正在完善中。
-
-#### 3.3.1 构建工程流程
-
-第一步：根据Kconfig的内容生成可视化配置菜单（使用menuconfig命令）。
-
-第二步：配置完毕，保存退出可视化菜单生成.config文件。
-
-第三步：根据.config的内容生成rtconfig.h文件。
-
-第四步：SConscript根据rtconfig.h中定义的宏决定哪些文件参与工程构建。
-
-#### 3.3.2 修改Kconfig 添加可视化配置选项
-
-修改Kconfig的过程，可以认为是构建流程的逆向过程。
-
-第一步：从SConscript中查找需要添加进工程的文件对应的控制宏，修改Kconfig时会用到。
-
-以stm32f10x工程为例：需要添加core_cm3.c到工程，该文件由宏`RT_USING_BSP_CMSIS`所控制（见rt-thread\bsp\stm32f10x\Libraries\SConscript）。
-
-第二步：确定修改哪个目录下的Kconfig文件。
-
-以stm32f10x工程为例：core_cm3.c属于BSP中的文件，期待配置选项出现在`BSP DRIVERS`配置目录下，则需要修改rt-thread\bsp\Kconfig。
-
-第三步：修改Kconfig。
-
-以stm32f10x工程为例：打开rt-thread\bsp\Kconfig文件，找到`menu "BSP DRIVERS"`,在下一行填写`config RT_USING_BSP_CMSIS`和`其他的配置辅助信息`（见下图），重新menuconfig则可视化配置界面出现刚才添加的配置选项。
-
-![image](./figures/menu_bsp_cmsis.png)
-
-## 4.包管理器
-
-### 4.1包管理器介绍
+### 5.1包管理器介绍
 
 包管理器是一个组件包平台，用户可以通过包管理器来获取，添加或者删除自己所需要的组件包。还可以提供自己使用的组件包到平台来。通过包管理器的`pkgs --wizard`可以制作组件包下载索引，提交组件包下载索引到如下地址即可将自己制作的组件包发布出来：
 
@@ -154,7 +109,7 @@ env也携带了`Python & scons`环境，只需在`rt-thread\bsp\stm32f429-apollo
 
 目前支持的组件包格式有`.zip,.rar.gz,rar.bz2`。同时支持托管在git上，并且附带有submudule的组件包。比如mqtt组件包的地址为`https://github.com/RT-Thread-packages/paho-mqtt.git`。
 
-### 4.2包管理器命令
+### 5.2包管理器命令
 
 包管理器的操作主要使用pkgs命令，可以使用 `pkgs -h`来获取使用帮助。 注意：在使用menuconfig选择在线包之前，需要先使用` pkgs --upgrade` 命令更新env的packages文件夹。请预先在电脑上装好git工具。
 
@@ -166,44 +121,46 @@ env也携带了`Python & scons`环境，只需在`rt-thread\bsp\stm32f429-apollo
     example：
     使用pkgs --upgrade命令后，env环境会自动从默认git地址： `https://github.com/RT-Thread/packages.git` 来更新本地包。后续会支持更新源列表。
 
-使用menuconfig来配置项目所需要的组件包，然后通过pkgs --update命令来更新项目中的组件包。如果不想要某个组件包，可以在menuconfig的配置中去掉包选项，然后再次使用`pkgs --update`命令更新即可。
+#### 第一步：更新env的在线组件包仓库列表
 
-#### 1.选中所需组件包：
+- 使用`pkgs --upgrade`命令来更新env的组件包仓库列表。
+
+![image](./figures/pkgs_upgrade.png)
+
+#### 第二步：配置所需的组件包
+
+- 支持在线下载的组件包在RT-thread online packages选项中，使用menuconfig来选择项目所需要的组件包，然后通过pkgs --update命令来更新项目中的组件包。如果不想要某个组件包，可以在menuconfig的配置中去掉包选项，然后再次使用`pkgs --update`命令更新即可。
+
+##### 1.选中所需组件包：
 
 ![image](./figures/select_package.png)
 
-#### 2.按下esc键退出选择yes按下回车即可保存本次配置：
+##### 2.按下esc键退出选择yes按下回车即可保存本次配置
 
 ![image](./figures/confirm_select.png)
 
-#### 3.使用pkgs --update命令进行更新：
+##### 3.使用pkgs --update命令使配置生效
 
 ![image](./figures/pkgs_update_packages.png)
 
-此时bsp中的packages文件夹里就会配置里选择下载的组件了，尝试使用scons工具编译或者生成工程吧。
+此时就会在线下载相应的组件包，并解压到bsp中的packages文件夹里。
 
 如果想要去除某个组件包，只需要重新进入`menuconfig`，去掉软件包的勾选，然后再次使用`pkgs --update`命令更新即可。
 
 如果解压出的组件包被人为修改，那么在删除组件包的时候会提示是否要删除被修改的文件。如果选择保留文件，那么请自行保存好这些文件，避免在下次更新包时被覆盖。
 
-支持在线下载的组件包在RT-thread online packages选项中，根据项目需要来选择所需的组件。目前提供了不同类型的组件包以供测试。
-
-## 5.编译RT-Thread
-
-### 5.1 scons编译工具链的配置
-
-### 5.2 开始编译工程吧
-
-RT-Thread 软件包环境也携带了Python & scons环境，所以只需要在设备工程目录中运行：
-
-    scons
-
-就可以编译RT-Thread了。一般来说，工程所需要的环境变量都会在控制台环境中已经配置好。
-
 ## 6.高级篇
-### 6.1如何制作一个组件包
-### 6.2如何制作一个组件包下载索引
-#### 6.2.1 制作一个git形式的组件包下载索引
+### 6.1关于menuconfig的支持
+
+- 目前RT-Thread还没有对所有的bsp做menuconfig的支持，也就是说有些bsp暂时还不能使用menuconfig来进行配置，这些BSP会逐渐完善起来。
+  已经支持的bsp有`stm32f429-apollo,stm32f429-disco,lpc54608-LPCXpresso`等。
+
+- menuconfig中选项的修改方法：
+  如果想在menuconfig的配置项中添加宏定义，则可以修改bsp下的Kconfig文件，修改方法可以在网络中搜索`Kconfig语法`关键字获得详细的说明文档，也可以参考RT-Thread中的Kconfig文件或者已经支持过menuconfig的bsp中的Kconfig文件。
+
+### 6.2如何制作一个组件包
+### 6.3如何制作一个组件包下载索引
+#### 6.3.1 制作一个git形式的组件包下载索引
 使用命令`pkgs --wizard`开始制作组件包下载索引：
 
 ![image](./figures/pkgs_wizard.png)
@@ -246,14 +203,14 @@ package.json文件内容如下：
 
 ![image](./figures/pkgs_ready2commit.png)
 
-接下来我们需要将组件包索引通过PR流程推送到`https://github.com/RT-Thread-packages`，我们需要将我们的组件包放在packages相应的文件夹下后再进行推送。
+接下来我们需要将组件包索引通过PR流程推送到`https://github.com/RT-Thread/packages`，我们需要将我们的组件包放在packages相应的文件夹下后再进行推送。
 
 ![image](./figures/pkgs_mqtt_add_dir.png)
 
 使用git进行PR的方法请参考：
     https://github.com/RTThread/rtthreadmanualdoc/blob/master/zh/9appendix/03_github.md
 
-#### 6.2.2 制作一个压缩包形式的组件包下载索引
+#### 6.3.2 制作一个压缩包形式的组件包下载索引
 
 制作一个压缩包形式的组件包下载索引大体上和上面的操作步骤是相同的。唯一不同的地方在于json文件，一个压缩包形式的组件包json文件如下：
 
