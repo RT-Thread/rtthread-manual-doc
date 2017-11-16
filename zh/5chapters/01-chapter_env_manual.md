@@ -209,7 +209,7 @@ package.json文件内容如下：
 ![image](./figures/pkgs_mqtt_add_dir.png)
 
 使用git进行PR的方法请参考：
-    https://github.com/RTThread/rtthreadmanualdoc/blob/master/zh/9appendix/03_github.md
+    https://github.com/RT-Thread/rtthread-manual-doc/blob/master/zh/9appendix/03_github.md
 
 #### 6.3.2 制作一个压缩包形式的组件包下载索引
 
