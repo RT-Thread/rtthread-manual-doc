@@ -15,14 +15,14 @@ env工具提供了简单易用的配置剪裁工具，用来对内核和组件�
 - 使用灵活，自动处理依赖，功能开关彻底；
 - 自动生成rtconfig.h，无需手动修改；
 - 使用scons工具生成工程，提供编译环境，操作简单；
-- 提供多种组件包，模块化组件包耦合关联少，可维护性好；
-- 组件包可在线下载，软件包持续集成，包可靠性高；
+- 提供多种软件包，模块化软件包耦合关联少，可维护性好；
+- 软件包可在线下载，软件包持续集成，包可靠性高；
 ## 1.2 准备工作
-env工具包含了RT-Thread源代码开发编译环境和组件包管理系统。
+env工具包含了RT-Thread源代码开发编译环境和软件包管理系统。
 
 * env环境编译器默认使用GNU GCC，工具链目录默认设置为 `env\tools\gnu_gcc\arm_gcc\mingw\bin`。版本为：gcc version 5.4.1 20160919 (release)。
 
-* 在电脑上装好git，git的下载地址为`https://git-scm.com/downloads`,根据向导正确安装git，并将git添加到系统环境变量。组件包管理功能需要git的支持。
+* 在电脑上装好git，git的下载地址为`https://git-scm.com/downloads`,根据向导正确安装git，并将git添加到系统环境变量。软件包管理功能需要git的支持。
 
 * 注意在工作环境中，所有的路径都不可以有中文字符或者空格。
 
@@ -93,42 +93,42 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 ### 5.1 包管理器介绍
 
-包管理器是一个组件包平台，用户可以通过包管理器来获取，添加或者删除自己所需要的组件包。还可以提供自己使用的组件包到平台来。通过包管理器的`pkgs --wizard`可以制作组件包下载索引，提交组件包下载索引到如下地址即可将自己制作的组件包发布出来：
+包管理器是一个软件包平台，用户可以通过包管理器来获取，添加或者删除自己所需要的软件包。还可以提供自己使用的软件包到平台来。通过包管理器的`pkgs --wizard`可以制作软件包下载索引，提交软件包下载索引到如下地址即可将自己制作的软件包发布出来：
 
     https://github.com/RT-Thread/packages.git
 
 ![image](./figures/rtt_packages.png)
 
-组件包代码本身可以存储在自己的网络存储空间，也可以提交到The packages repositories of RT-Thread中审核并管理，地址如下：
+软件包代码本身可以存储在自己的网络存储空间，也可以提交到The packages repositories of RT-Thread中审核并管理，地址如下：
 
     https://github.com/RT-Thread-packages
 
 ![image](./figures/pkgs_repo_rtt.png)
 
-目前支持的组件包格式有`.zip,.rar.gz,rar.bz2`。同时支持托管在git上，并且附带有submudule的组件包。比如mqtt组件包的地址为`https://github.com/RT-Thread-packages/paho-mqtt.git`。
+目前支持的软件包格式有`.zip,.rar.gz,rar.bz2`。同时支持托管在git上，并且附带有submudule的软件包。比如mqtt软件包的地址为`https://github.com/RT-Thread-packages/paho-mqtt.git`。
 
 ### 5.2 包管理器命令
 
 包管理器的操作主要使用pkgs命令，可以使用 `pkgs -h`来获取使用帮助。 注意：在使用menuconfig选择在线包之前，需要先使用` pkgs --upgrade` 命令更新env的packages文件夹。请预先在电脑上装好git工具。
 
-    pkgs --list            列出当前使用的组件包列表
-    pkgs --update          读取目前menuconfig对项目的配置，和旧的项目配置做对比，然后更新组件包
-    pkgs --wizard          组件包制作向导，根据提示输入来制作包向导文件夹
-    pkgs --upgrade         从reposource更新env的本地packages文件夹
+    pkgs --list            列出当前使用的软件包列表
+    pkgs --update          读取目前menuconfig对项目的配置，和旧的项目配置做对比，然后更新软件包
+    pkgs --wizard          软件包制作向导，根据提示输入来制作包向导文件夹
+    pkgs --upgrade         从reposource更新env的本地packages文件夹,同时也会更新env自身的功能代码
     example：
-    使用pkgs --upgrade命令后，env环境会自动从默认git地址： `https://github.com/RT-Thread/packages.git` 来更新本地包。后续会支持更新源列表。
+    使用pkgs --upgrade命令后，env环境会自动从默认git地址： `https://github.com/RT-Thread/packages.git` 来更新本地包列表，同时升级自身的功能代码。后续会支持更新源列表。
 
-#### 第一步：更新env的在线组件包仓库列表 (如果软件包列表已经更新，可忽略这步)
+#### 第一步：更新env的在线软件包仓库列表 (如果软件包列表已经更新，可忽略这步)
 
-- 使用`pkgs --upgrade`命令来更新env的组件包仓库列表。
+- 使用`pkgs --upgrade`命令来更新env的软件包仓库列表。
 
 ![image](./figures/pkgs_upgrade.png)
 
-#### 第二步：配置所需的组件包
+#### 第二步：配置所需的软件包
 
-- 支持在线下载的组件包在RT-thread online packages选项中，使用menuconfig来选择项目所需要的组件包，然后通过pkgs --update命令来更新项目中的组件包。如果不想要某个组件包，可以在menuconfig的配置中去掉包选项，然后再次使用`pkgs --update`命令更新即可。
+- 支持在线下载的软件包在RT-thread online packages选项中，使用menuconfig来选择项目所需要的软件包，然后通过pkgs --update命令来更新项目中的软件包。如果不想要某个软件包，可以在menuconfig的配置中去掉包选项，然后再次使用`pkgs --update`命令更新即可。
 
-##### 1.选中所需组件包：
+##### 1.选中所需软件包：
 
 ![image](./figures/select_package.png)
 
@@ -140,11 +140,11 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 ![image](./figures/pkgs_update_packages.png)
 
-此时就会在线下载相应的组件包，并解压到bsp中的packages文件夹里。
+此时就会在线下载相应的软件包，并解压到bsp中的packages文件夹里。
 
-如果想要去除某个组件包，只需要重新进入`menuconfig`，去掉软件包的勾选，然后再次使用`pkgs --update`命令更新即可。
+如果想要去除某个软件包，只需要重新进入`menuconfig`，去掉软件包的勾选，然后再次使用`pkgs --update`命令更新即可。
 
-如果解压出的组件包被人为修改，那么在删除组件包的时候会提示是否要删除被修改的文件。如果选择保留文件，那么请自行保存好这些文件，避免在下次更新包时被覆盖。
+如果解压出的软件包被人为修改，那么在删除软件包的时候会提示是否要删除被修改的文件。如果选择保留文件，那么请自行保存好这些文件，避免在下次更新包时被覆盖。
 
 ## 6.高级篇
 ### 6.1关于menuconfig的支持
@@ -155,18 +155,18 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 - menuconfig中选项的修改方法：
   如果想在menuconfig的配置项中添加宏定义，则可以修改bsp下的Kconfig文件，修改方法可以在网络中搜索`Kconfig语法`关键字获得详细的说明文档，也可以参考RT-Thread中的Kconfig文件或者已经支持过menuconfig的bsp中的Kconfig文件。
 
-### 6.2如何制作一个组件包
-### 6.3如何制作一个组件包下载索引
-#### 6.3.1 制作一个git形式的组件包下载索引
-使用命令`pkgs --wizard`开始制作组件包下载索引：
+### 6.2如何制作一个软件包
+### 6.3如何制作一个软件包下载索引
+#### 6.3.1 制作一个git形式的软件包下载索引
+使用命令`pkgs --wizard`开始制作软件包下载索引：
 
 ![image](./figures/pkgs_wizard.png)
 
-接下来需要输入组件包的名字，请使用小写字母组合的形式来给组件包取名。本次示例我们制作一个`pahomqtt`的组件包。
+接下来需要输入软件包的名字，请使用小写字母组合的形式来给软件包取名。本次示例我们制作一个`pahomqtt`的软件包。
 
 ![image](./figures/pkgs_wizard_make.png)
 
-分为五步操作，首先输入组件包的名称，注意使用小写字母的组合，menuconfig选项名，版本号和第三个keyword在第一次制作的时候都可以按下回车使用默认值，最后根据提示为这次制作的软件包选择一个类别。因为本次制作的是iot类的组件包，所以输入1后按下回车，包下载索引就制作完成了。
+分为五步操作，首先输入软件包的名称，注意使用小写字母的组合，menuconfig选项名，版本号和第三个keyword在第一次制作的时候都可以按下回车使用默认值，最后根据提示为这次制作的软件包选择一个类别。因为本次制作的是iot类的软件包，所以输入1后按下回车，包下载索引就制作完成了。
 
 在使用`pkgs --wizard`命令的目录找到生成的文件夹pahomqtt。
 
@@ -184,7 +184,7 @@ package.json文件内容如下：
 
 ![image](./figures/pkgs_mqtt_json.png)
 
-本次示例所用的组件包已经制作好并上传到了git上，地址如下：
+本次示例所用的软件包已经制作好并上传到了git上，地址如下：
 
 ![image](./figures/pkgs_mqtt_git.png)
 
@@ -196,11 +196,11 @@ package.json文件内容如下：
 
 ![image](./figures/pkgs_mqtt_complete_SHA.png)
 
-到此组件包下载索引就制作完成了，接下来将pkginfo文件夹改名为组件包名：
+到此软件包下载索引就制作完成了，接下来将pkginfo文件夹改名为软件包名：
 
 ![image](./figures/pkgs_ready2commit.png)
 
-接下来我们需要将组件包索引通过PR流程推送到`https://github.com/RT-Thread/packages`，我们需要将我们的组件包放在packages相应的文件夹下后再进行推送。
+接下来我们需要将软件包索引通过PR流程推送到`https://github.com/RT-Thread/packages`，我们需要将我们的软件包放在packages相应的文件夹下后再进行推送。
 
 ![image](./figures/pkgs_mqtt_add_dir.png)
 
@@ -209,8 +209,8 @@ package.json文件内容如下：
 
 #### 6.3.2 制作一个压缩包形式的软件包下载索引
 
-制作一个压缩包形式的组件包下载索引大体上和上面的操作步骤是相同的。唯一不同的地方在于json文件，一个压缩包形式的组件包json文件如下：
+制作一个压缩包形式的软件包下载索引大体上和上面的操作步骤是相同的。唯一不同的地方在于json文件，一个压缩包形式的软件包json文件如下：
 
 ![image](./figures/pkgs_comon_json.png)
 
-这样我们就制作好一个下载索引包了，如果还有不懂的地方可以参考已有的组件包，或在RT-Thread论坛中提出来，我们会第一时间回答你的疑问，并且对env中存在的问题进行优化。谢谢你的参与。
+这样我们就制作好一个下载索引包了，如果还有不懂的地方可以参考已有的软件包，或在RT-Thread论坛中提出来，我们会第一时间回答你的疑问，并且对env中存在的问题进行优化。谢谢你的参与。
