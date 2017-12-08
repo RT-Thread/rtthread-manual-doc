@@ -2,10 +2,10 @@ before_script:
   - uname -a 
   - cat /etc/lsb-release
   - sudo apt-get update -q
-  - sudo apt-get install -q ttf-arphic-gbsn00lp ttf-arphic-ukai ttf-wqy-microhei ttf-wqy-zenhei
+  - sudo apt-get install -q fonts-arphic-gbsn00lp fonts-arphic-ukai ttf-wqy-microhei ttf-wqy-zenhei
   - sudo apt-get install -q texlive-xetex texlive-latex-recommended texlive-latex-extra
+  - sudo apt-get install -q texlive-fonts-recommended
   - sudo apt-get install -q curl
-
   - sudo apt-get install -q wget
   - mkdir -pv ~/.cabal/bin/
   - wget http://www.rt-thread.com/download/tools/pandoc.tar.gz -O ~/.cabal/bin/pandoc.tar.gz
@@ -23,5 +23,5 @@ rvm:
 script: 
   - chmod +x mkbok
   - ./mkbok --lang zh --build pdf
-  - curl -F "file=@rtthread_manual.zh.pdf;type=application/octet-stream" http://www.rt-thread.org/download/manual/manual_upload.php
+  - curl -F "file=@rtthread_manual.zh.pdf;type=application/octet-stream" http://download.rt-thread.org/download/manual/manual_upload.php
 

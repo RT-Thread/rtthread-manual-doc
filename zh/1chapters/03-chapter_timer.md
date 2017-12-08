@@ -464,8 +464,8 @@ RT-Thread的定时器与其他实时操作系统的定时器实现稍微有些�
 高精度延时 的例程如下所示
 
 ```c
-#include <core_cm3.h>
-void rt_hw_us_delay(int us)
+#include <board.h>
+void rt_hw_us_delay(rt_uint32_t us)
 {
     rt_uint32_t delta;
 
