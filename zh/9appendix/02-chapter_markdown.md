@@ -141,13 +141,13 @@ I start my morning with a cup of coffee and
 它的效果类似于这样：
 
 ```c
-    #include <stdio.h>
+#include <stdio.h>
 
-    int main(int argc, char** argv)
-    {
-        printf("hello\n");
-        return 0;
-    }
+int main(int argc, char** argv)
+{
+    printf("hello\n");
+    return 0;
+}
 ```
 
 ## API说明 ##
@@ -184,10 +184,10 @@ I start my morning with a cup of coffee and
 这是一个用于什么的例子，例子的大致描述。
 
 ```c
-    int result;
+int result;
 
-    /* 调用函数 */
-    result = function(1, 2);
+/* 调用函数 */
+result = function(1, 2);
 ```
 
 例子是否需要详细解释。
