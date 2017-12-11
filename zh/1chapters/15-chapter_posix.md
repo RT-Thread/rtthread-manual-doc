@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # POSIX接口 #
 
 POSIX Threads简称Pthreads，POSIX是"Portable Operating System Interface"（可移植操作系统接口） 的缩写，POSIX是IEEE Computer Society为了提高不同操作系统的兼容性和应用程序的可移植性而制定的一套标准。Pthreads是线程的POSIX标准，被定义在POSIX.1c, Threads extensions (IEEE Std1003.1c-1995)标准里，该标准定义了一套C程序语言的类型、函数和常量。定义在pthread.h头文件和一个线程库里，大约有100个API，所有API都带有"pthread_"前缀，可以分为4大类：
@@ -7,6 +8,34 @@ POSIX Threads简称Pthreads，POSIX是"Portable Operating System Interface"（�
 * 互斥锁（Mutex）："mutual exclusion"的缩写，用了限制线程对共享数据的访问，保护共享数据的完整性。包括创建、销毁、锁定和解锁互斥锁及一些用于设置或修改互斥量属性等函数。
 
 * 条件变量（Condition variable）：用于共享一个互斥量的线程间的通信。包括条件变量的创建、销毁、等待和发送信号（signal）等函数。
+=======
+
+Pthreads简介
+============
+
+什么是进程和线程？
+------------------
+
+简单的说进程是正在执行的应用程序，一个个应用程序就是一个个独立的进程，比如一个浏览器，一个音乐播放器等。每个进程都有各自独立的内存空间。
+
+线程被进程创建，是被操作系统调度的独立的指令流，比如音乐播放器的播放音乐或者下载音乐功能。同一个进程的线程之间共享一块内存空间。
+
+什么是Pthreads？
+----------------
+
+POSIX Threads 简称[]{#OLE_LINK44 .anchor}Pthreads，POSIX是"Portable
+Operating System Interface"（可移植操作系统接口） 的缩写，POSIX是IEEE
+Computer Society
+为了提高不同操作系统的兼容性和应用程序的可移植性而制定的一套标准。Pthreads
+是线程的POSIX标准，被定义在POSIX.1c, Threads extensions (IEEE Std
+1003.1c-1995)标准里，该标准定义了一套C程序语言的类型、函数和常量。定义在pthread.h头文件和一个线程库里，大约有100个API，所有API都带有"pthread\_"前缀，可以分为4大类：
+
+-   线程管理（Thread
+    management）：包括线程创建（creating）、分离（detaching）、连接（joining）及设置和查询线程属性的函数等。
+
+-   互斥锁（Mutex）："mutual
+    exclusion"的缩写，用了限制线程对共享数据的访问，保护共享数据的完整性。包括创建、销毁、锁定和解锁互斥锁及一些用于设置或修改互斥量属性等函数。
+>>>>>>> cbb649c8982302c8ff4ee4948b6c4bf7889258ba
 
 * 读写锁（read/write lock）和屏障（barrier）：包括读写锁和栏杆的创建、销毁、等待及相关属性设置等函数。
 
