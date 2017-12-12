@@ -2870,11 +2870,11 @@ struct mq_attr
 };
 
 ```
-**函数原型**  Int mq_setattr(mqd_t mqdes, const struct mq_attr *mqstat, struct mq_attr *omqstat);
+**函数原型**    Int mq_setattr(mqd_t mqdes, const struct mq_attr *mqstat, struct mq_attr *omqstat);
 
-**函数功能**  RT-Thread具体未实现，是一个桩函数。
+**函数功能**    RT-Thread具体未实现，是一个桩函数。
 
-**函数返回**  只返回-1。
+**函数返回**    只返回-1。
 
 
 **函数原型**
@@ -2889,8 +2889,8 @@ int mq_getattr(mqd_t mqdes, struct mq_attr *mqstat);
        mqstat    指向保存获取数据的指针
 -----------------------------------------------------------------------
 
-**函数功能**  获取消息队列属性。
+**函数功能**    获取消息队列属性。
 
-**函数返回**  成功则返回0，参数无效则返回-1。
+**函数返回**    成功则返回0，参数无效则返回-1。
 
 
