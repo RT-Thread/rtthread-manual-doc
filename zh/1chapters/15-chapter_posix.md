@@ -8,7 +8,7 @@ POSIX Threads简称Pthreads，POSIX是"Portable Operating System Interface"（�
 
 * 条件变量（Condition variable）：用于共享一个互斥量的线程间的通信。包括条件变量的创建、销毁、等待和发送信号（signal）等函数。
 
-* 读写锁（read/write lock）和屏障（barrier）：包括读写锁和栏杆的创建、销毁、等待及相关属性设置等函数。
+* 读写锁（read/write lock）和屏障（barrier）：包括读写锁和屏障的创建、销毁、等待及相关属性设置等函数。
 
 * POSIX信号量（semaphore）和Pthreads一起使用，但不是Pthreads标准定义的一部分，被定义在POSIX.1b, Real-time extensions (IEEE Std1003.1b-1993)标准里。因此信号量相关函数的前缀是"sem_"而不是"pthread_"。
 
@@ -35,9 +35,9 @@ POSIX Threads简称Pthreads，POSIX是"Portable Operating System Interface"（�
   
      pthread_spin_          自旋锁
   
-     pthread_barrier_       栏杆
+     pthread_barrier_       屏障
   
-     pthread_barrierattr_   栏杆属性对象
+     pthread_barrierattr_   屏障属性对象
   
      sem_                   信号量
   
@@ -1369,7 +1369,7 @@ static void* thread3_entry(void* parameter)
 /* 用户应用入口 */
 int rt_application_init()
 {
-	int result;
+    int result;
 	pthread_barrier_init(&barrier,NULL,3);
 	
 	/*创建线程1,线程入口是thread1_entry, 属性参数设为NULL选择默认值，入口参数为NULL*/
@@ -2330,21 +2330,21 @@ int rt_application_init()
 {
     int result;
     pthread_attr_t attr;  	/* 线程属性 */
-	struct sched_param prio;  /* 线程优先级 */
-	
-	prio.sched_priority = 8;  /* 优先级设置为8 */
-	pthread_attr_init(&attr);  /* 先使用默认值初始化属性 */
-	pthread_attr_setschedparam(&attr,&prio);  /* 修改属性对应的优先级 */
-	
-	/* 创建线程1,属性为attr，入口函数是thread_entry，入口函数参数是1 */
-	result = pthread_create(&tid1,&attr,thread_entry,(void*)1);
-	check_result("thread1 created",result);
+    struct sched_param prio;  /* 线程优先级 */
 
-	/* 创建线程2,属性为默认值，入口函数是thread_entry，入口函数参数是2 */
-	result = pthread_create(&tid2,NULL,thread_entry,(void*)2);
-	check_result("thread2 created",result);
-	
-	return 0;
+    prio.sched_priority = 8;  /* 优先级设置为8 */
+    pthread_attr_init(&attr);  /* 先使用默认值初始化属性 */
+    pthread_attr_setschedparam(&attr,&prio);  /* 修改属性对应的优先级 */
+
+    /* 创建线程1,属性为attr，入口函数是thread_entry，入口函数参数是1 */
+    result = pthread_create(&tid1,&attr,thread_entry,(void*)1);
+    check_result("thread1 created",result);
+
+    /* 创建线程2,属性为默认值，入口函数是thread_entry，入口函数参数是2 */
+    result = pthread_create(&tid2,NULL,thread_entry,(void*)2);
+    check_result("thread2 created",result);
+
+    return 0;
 }
 
 ```
@@ -2381,7 +2381,7 @@ int rt_application_init()
 --------------  -------------------------------------------------------		
 		state	有两种值：PTHREAD_CANCEL_ENABLE：取消使能 PTHREAD_CANCEL_DISABLE：取消不使能（线程创建时的默认值）
 
-	 oldstate	保存原来的取消状态
+	   oldstate	保存原来的取消状态
 -----------------------------------------------------------------------
 **函数返回**
 
