@@ -71,15 +71,15 @@ pthread_t是rt_thread_t类型的重定义，定义在pthread.h头文件里。rt_
 int pthread_create (pthread_t *tid, const pthread_attr_t *attr, void *(*start) (void *), void *arg);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-          tid   指向线程句柄(线程标识符)的指针，不能为NULL
+         tid    指向线程句柄(线程标识符)的指针，不能为NULL
 
-         attr   指向线程属性的指针，如果使用NULL，则使用默认的线程属性
+         attr    指向线程属性的指针，如果使用NULL，则使用默认的线程属性
 
          star   线程入口函数地址
-		  
-		arg    传递给线程入口函数的参数	  
+          
+        arg    传递给线程入口函数的参数      
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -107,14 +107,14 @@ static pthread_t tid2;
 /* 函数返回值检查 */
 static void check_result(char* str,int result)
 {
-	if (0 == result)
-	{
-		printf("%s successfully!\n",str);
-	}
-	else
-	{
-		printf("%s failed! error code is %d\n",str,result);
-	}	
+    if (0 == result)
+    {
+        printf("%s successfully!\n",str);
+    }
+    else
+    {
+        printf("%s failed! error code is %d\n",str,result);
+    }    
 }
 /* 线程入口函数*/
 static void* thread_entry(void* parameter)
@@ -127,7 +127,7 @@ static void* thread_entry(void* parameter)
         /* 打印输出线程计数值 */
         printf("thread%d count: %d\n", no, count ++);
 
-        sleep(2);	/* 休眠2秒 */
+        sleep(2);    /* 休眠2秒 */
     }
 }
 
@@ -135,16 +135,16 @@ static void* thread_entry(void* parameter)
 int rt_application_init()
 {
     int result;
-	
-	/* 创建线程1,属性为默认值，入口函数是thread_entry，入口函数参数是1 */
-	result = pthread_create(&tid1,NULL,thread_entry,(void*)1);
-	check_result("thread1 created",result);
+    
+    /* 创建线程1,属性为默认值，入口函数是thread_entry，入口函数参数是1 */
+    result = pthread_create(&tid1,NULL,thread_entry,(void*)1);
+    check_result("thread1 created",result);
 
-	/* 创建线程2,属性为默认值，入口函数是thread_entry，入口函数参数是2 */
-	result = pthread_create(&tid2,NULL,thread_entry,(void*)2);
-	check_result("thread2 created",result);
-	
-	return 0;
+    /* 创建线程2,属性为默认值，入口函数是thread_entry，入口函数参数是2 */
+    result = pthread_create(&tid2,NULL,thread_entry,(void*)2);
+    check_result("thread2 created",result);
+    
+    return 0;
 }
 
 ```
@@ -156,9 +156,9 @@ int rt_application_init()
     int pthread_detach (pthread_t thread);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-        thread  线程句柄（线程标识符）	  
+        thread   线程句柄（线程标识符）      
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -187,59 +187,59 @@ static pthread_t tid2;
 /* 函数返回值检查 */
 static void check_result(char* str,int result)
 {
-	if (0 == result)
-	{
-		printf("%s successfully!\n",str);
-	}
-	else
-	{
-		printf("%s failed! error code is %d\n",str,result);
-	}
+    if (0 == result)
+    {
+        printf("%s successfully!\n",str);
+    }
+    else
+    {
+        printf("%s failed! error code is %d\n",str,result);
+    }
 }
 /* 线程1入口函数*/
 static void* thread1_entry(void* parameter)
 {
-	int i;
- 	printf("i'm thread1 and i will detach myself!\n");
-	pthread_detach(pthread_self());		/*线程1脱离自己*/
-	
-	for (i = 0;i < 3;i++)	/* 循环打印3次信息 */
-	{
-	    printf("thread1 run count: %d\n",i);
-        sleep(2);	/* 休眠2秒 */	
-	}
-	
-	printf("thread1 exited!\n");
+    int i;
+     printf("i'm thread1 and i will detach myself!\n");
+    pthread_detach(pthread_self());        /*线程1脱离自己*/
+    
+    for (i = 0;i < 3;i++)    /* 循环打印3次信息 */
+    {
+        printf("thread1 run count: %d\n",i);
+        sleep(2);    /* 休眠2秒 */    
+    }
+    
+    printf("thread1 exited!\n");
 }
 /* 线程2入口函数*/
 static void* thread2_entry(void* parameter)
 {
-	int i;
+    int i;
 
-	for (i = 0;i < 3;i++)	/* 循环打印3次信息 */
-	{
-	    printf("thread2 run count: %d\n",i);
-        sleep(2);	/* 休眠2秒 */	
-	}
+    for (i = 0;i < 3;i++)    /* 循环打印3次信息 */
+    {
+        printf("thread2 run count: %d\n",i);
+        sleep(2);    /* 休眠2秒 */    
+    }
 
-    printf("thread2 exited!\n");	
+    printf("thread2 exited!\n");    
 }
 /* 用户应用入口 */
 int rt_application_init()
 {
     int result;
-	/* 创建线程1,属性为默认值，分离状态为默认值joinable,
-	 入口函数是thread1_entry，入口函数参数为NULL */
-	result = pthread_create(&tid1,NULL,thread1_entry,NULL);
-	check_result("thread1 created",result);
+    /* 创建线程1,属性为默认值，分离状态为默认值joinable,
+     入口函数是thread1_entry，入口函数参数为NULL */
+    result = pthread_create(&tid1,NULL,thread1_entry,NULL);
+    check_result("thread1 created",result);
 
-	/* 创建线程2,属性为默认值，分离状态为默认值joinable,
-	 入口函数是thread2_entry，入口函数参数为NULL */
-	result = pthread_create(&tid2,NULL,thread2_entry,NULL);
-	check_result("thread2 created",result);
-	
-	pthread_detach(tid2);	/* 脱离线程2 */
-	
+    /* 创建线程2,属性为默认值，分离状态为默认值joinable,
+     入口函数是thread2_entry，入口函数参数为NULL */
+    result = pthread_create(&tid2,NULL,thread2_entry,NULL);
+    check_result("thread2 created",result);
+    
+    pthread_detach(tid2);    /* 脱离线程2 */
+    
     return 0;
 }
 
@@ -252,11 +252,11 @@ int rt_application_init()
     int pthread_join (pthread_t thread, void **value_ptr);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-        thread 	线程句柄（线程标识符）	 
+       thread    线程句柄（线程标识符）     
 
-     value_ptr	用户定义的指针，用来存储被等待线程的返回值地址，可由函数pthread_join()获取		
+     value_ptr    用户定义的指针，用来存储被等待线程的返回值地址，可由函数pthread_join()获取        
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -284,57 +284,57 @@ static pthread_t tid2;
 /* 函数返回值检查 */
 static void check_result(char* str,int result)
 {
-	if (0 == result)
-	{
-		printf("%s successfully!\n",str);
-	}
-	else
-	{
-		printf("%s failed! error code is %d\n",str,result);
-	}
+    if (0 == result)
+    {
+        printf("%s successfully!\n",str);
+    }
+    else
+    {
+        printf("%s failed! error code is %d\n",str,result);
+    }
 }
 /* 线程1入口函数 */
 static void* thread1_entry(void* parameter)
 {
-	int i;
-	for (int i = 0;i < 3;i++)	/* 循环打印3次信息 */
+    int i;
+    for (int i = 0;i < 3;i++)    /* 循环打印3次信息 */
     {  
-		printf("thread1 run count: %d\n",i); 
-        sleep(2);	/* 休眠2秒 */ 
+        printf("thread1 run count: %d\n",i); 
+        sleep(2);    /* 休眠2秒 */ 
     }
-	
+    
     printf("thread1 exited!\n");
 }
 /* 线程2入口函数*/
 static void* thread2_entry(void* parameter)
 {
     int count = 0;
-	void* thread1_return_value;
-	
-	/* 阻塞等待线程1运行结束 */
-	pthread_join(tid1,NULL);
-    /* 线程2打印信息开始输出 */	
-	while(1)
-	{
-		/* 打印线程计数值输出 */
-		printf("thread2 run count: %d\n",count ++);
-        sleep(2);	/* 休眠2秒 */
-	}			
+    void* thread1_return_value;
+    
+    /* 阻塞等待线程1运行结束 */
+    pthread_join(tid1,NULL);
+    /* 线程2打印信息开始输出 */    
+    while(1)
+    {
+        /* 打印线程计数值输出 */
+        printf("thread2 run count: %d\n",count ++);
+        sleep(2);    /* 休眠2秒 */
+    }
 }
 /* 用户应用入口 */
 int rt_application_init()
 {
     int result;
-	/* 创建线程1,属性为默认值，分离状态为默认值joinable,
-	 入口函数是thread1_entry，入口函数参数为NULL */
-	result = pthread_create(&tid1,NULL,thread1_entry,NULL);
-	check_result("thread1 created",result);
+    /* 创建线程1,属性为默认值，分离状态为默认值joinable,
+     入口函数是thread1_entry，入口函数参数为NULL */
+    result = pthread_create(&tid1,NULL,thread1_entry,NULL);
+    check_result("thread1 created",result);
 
-	/* 创建线程2,属性为默认值，分离状态为默认值joinable,
-	 入口函数是thread2_entry，入口函数参数为NULL */
-	result = pthread_create(&tid2,NULL,thread2_entry,NULL);
-	check_result("thread2 created",result);
-	
+    /* 创建线程2,属性为默认值，分离状态为默认值joinable,
+     入口函数是thread2_entry，入口函数参数为NULL */
+    result = pthread_create(&tid2,NULL,thread2_entry,NULL);
+    check_result("thread2 created",result);
+    
     return 0;
 }
 
@@ -347,9 +347,9 @@ int rt_application_init()
     void pthread_exit(void *value_ptr);
 ```
 -----------------------------------------------------------------------
-          参数  描述
+         参数    描述
 --------------  -------------------------------------------------------
-     value_ptr	用户定义的指针，用来存储被等待线程的返回值地址，可由函数pthread_join()获取		
+     value_ptr    用户定义的指针，用来存储被等待线程的返回值地址，可由函数pthread_join()获取        
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -376,58 +376,58 @@ static pthread_t tid2;
 /* 函数返回值核对函数 */
 static void check_result(char* str,int result)
 {
-	if (0 == result)
-	{
-		printf("%s successfully!\n",str);
-	}
-	else
-	{
-		printf("%s failed! error code is %d\n",str,result);
-	}
+    if (0 == result)
+    {
+        printf("%s successfully!\n",str);
+    }
+    else
+    {
+        printf("%s failed! error code is %d\n",str,result);
+    }
 }
 /* 线程1入口函数*/
 static void* thread1_entry(void* parameter)
 {
-	int count = 0;
-	while(1)
-	{
-		/* 打印线程计数值输出 */
-		printf("thread1 run count: %d\n",count ++);
-        sleep(2);	/* 休眠2秒 */
-		printf("thread1 will exit!\n");
-		
-		pthread_exit(0);    /* 线程1主动退出 */
-	}	
+    int count = 0;
+    while(1)
+    {
+        /* 打印线程计数值输出 */
+        printf("thread1 run count: %d\n",count ++);
+        sleep(2);    /* 休眠2秒 */
+        printf("thread1 will exit!\n");
+        
+        pthread_exit(0);    /* 线程1主动退出 */
+    }    
 }
 /* 线程2入口函数*/
 static void* thread2_entry(void* parameter)
 {
     int count = 0;
-	
-	/* 阻塞等待线程1运行结束 */
-	pthread_join(tid1,NULL);
-	/* 线程2开始输出打印信息 */
-	while(1)
-	{
-		/* 打印线程计数值输出 */
-		printf("thread2 run count: %d\n",count ++);
-        sleep(2);	/* 休眠2秒 */
-	}			
+    
+    /* 阻塞等待线程1运行结束 */
+    pthread_join(tid1,NULL);
+    /* 线程2开始输出打印信息 */
+    while(1)
+    {
+        /* 打印线程计数值输出 */
+        printf("thread2 run count: %d\n",count ++);
+        sleep(2);    /* 休眠2秒 */
+    }            
 }
 /* 用户应用入口 */
 int rt_application_init()
 {
     int result;
-	/* 创建线程1,属性为默认值，分离状态为默认值joinable,
-	 入口函数是thread1_entry，入口函数参数为NULL */
-	result = pthread_create(&tid1,NULL,thread1_entry,NULL);
-	check_result("thread1 created",result);
+    /* 创建线程1,属性为默认值，分离状态为默认值joinable,
+     入口函数是thread1_entry，入口函数参数为NULL */
+    result = pthread_create(&tid1,NULL,thread1_entry,NULL);
+    check_result("thread1 created",result);
 
-	/* 创建线程2,属性为默认值，分离状态为默认值joinable,
-	 入口函数是thread2_entry，入口函数参数为NULL */
-	result = pthread_create(&tid2,NULL,thread2_entry,NULL);
-	check_result("thread2 created",result);
-	
+    /* 创建线程2,属性为默认值，分离状态为默认值joinable,
+     入口函数是thread2_entry，入口函数参数为NULL */
+    result = pthread_create(&tid2,NULL,thread2_entry,NULL);
+    check_result("thread2 created",result);
+    
     return 0;
 }
 
@@ -453,8 +453,8 @@ int rt_application_init()
 
 struct pthread_mutex
 {
-    pthread_mutexattr_t attr;	/* 互斥锁属性 */
-    struct rt_mutex lock;	/* RT-Thread互斥锁控制块 */
+    pthread_mutexattr_t attr;    /* 互斥锁属性 */
+    struct rt_mutex lock;    /* RT-Thread互斥锁控制块 */
 };
 typedef struct pthread_mutex pthread_mutex_t;
 
@@ -462,13 +462,13 @@ rt_mutex是RT-Thread 内核里定义的一个数据结构，定义在rtdef.h头�
 
 struct rt_mutex
 {
-	struct rt_ipc_object parent;                /* 继承自ipc_object类 */
-	rt_uint16_t          value;                  /* 互斥锁的值 */
-	rt_uint8_t           original_priority;     /* 持有线程的原始优先级 */
-	rt_uint8_t           hold;                    /* 互斥锁持有计数  */
-	struct rt_thread    *owner;                 /* 当前拥有互斥锁的线程 */
+    struct rt_ipc_object parent;                /* 继承自ipc_object类 */
+    rt_uint16_t          value;                  /* 互斥锁的值 */
+    rt_uint8_t           original_priority;     /* 持有线程的原始优先级 */
+    rt_uint8_t           hold;                    /* 互斥锁持有计数  */
+    struct rt_thread    *owner;                 /* 当前拥有互斥锁的线程 */
 };
-typedef struct rt_mutex* rt_mutex_t;		/* rt_mutext_t为指向互斥锁结构体的指针 */
+typedef struct rt_mutex* rt_mutex_t;        /* rt_mutext_t为指向互斥锁结构体的指针 */
 
 ```
 ### 互斥锁初始化 ###
@@ -478,11 +478,11 @@ typedef struct rt_mutex* rt_mutex_t;		/* rt_mutext_t为指向互斥锁结构体�
     int pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *attr);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-         mutex	互斥锁句柄，不能为NULL
+         mutex    互斥锁句柄，不能为NULL
 
-          attr	指向互斥锁属性的指针，若该指针NULL，则使用默认的属性。
+          attr    指向互斥锁属性的指针，若该指针NULL，则使用默认的属性。
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -501,9 +501,9 @@ typedef struct rt_mutex* rt_mutex_t;		/* rt_mutext_t为指向互斥锁结构体�
     int pthread_mutex_destroy(pthread_mutex_t *mutex);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-         mutex	互斥锁句柄，不能为NULL
+         mutex    互斥锁句柄，不能为NULL
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -520,9 +520,9 @@ typedef struct rt_mutex* rt_mutex_t;		/* rt_mutext_t为指向互斥锁结构体�
     int pthread_mutex_lock(pthread_mutex_t *mutex);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-         mutex	互斥锁句柄，不能为NULL
+         mutex    互斥锁句柄，不能为NULL
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -537,9 +537,9 @@ typedef struct rt_mutex* rt_mutex_t;		/* rt_mutext_t为指向互斥锁结构体�
     int pthread_mutex_trylock(pthread_mutex_t *mutex);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-         mutex	互斥锁句柄，不能为NULL
+         mutex    互斥锁句柄，不能为NULL
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -554,9 +554,9 @@ typedef struct rt_mutex* rt_mutex_t;		/* rt_mutext_t为指向互斥锁结构体�
     int pthread_mutex_unlock(pthread_mutex_t *mutex);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-         mutex	互斥锁句柄，不能为NULL
+         mutex    互斥锁句柄，不能为NULL
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -582,71 +582,71 @@ static pthread_mutex_t mutex;
 /* 线程共享的打印函数 */
 static void printer(char* str)
 {
-	while(*str != 0)
-	{
-		putchar(*str);	/* 输出一个字符 */
-		str++;
-        sleep(1);	/* 休眠1秒 */
-	}
-	printf("\n");
+    while(*str != 0)
+    {
+        putchar(*str);    /* 输出一个字符 */
+        str++;
+        sleep(1);    /* 休眠1秒 */
+    }
+    printf("\n");
 }
 /* 函数返回值检查 */
 static void check_result(char* str,int result)
 {
-	if (0 == result)
-	{
-		printf("%s successfully!\n",str);
-	}
-	else
-	{
-		printf("%s failed! error code is %d\n",str,result);
-	}
+    if (0 == result)
+    {
+        printf("%s successfully!\n",str);
+    }
+    else
+    {
+        printf("%s failed! error code is %d\n",str,result);
+    }
 }
 /*线程入口*/
 static void* thread1_entry(void* parameter)
 {
-	char* str = "thread1 hello RT-Thread";
+    char* str = "thread1 hello RT-Thread";
     while (1)
-    {   		
-		pthread_mutex_lock(&mutex);	  /* 互斥锁上锁 */
-		
-		printer(str);  /* 访问共享打印函数 */
-		
-		pthread_mutex_unlock(&mutex);  /* 访问完成后解锁 */
-		
-        sleep(2);	/* 休眠2秒 */
+    {           
+        pthread_mutex_lock(&mutex);      /* 互斥锁上锁 */
+        
+        printer(str);  /* 访问共享打印函数 */
+        
+        pthread_mutex_unlock(&mutex);  /* 访问完成后解锁 */
+        
+        sleep(2);    /* 休眠2秒 */
     }
 }
 static void* thread2_entry(void* parameter)
 {
-	char* str = "thread2 hi world";
+    char* str = "thread2 hi world";
     while (1)
-    {		
-		pthread_mutex_lock(&mutex);  /* 互斥锁上锁 */
-		
-		printer(str);  /* 访问共享打印函数 */
-		
-		pthread_mutex_unlock(&mutex);  /* 访问完成后解锁 */
-		
-		sleep(2);	/* 休眠2秒 */
+    {        
+        pthread_mutex_lock(&mutex);  /* 互斥锁上锁 */
+        
+        printer(str);  /* 访问共享打印函数 */
+        
+        pthread_mutex_unlock(&mutex);  /* 访问完成后解锁 */
+        
+        sleep(2);    /* 休眠2秒 */
     }
 }
 /* 用户应用入口 */
 int rt_application_init()
 {
-	int result;
-	/* 初始化一个互斥锁 */
-	pthread_mutex_init(&mutex,NULL);
-	
-	/*创建线程1,线程入口是thread1_entry, 属性参数为NULL选择默认值，入口参数是NULL*/
-	result = pthread_create(&tid1,NULL,thread1_entry,NULL);
-	check_result("thread1 created",result);
-	
-	/*创建线程2,线程入口是thread2_entry, 属性参数为NULL选择默认值，入口参数是NULL*/
-	result = pthread_create(&tid2,NULL,thread2_entry,NULL);
-	check_result("thread2 created",result);
-	
-	return 0;
+    int result;
+    /* 初始化一个互斥锁 */
+    pthread_mutex_init(&mutex,NULL);
+    
+    /*创建线程1,线程入口是thread1_entry, 属性参数为NULL选择默认值，入口参数是NULL*/
+    result = pthread_create(&tid1,NULL,thread1_entry,NULL);
+    check_result("thread1 created",result);
+    
+    /*创建线程2,线程入口是thread2_entry, 属性参数为NULL选择默认值，入口参数是NULL*/
+    result = pthread_create(&tid2,NULL,thread2_entry,NULL);
+    check_result("thread2 created",result);
+    
+    return 0;
 }
 
 ```
@@ -667,8 +667,8 @@ int rt_application_init()
 
 struct pthread_cond
 {
-    pthread_condattr_t attr;		 /* 条件变量属性 */
-    struct rt_semaphore sem;		/* RT-Thread信号量控制块 */
+    pthread_condattr_t attr;         /* 条件变量属性 */
+    struct rt_semaphore sem;        /* RT-Thread信号量控制块 */
 };
 typedef struct pthread_cond pthread_cond_t;
 
@@ -689,11 +689,11 @@ struct rt_semaphore
     int pthread_cond_init(pthread_cond_t *cond, const pthread_condattr_t *attr);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-         cond	条件变量句柄，不能为NULL
+         cond    条件变量句柄，不能为NULL
          
-		 attr	指向条件变量属性的指针，若为NULL则使用默认属性值
+         attr    指向条件变量属性的指针，若为NULL则使用默认属性值
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -712,9 +712,9 @@ attr一般设置NULL使用默认值即可，具体会在线程高级编程一章
     int pthread_cond_destroy(pthread_cond_t *cond);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-        cond	条件变量句柄，不能为NULL 		
+        cond    条件变量句柄，不能为NULL         
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -731,11 +731,11 @@ attr一般设置NULL使用默认值即可，具体会在线程高级编程一章
     int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-        cond	条件变量句柄，不能为NULL	
+        cond    条件变量句柄，不能为NULL    
 
-       mutex	指向互斥锁控制块的指针，不能为NULL 		
+       mutex    指向互斥锁控制块的指针，不能为NULL         
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -750,13 +750,13 @@ attr一般设置NULL使用默认值即可，具体会在线程高级编程一章
     int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex, const struct timespec *abstime);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-        cond	条件变量句柄，不能为NULL	
+        cond    条件变量句柄，不能为NULL    
 
-       mutex	指向互斥锁控制块的指针，不能为NULL 
+       mutex    指向互斥锁控制块的指针，不能为NULL 
 
-     abstime	指定的等待时间，单位是操作系统时钟节拍（OS Tick）	   
+     abstime    指定的等待时间，单位是操作系统时钟节拍（OS Tick）       
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -771,9 +771,9 @@ attr一般设置NULL使用默认值即可，具体会在线程高级编程一章
     int pthread_cond_signal(pthread_cond_t *cond);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-        cond	条件变量句柄，不能为NULL	 
+        cond    条件变量句柄，不能为NULL     
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -788,9 +788,9 @@ attr一般设置NULL使用默认值即可，具体会在线程高级编程一章
     int pthread_cond_broadcast(pthread_cond_t *cond);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-        cond	条件变量句柄，不能为NULL	 
+        cond    条件变量句柄，不能为NULL     
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -820,14 +820,14 @@ static pthread_t tid2;
 /* 函数返回值检查 */
 static void check_result(char* str,int result)
 {
-	if (0 == result)
-	{
-		printf("%s successfully!\n",str);
-	}
-	else
-	{
-		printf("%s failed! error code is %d\n",str,result);
-	}
+    if (0 == result)
+    {
+        printf("%s successfully!\n",str);
+    }
+    else
+    {
+        printf("%s failed! error code is %d\n",str,result);
+    }
 }
 
 /* 生产者生产的结构体数据，存放在链表里 */
@@ -842,29 +842,29 @@ struct node* head = NULL; /* 链表头,是共享资源 */
 static void* consumer(void* parameter) 
 {
     struct node* p_node = NULL;
-	
-    pthread_mutex_lock(&mutex);	/* 对互斥锁上锁 */
-	
+    
+    pthread_mutex_lock(&mutex);    /* 对互斥锁上锁 */
+    
     while (1)
-	{
-        while (head == NULL)	/* 判断链表里是否有元素 */
-		{
+    {
+        while (head == NULL)    /* 判断链表里是否有元素 */
+        {
             pthread_cond_wait(&cond,&mutex); /* 尝试获取条件变量 */
         }
         /* 
-		pthread_cond_wait()会先对mutex解锁，
+        pthread_cond_wait()会先对mutex解锁，
         然后阻塞在等待队列，直到获取条件变量被唤醒，
         被唤醒后，该线程会再次对mutex上锁，成功进入临界区。
-		*/
-	
-        p_node = head;	/* 拿到资源 */
-        head = head->n_next;	/* 头指针指向下一个资源 */
-		/* 打印输出 */
+        */
+    
+        p_node = head;    /* 拿到资源 */
+        head = head->n_next;    /* 头指针指向下一个资源 */
+        /* 打印输出 */
         printf("consume %d\n",p_node->n_number);
-		
-        free(p_node);	/* 拿到资源后释放节点占用的内存 */
+        
+        free(p_node);    /* 拿到资源后释放节点占用的内存 */
     }
-	pthread_mutex_unlock(&mutex);	/* 释放互斥锁 */
+    pthread_mutex_unlock(&mutex);    /* 释放互斥锁 */
     return 0;
 }
 /* 生产者线程入口函数 */
@@ -872,46 +872,46 @@ static void* product(void* patameter)
 {
     int count = 0;
     struct node *p_node;
-	
-	while(1)
-	{
-	    /* 动态分配一块结构体内存 */
-		p_node = (struct node*)malloc(sizeof(struct node));
-		if (p_node != NULL)
-		{
-			p_node->n_number = count++;	
-			pthread_mutex_lock(&mutex);	/* 需要操作head这个临界资源，先加锁 */
-			
-			p_node->n_next = head;
-			head = p_node;	/* 往链表头插入数据 */
-			
-			pthread_mutex_unlock(&mutex);	/* 解锁 */
-			printf("produce %d\n",p_node->n_number);
-			
-			pthread_cond_signal(&cond);	/* 发信号唤醒一个线程 */
+    
+    while(1)
+    {
+        /* 动态分配一块结构体内存 */
+        p_node = (struct node*)malloc(sizeof(struct node));
+        if (p_node != NULL)
+        {
+            p_node->n_number = count++;    
+            pthread_mutex_lock(&mutex);    /* 需要操作head这个临界资源，先加锁 */
+            
+            p_node->n_next = head;
+            head = p_node;    /* 往链表头插入数据 */
+            
+            pthread_mutex_unlock(&mutex);    /* 解锁 */
+            printf("produce %d\n",p_node->n_number);
+            
+            pthread_cond_signal(&cond);    /* 发信号唤醒一个线程 */
 
-			sleep(2);	/* 休眠2秒 */
-		}
-		else
-		{
-			printf("product malloc node failed!\n");
-			break;
-		}
-	}
+            sleep(2);    /* 休眠2秒 */
+        }
+        else
+        {
+            printf("product malloc node failed!\n");
+            break;
+        }
+    }
 }
  
 int rt_application_init() 
 {
-	int result;
-	
-	/* 创建生产者线程,属性为默认值，入口函数是product，入口函数参数为NULL*/
-	result = pthread_create(&tid1,NULL,product,NULL);
-	check_result("product thread created ",result);
+    int result;
+    
+    /* 创建生产者线程,属性为默认值，入口函数是product，入口函数参数为NULL*/
+    result = pthread_create(&tid1,NULL,product,NULL);
+    check_result("product thread created ",result);
 
-	/* 创建消费者线程,属性为默认值，入口函数是consumer，入口函数参数是NULL */
-	result = pthread_create(&tid2,NULL,consumer,NULL);
-	check_result("consumer thread created ",result);
-	
+    /* 创建消费者线程,属性为默认值，入口函数是consumer，入口函数参数是NULL */
+    result = pthread_create(&tid2,NULL,consumer,NULL);
+    check_result("consumer thread created ",result);
+    
     return 0;
 }
 
@@ -935,15 +935,15 @@ int rt_application_init()
 
 struct pthread_rwlock
 {
-    pthread_rwlockattr_t attr;	/* 读写锁属性 */
-    pthread_mutex_t rw_mutex;	/* 互斥锁 */
+    pthread_rwlockattr_t attr;    /* 读写锁属性 */
+    pthread_mutex_t rw_mutex;    /* 互斥锁 */
     pthread_cond_t rw_condreaders;    /* 条件变量，供读者线程使用 */
     pthread_cond_t rw_condwriters;    /* 条件变量，供写者线程使用 */
     int rw_nwaitreaders;    /* 读者线程等待计数 */
     int rw_nwaitwriters;    /* 写者线程等待计数 */
     int rw_refcount;    /* 读写锁值，为0值：未上锁,为 -1值: 被写者线程锁定, 大于0值：被读者线程锁定数量 */
 };
-typedef struct pthread_rwlock pthread_rwlock_t;		/* 类型重定义 */
+typedef struct pthread_rwlock pthread_rwlock_t;        /* 类型重定义 */
 
 
 ```
@@ -955,11 +955,11 @@ typedef struct pthread_rwlock pthread_rwlock_t;		/* 类型重定义 */
     int pthread_rwlock_init (pthread_rwlock_t *rwlock, const pthread_rwlockattr_t *attr);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-        rwlock	读写锁句柄，不能为NULL
+        rwlock    读写锁句柄，不能为NULL
 
-         attr	指向读写锁属性的指针，RT-Thread不使用此变量	
+         attr    指向读写锁属性的指针，RT-Thread不使用此变量    
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -978,9 +978,9 @@ attr一般设置NULL使用默认值即可，具体会在线程高级编程一章
     int pthread_rwlock_destroy (pthread_rwlock_t *rwlock);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-        rwlock	读写锁句柄，不能为NULL
+        rwlock    读写锁句柄，不能为NULL
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -997,9 +997,9 @@ attr一般设置NULL使用默认值即可，具体会在线程高级编程一章
     int pthread_rwlock_rdlock (pthread_rwlock_t *rwlock);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-        rwlock	读写锁句柄，不能为NULL
+        rwlock    读写锁句柄，不能为NULL
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -1014,9 +1014,9 @@ attr一般设置NULL使用默认值即可，具体会在线程高级编程一章
     int pthread_rwlock_tryrdlock (pthread_rwlock_t *rwlock);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-        rwlock	读写锁句柄，不能为NULL
+        rwlock    读写锁句柄，不能为NULL
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -1032,11 +1032,11 @@ attr一般设置NULL使用默认值即可，具体会在线程高级编程一章
     int pthread_rwlock_timedrdlock (pthread_rwlock_t *rwlock, const struct timespec *abstime);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-        rwlock	读写锁句柄，不能为NULL
-		
-	   abstime	指定的等待时间，单位是操作系统时钟节拍（OS Tick）
+        rwlock    读写锁句柄，不能为NULL
+        
+       abstime    指定的等待时间，单位是操作系统时钟节拍（OS Tick）
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -1053,9 +1053,9 @@ attr一般设置NULL使用默认值即可，具体会在线程高级编程一章
     int pthread_rwlock_wrlock (pthread_rwlock_t *rwlock);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-        rwlock	读写锁句柄，不能为NULL
+        rwlock    读写锁句柄，不能为NULL
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -1070,9 +1070,9 @@ attr一般设置NULL使用默认值即可，具体会在线程高级编程一章
     int pthread_rwlock_trywrlock (pthread_rwlock_t *rwlock);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-        rwlock	读写锁句柄，不能为NULL
+        rwlock    读写锁句柄，不能为NULL
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -1087,10 +1087,10 @@ attr一般设置NULL使用默认值即可，具体会在线程高级编程一章
     int pthread_rwlock_timedwrlock (pthread_rwlock_t *rwlock, const struct timespec *abstime);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-       rwlock	读写锁句柄，不能为NULL
-	  abstime 	指定的等待时间，单位是操作系统时钟节拍（OS Tick）
+       rwlock    读写锁句柄，不能为NULL
+      abstime     指定的等待时间，单位是操作系统时钟节拍（OS Tick）
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -1105,9 +1105,9 @@ attr一般设置NULL使用默认值即可，具体会在线程高级编程一章
     int pthread_rwlock_unlock (pthread_rwlock_t *rwlock);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-        rwlock	读写锁句柄，不能为NULL
+        rwlock    读写锁句柄，不能为NULL
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -1136,14 +1136,14 @@ static pthread_rwlock_t rwlock;
 /* 函数结果检查 */
 static void check_result(char* str,int result)
 {
-	if (0 == result)
-	{
-		printf("%s successfully!\n",str);
-	}
-	else
-	{
-		printf("%s failed! error code is %d\n",str,result);
-	}
+    if (0 == result)
+    {
+        printf("%s successfully!\n",str);
+    }
+    else
+    {
+        printf("%s failed! error code is %d\n",str,result);
+    }
 }
 /*线程入口*/
 static void* reader1_entry(void* parameter)
@@ -1151,60 +1151,60 @@ static void* reader1_entry(void* parameter)
     while (1)
     {   
 
-		pthread_rwlock_rdlock(&rwlock);  /* 尝试读锁定该读写锁 */
-		
-		printf("reader1 read book value is %d\n",book);
-		sleep(2);  /* 线程休眠2秒，切换到其他线程运行 */
-		
-		pthread_rwlock_unlock(&rwlock);  /* 线程运行后对读写锁解锁 */
+        pthread_rwlock_rdlock(&rwlock);  /* 尝试读锁定该读写锁 */
+        
+        printf("reader1 read book value is %d\n",book);
+        sleep(2);  /* 线程休眠2秒，切换到其他线程运行 */
+        
+        pthread_rwlock_unlock(&rwlock);  /* 线程运行后对读写锁解锁 */
     }
 }
 static void* reader2_entry(void* parameter)
 {
     while (1)
     {   
-		pthread_rwlock_rdlock(&rwlock);  /* 尝试读锁定该读写锁 */
-		
-		printf("reader2 read book value is %d\n",book);
-		sleep(2);  /* 线程休眠2秒，切换到其他线程运行 */
-		
-		pthread_rwlock_unlock(&rwlock);  /* 线程运行后对读写锁解锁 */
+        pthread_rwlock_rdlock(&rwlock);  /* 尝试读锁定该读写锁 */
+        
+        printf("reader2 read book value is %d\n",book);
+        sleep(2);  /* 线程休眠2秒，切换到其他线程运行 */
+        
+        pthread_rwlock_unlock(&rwlock);  /* 线程运行后对读写锁解锁 */
     }
 }
 static void* writer1_entry(void* parameter)
 {
     while (1)
-    {		
-		pthread_rwlock_wrlock(&rwlock);  /* 尝试写锁定该读写锁 */
-		
-		book++;
-		printf("writer1 write book value is %d\n",book);
-		
-		pthread_rwlock_unlock(&rwlock);  /* 对读写锁解锁 */
-		
-		sleep(2);  /* 线程休眠2秒，切换到其他线程运行 */
+    {        
+        pthread_rwlock_wrlock(&rwlock);  /* 尝试写锁定该读写锁 */
+        
+        book++;
+        printf("writer1 write book value is %d\n",book);
+        
+        pthread_rwlock_unlock(&rwlock);  /* 对读写锁解锁 */
+        
+        sleep(2);  /* 线程休眠2秒，切换到其他线程运行 */
     }
 }
 /* 用户应用入口 */
 int rt_application_init()
 {
-	int result;
-	/* 默认属性初始化读写锁 */
-	pthread_rwlock_init(&rwlock,NULL);
-	
-	/*创建reader1线程,线程入口是reader1_entry, 线程属性为默认值，入口参数为NULL*/
-	result = pthread_create(&reader1,NULL,reader1_entry,NULL);
-	check_result("reader1 created",result);
-	
+    int result;
+    /* 默认属性初始化读写锁 */
+    pthread_rwlock_init(&rwlock,NULL);
+    
+    /*创建reader1线程,线程入口是reader1_entry, 线程属性为默认值，入口参数为NULL*/
+    result = pthread_create(&reader1,NULL,reader1_entry,NULL);
+    check_result("reader1 created",result);
+    
     /*创建reader2线程,线程入口是reader2_entry, 线程属性为默认值，入口参数为NULL*/
-	result = pthread_create(&reader2,NULL,reader2_entry,NULL);
-	check_result("reader2 created",result);
+    result = pthread_create(&reader2,NULL,reader2_entry,NULL);
+    check_result("reader2 created",result);
 
-	/*创建writer1线程,线程入口是writer1_entry, 线程属性为，入口参数为NULL*/
-	result = pthread_create(&writer1,NULL,writer1_entry,NULL);
-	check_result("writer1 created",result);
+    /*创建writer1线程,线程入口是writer1_entry, 线程属性为，入口参数为NULL*/
+    result = pthread_create(&writer1,NULL,writer1_entry,NULL);
+    check_result("writer1 created",result);
 
-	return 0;	
+    return 0;    
 }
 
 ```
@@ -1223,9 +1223,9 @@ int rt_application_init()
 
 struct pthread_barrier
 {
-    int count;	/*指定的等待线程个数*/
-    pthread_cond_t cond;		/* 条件变量 */
-    pthread_mutex_t mutex;	/* 互斥锁 */
+    int count;    /*指定的等待线程个数*/
+    pthread_cond_t cond;        /* 条件变量 */
+    pthread_mutex_t mutex;    /* 互斥锁 */
 };
 typedef struct pthread_barrier pthread_barrier_t;
 
@@ -1237,13 +1237,13 @@ typedef struct pthread_barrier pthread_barrier_t;
     int pthread_barrier_init(pthread_barrier_t *barrier, const pthread_barrierattr_t *attr, unsigned count);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-        attr 	指向屏障属性的指针，传入NULL，则使用默认值，非NULL必须使用PTHREAD_PROCESS_PRIVATE	 
+        attr    指向屏障属性的指针，传入NULL，则使用默认值，非NULL必须使用PTHREAD_PROCESS_PRIVATE
 
-     barrier	屏障句柄
+     barrier    屏障句柄
 
-       count	指定的等待线程个数		
+       count    指定的等待线程个数        
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -1260,9 +1260,9 @@ attr一般设置NULL使用默认值即可，具体会在线程高级编程一章
     int pthread_barrier_destroy(pthread_barrier_t *barrier);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-      barrier 	屏障句柄	 
+      barrier    屏障句柄     
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -1277,9 +1277,9 @@ attr一般设置NULL使用默认值即可，具体会在线程高级编程一章
     int pthread_barrier_wait(pthread_barrier_t *barrier);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-      barrier 	屏障句柄	 
+      barrier    屏障句柄     
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -1306,23 +1306,23 @@ static pthread_barrier_t barrier;
 /* 函数返回值检查函数 */
 static void check_result(char* str,int result)
 {
-	if (0 == result)
-	{
-			printf("%s successfully!\n",str);
-	}
-	else
-	{
-			printf("%s failed! error code is %d\n",str,result);
-	}
+    if (0 == result)
+    {
+            printf("%s successfully!\n",str);
+    }
+    else
+    {
+            printf("%s failed! error code is %d\n",str,result);
+    }
 }
 /*线程1入口函数*/
 static void* thread1_entry(void* parameter)
 {
     int count = 0;
 
-	printf("thread1 have arrived the barrier!\n");
-	pthread_barrier_wait(&barrier);	/* 到达屏障，并等待其他线程到达 */
-	
+    printf("thread1 have arrived the barrier!\n");
+    pthread_barrier_wait(&barrier);    /* 到达屏障，并等待其他线程到达 */
+    
     while (1)
     {
         /* 打印线程计数值输出 */
@@ -1337,9 +1337,9 @@ static void* thread2_entry(void* parameter)
 {
     int count = 0;
 
-	printf("thread2 have arrived the barrier!\n");
-	pthread_barrier_wait(&barrier);
-	
+    printf("thread2 have arrived the barrier!\n");
+    pthread_barrier_wait(&barrier);
+    
     while (1)
     {
         /* 打印线程计数值输出 */
@@ -1354,9 +1354,9 @@ static void* thread3_entry(void* parameter)
 {
     int count = 0;
 
-	printf("thread3 have arrived the barrier!\n");
-	pthread_barrier_wait(&barrier);
-	
+    printf("thread3 have arrived the barrier!\n");
+    pthread_barrier_wait(&barrier);
+    
     while (1)
     {
         /* 打印线程计数值输出 */
@@ -1370,20 +1370,20 @@ static void* thread3_entry(void* parameter)
 int rt_application_init()
 {
     int result;
-	pthread_barrier_init(&barrier,NULL,3);
-	
-	/*创建线程1,线程入口是thread1_entry, 属性参数设为NULL选择默认值，入口参数为NULL*/
-	result = pthread_create(&tid1,NULL,thread1_entry,NULL);
-	check_result("thread1 created",result);
-	
-	/*创建线程2,线程入口是thread2_entry, 属性参数设为NULL选择默认值，入口参数为NULL*/
-	result = pthread_create(&tid2,NULL,thread2_entry,NULL);
-	check_result("thread2 created",result);
+    pthread_barrier_init(&barrier,NULL,3);
+    
+    /*创建线程1,线程入口是thread1_entry, 属性参数设为NULL选择默认值，入口参数为NULL*/
+    result = pthread_create(&tid1,NULL,thread1_entry,NULL);
+    check_result("thread1 created",result);
+    
+    /*创建线程2,线程入口是thread2_entry, 属性参数设为NULL选择默认值，入口参数为NULL*/
+    result = pthread_create(&tid2,NULL,thread2_entry,NULL);
+    check_result("thread2 created",result);
 
-	/*创建线程3,线程入口是thread3_entry, 属性参数设为NULL选择默认值，入口参数为NULL*/
-	result = pthread_create(&tid3,NULL,thread3_entry,NULL);
-	check_result("thread3 created",result);
-		
+    /*创建线程3,线程入口是thread3_entry, 属性参数设为NULL选择默认值，入口参数为NULL*/
+    result = pthread_create(&tid3,NULL,thread3_entry,NULL);
+    check_result("thread3 created",result);
+        
 }
 
 ```
@@ -1417,8 +1417,8 @@ struct posix_sem
     rt_uint16_t refcount;
     rt_uint8_t unlinked;
     rt_uint8_t unamed;
-    rt_sem_t sem;	/* RT-Thread 信号量 */
-    struct posix_sem* next;	 /* 指向下一个信号量控制块 */
+    rt_sem_t sem;    /* RT-Thread 信号量 */
+    struct posix_sem* next;     /* 指向下一个信号量控制块 */
 };
 typedef struct posix_sem sem_t;
 
@@ -1446,13 +1446,13 @@ typedef struct rt_semaphore* rt_sem_t;
     int sem_init(sem_t *sem, int pshared, unsigned int value);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-         sem	信号量句柄
-		 
-       value	信号量初始值，表示信号量资源的可用数量
-		 
-     pshared	RT-Thread未实现参数	
+         sem    信号量句柄
+         
+       value    信号量初始值，表示信号量资源的可用数量
+         
+     pshared    RT-Thread未实现参数    
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -1467,9 +1467,9 @@ typedef struct rt_semaphore* rt_sem_t;
     int sem_destroy(sem_t *sem);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-         sem	信号量句柄		 
+         sem    信号量句柄         
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -1488,11 +1488,11 @@ typedef struct rt_semaphore* rt_sem_t;
     sem_t *sem_open(const char *name, int oflag, ...);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-         name	信号量名称
-		 
-        oflag	信号量的打开方式 
+         name    信号量名称
+         
+        oflag    信号量的打开方式 
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -1509,9 +1509,9 @@ typedef struct rt_semaphore* rt_sem_t;
     int sem_unlink(const char *name);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-         name	信号量名称
+         name    信号量名称
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -1526,9 +1526,9 @@ typedef struct rt_semaphore* rt_sem_t;
     int sem_close(sem_t *sem);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-         sem	信号量句柄
+         sem    信号量句柄
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -1543,11 +1543,11 @@ typedef struct rt_semaphore* rt_sem_t;
     int sem_getvalue(sem_t *sem, int *sval);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-          sem	信号量句柄，不能为NULL
+          sem    信号量句柄，不能为NULL
 
-		 sval	保存获取的信号量值地址,不能为NULL
+         sval    保存获取的信号量值地址,不能为NULL
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -1562,9 +1562,9 @@ typedef struct rt_semaphore* rt_sem_t;
     int sem_wait(sem_t *sem);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-         sem	信号量句柄，不能为NULL
+         sem    信号量句柄，不能为NULL
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -1579,9 +1579,9 @@ typedef struct rt_semaphore* rt_sem_t;
     int sem_trywait(sem_t *sem);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-          sem	信号量句柄，不能为NULL
+          sem    信号量句柄，不能为NULL
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -1596,11 +1596,11 @@ typedef struct rt_semaphore* rt_sem_t;
     int sem_timedwait(sem_t *sem, const struct timespec *abs_timeout);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-          sem	信号量句柄，不能为NULL
+          sem    信号量句柄，不能为NULL
   
-     abs_timeout	指定的等待时间，单位是操作系统时钟节拍（OS Tick）
+     abs_timeout    指定的等待时间，单位是操作系统时钟节拍（OS Tick）
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -1615,9 +1615,9 @@ typedef struct rt_semaphore* rt_sem_t;
     int sem_post(sem_t *sem);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-          sem	信号量句柄，不能为NULL
+          sem    信号量句柄，不能为NULL
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -1651,14 +1651,14 @@ static pthread_t tid2;
 /* 函数返回值检查 */
 static void check_result(char* str,int result)
 {
-	if (0 == result)
-	{
-		printf("%s successfully!\n",str);
-	}
-	else
-	{
-		printf("%s failed! error code is %d\n",str,result);
-	}
+    if (0 == result)
+    {
+        printf("%s successfully!\n",str);
+    }
+    else
+    {
+        printf("%s failed! error code is %d\n",str,result);
+    }
 }
 
 /* 生产者生产的结构体数据，存放在链表里 */
@@ -1673,74 +1673,74 @@ struct node* head = NULL; /* 链表头,是共享资源 */
 static void* consumer(void* parameter) 
 {
     struct node* p_node = NULL;
-	
+    
     while (1)
-	{
+    {
         sem_wait(&full_sem);
-		pthread_mutex_lock(&mutex);	/* 对互斥锁上锁, */
-		
-		while (head != NULL)	/* 判断链表里是否有元素 */
-		{
-			p_node = head;	/* 拿到资源 */
-			head = head->n_next;	/* 头指针指向下一个资源 */
-			/* 打印输出 */
-			printf("consume %d\n",p_node->n_number);
-			
-			free(p_node);	/* 拿到资源后释放节点占用的内存 */ 
+        pthread_mutex_lock(&mutex);    /* 对互斥锁上锁, */
+        
+        while (head != NULL)    /* 判断链表里是否有元素 */
+        {
+            p_node = head;    /* 拿到资源 */
+            head = head->n_next;    /* 头指针指向下一个资源 */
+            /* 打印输出 */
+            printf("consume %d\n",p_node->n_number);
+            
+            free(p_node);    /* 拿到资源后释放节点占用的内存 */ 
         }
-		
-	    pthread_mutex_unlock(&mutex);	/* 临界区数据操作完毕，释放互斥锁 */
+        
+        pthread_mutex_unlock(&mutex);    /* 临界区数据操作完毕，释放互斥锁 */
 
-		sem_post(&empty_sem);  /* 发送一个空信号量给生产者 */
-    }	
+        sem_post(&empty_sem);  /* 发送一个空信号量给生产者 */
+    }    
 }
 /* 生产者线程入口函数 */
 static void* product(void* patameter)
 {
     int count = 0;
     struct node *p_node;
-	
-	while(1)
-	{
-	    /* 动态分配一块结构体内存 */
-		p_node = (struct node*)malloc(sizeof(struct node));
-		if (p_node != NULL)
-		{
-			p_node->n_number = count++;	
-			pthread_mutex_lock(&mutex);	/* 需要操作head这个临界资源，先加锁 */
-			
-			p_node->n_next = head;
-			head = p_node;	/* 往链表头插入数据 */
-			
-			pthread_mutex_unlock(&mutex);	/* 解锁 */
-			printf("produce %d\n",p_node->n_number);
-			
-			sem_post(&full_sem);  /* 发送一个满信号量给消费者 */
-		}
-		else
-		{
-			printf("product malloc node failed!\n");
-			break;
-		}
-		sleep(2);	/* 休眠2秒 */
-		sem_wait(&empty_sem);  /* 等待消费者发送空信号量 */
-	}
+    
+    while(1)
+    {
+        /* 动态分配一块结构体内存 */
+        p_node = (struct node*)malloc(sizeof(struct node));
+        if (p_node != NULL)
+        {
+            p_node->n_number = count++;    
+            pthread_mutex_lock(&mutex);    /* 需要操作head这个临界资源，先加锁 */
+            
+            p_node->n_next = head;
+            head = p_node;    /* 往链表头插入数据 */
+            
+            pthread_mutex_unlock(&mutex);    /* 解锁 */
+            printf("produce %d\n",p_node->n_number);
+            
+            sem_post(&full_sem);  /* 发送一个满信号量给消费者 */
+        }
+        else
+        {
+            printf("product malloc node failed!\n");
+            break;
+        }
+        sleep(2);    /* 休眠2秒 */
+        sem_wait(&empty_sem);  /* 等待消费者发送空信号量 */
+    }
 }
  
 int rt_application_init() 
 {
-	int result;
-	
-	sem_init(&empty_sem,NULL,0);
-	sem_init(&full_sem,NULL,0);
-	/* 创建生产者线程,属性为默认值，入口函数是product，入口函数参数为NULL*/
-	result = pthread_create(&tid1,NULL,product,NULL);
-	check_result("product thread created ",result);
+    int result;
+    
+    sem_init(&empty_sem,NULL,0);
+    sem_init(&full_sem,NULL,0);
+    /* 创建生产者线程,属性为默认值，入口函数是product，入口函数参数为NULL*/
+    result = pthread_create(&tid1,NULL,product,NULL);
+    check_result("product thread created ",result);
 
-	/* 创建消费者线程,属性为默认值，入口函数是consumer，入口函数参数是NULL */
-	result = pthread_create(&tid2,NULL,consumer,NULL);
-	check_result("consumer thread created ",result);
-	
+    /* 创建消费者线程,属性为默认值，入口函数是consumer，入口函数参数是NULL */
+    result = pthread_create(&tid2,NULL,consumer,NULL);
+    check_result("consumer thread created ",result);
+    
     return 0;
 }
 
@@ -1764,8 +1764,8 @@ struct mqdes
 {
     rt_uint16_t refcount;  /* 引用计数 */
     rt_uint16_t unlinked;  /* 消息队列的分离状态，值为1表示消息队列已经分离 */
-    rt_mq_t mq;	    /* RT-Thread 消息队列控制块 */
-    struct mqdes* next;	/* 指向下一个消息队列控制块 */
+    rt_mq_t mq;        /* RT-Thread 消息队列控制块 */
+    struct mqdes* next;    /* 指向下一个消息队列控制块 */
 };
 typedef struct mqdes* mqd_t;  /* 消息队列控制块指针类型重定义 */
 
@@ -1778,11 +1778,11 @@ typedef struct mqdes* mqd_t;  /* 消息队列控制块指针类型重定义 */
     mqd_t mq_open(const char *name, int oflag, ...);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-        name	消息队列名称
+        name    消息队列名称
 
-       oflag	消息队列打开方式		
+       oflag    消息队列打开方式        
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -1797,9 +1797,9 @@ typedef struct mqdes* mqd_t;  /* 消息队列控制块指针类型重定义 */
     int mq_unlink(const char *name);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-        name	消息队列名称	
+        name    消息队列名称    
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -1814,9 +1814,9 @@ typedef struct mqdes* mqd_t;  /* 消息队列控制块指针类型重定义 */
     int mq_close(mqd_t mqdes);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-        mqdes	消息队列句柄
+        mqdes    消息队列句柄
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -1831,15 +1831,15 @@ typedef struct mqdes* mqd_t;  /* 消息队列控制块指针类型重定义 */
     int mq_send(mqd_t mqdes, const char *msg_ptr, size_t msg_len, unsigned msg_prio);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-        mqdes	消息队列句柄,不能为NULL
-		 
-	   sg_ptr	指向要发送的消息的指针，不能为NULL
+        mqdes    消息队列句柄,不能为NULL
+         
+       sg_ptr    指向要发送的消息的指针，不能为NULL
 
-	  msg_len	发送的消息的长度
+      msg_len    发送的消息的长度
 
-	 msg_prio	Rt-thread未实现参数
+     msg_prio    Rt-thread未实现参数
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -1856,17 +1856,17 @@ typedef struct mqdes* mqd_t;  /* 消息队列控制块指针类型重定义 */
     int mq_timedsend(mqd_t mqdes, const char *msg_ptr, size_t msg_len, unsigned msg_prio,const struct timespec *abs_timeout);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-        mqdes	消息队列句柄,不能为NULL
-		 
-	  msg_ptr	指向要发送的消息的指针，不能为NULL
+        mqdes    消息队列句柄,不能为NULL
+         
+      msg_ptr    指向要发送的消息的指针，不能为NULL
 
-	  msg_len	发送的消息的长度
+      msg_len    发送的消息的长度
 
-	 msg_prio	Rt-thread未实现参数
-	
-     abs_timeout	指定的等待时间，单位是操作系统时钟节拍（OS Tick）
+     msg_prio    Rt-thread未实现参数
+    
+     abs_timeout    指定的等待时间，单位是操作系统时钟节拍（OS Tick）
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -1881,15 +1881,15 @@ typedef struct mqdes* mqd_t;  /* 消息队列控制块指针类型重定义 */
     ssize_t mq_receive(mqd_t mqdes, char *msg_ptr, size_t msg_len, unsigned *msg_prio);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-        mqdes	消息队列句柄,不能为NULL
-		 
-	  msg_ptr	指向要发送的消息的指针，不能为NULL
+        mqdes    消息队列句柄,不能为NULL
+         
+      msg_ptr    指向要发送的消息的指针，不能为NULL
 
-	  msg_len	发送的消息的长度
+      msg_len    发送的消息的长度
 
-	 msg_prio	Rt-thread未实现参数
+     msg_prio    Rt-thread未实现参数
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -1904,17 +1904,17 @@ typedef struct mqdes* mqd_t;  /* 消息队列控制块指针类型重定义 */
     ssize_t mq_timedreceive(mqd_t  mqdes, char *msg_ptr, size_t msg_len, unsigned *msg_prio, const struct timespec *abs_timeout);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-        mqdes	消息队列句柄,不能为NULL
-		 
-	  msg_ptr 	指向要发送的消息的指针，不能为NULL
+        mqdes    消息队列句柄,不能为NULL
+         
+      msg_ptr    指向要发送的消息的指针，不能为NULL
 
-	  msg_len	发送的消息的长度
+      msg_len    发送的消息的长度
 
-	 msg_prio	Rt-thread未实现参数
-	 
-     abs_timeout	指定的等待时间，单位是操作系统时钟节拍（OS Tick）
+     msg_prio    Rt-thread未实现参数
+     
+     abs_timeout    指定的等待时间，单位是操作系统时钟节拍（OS Tick）
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -1941,26 +1941,26 @@ static mqd_t mqueue;
 /* 函数返回值检查函数 */
 static void check_result(char* str,int result)
 {
-	if (0 == result)
-	{
-			printf("%s successfully!\n",str);
-	}
-	else
-	{
-			printf("%s failed! error code is %d\n",str,result);
-	}
+    if (0 == result)
+    {
+            printf("%s successfully!\n",str);
+    }
+    else
+    {
+            printf("%s failed! error code is %d\n",str,result);
+    }
 }
 /*线程1入口函数*/
 static void* thread1_entry(void* parameter)
 {
     char buf[128];
-	int result;
+    int result;
 
     while (1)
     {
         /* 从消息队列中接收消息 */
-		result = mq_receive(mqueue, &buf[0], sizeof(buf), 0);
-		if (result != -1)
+        result = mq_receive(mqueue, &buf[0], sizeof(buf), 0);
+        if (result != -1)
         {
             /* 输出内容 */
             printf("thread1 recv [%s]\n", buf);
@@ -2027,31 +2027,31 @@ static void* thread3_entry(void* parameter)
 /* 用户应用入口 */
 int rt_application_init()
 {
-	int result;
-	struct mq_attr mqstat;
-	int oflag = O_CREAT|O_RDWR;
-#define MSG_SIZE	128
-#define MAX_MSG		128
-	memset(&mqstat, 0, sizeof(mqstat));
-	mqstat.mq_maxmsg = MAX_MSG;
-	mqstat.mq_msgsize = MSG_SIZE;
-	mqstat.mq_flags = 0;
-	mqueue = mq_open("mqueue1",O_CREAT,0777,&mqstat);
+    int result;
+    struct mq_attr mqstat;
+    int oflag = O_CREAT|O_RDWR;
+#define MSG_SIZE    128
+#define MAX_MSG        128
+    memset(&mqstat, 0, sizeof(mqstat));
+    mqstat.mq_maxmsg = MAX_MSG;
+    mqstat.mq_msgsize = MSG_SIZE;
+    mqstat.mq_flags = 0;
+    mqueue = mq_open("mqueue1",O_CREAT,0777,&mqstat);
 
-	/*创建线程1,线程入口是thread1_entry, 属性参数设为NULL选择默认值，入口参数为NULL*/
-	result = pthread_create(&tid1,NULL,thread1_entry,NULL);
-	check_result("thread1 created",result);
+    /*创建线程1,线程入口是thread1_entry, 属性参数设为NULL选择默认值，入口参数为NULL*/
+    result = pthread_create(&tid1,NULL,thread1_entry,NULL);
+    check_result("thread1 created",result);
 
-	/*创建线程2,线程入口是thread2_entry, 属性参数设为NULL选择默认值，入口参数为NULL*/
-	result = pthread_create(&tid2,NULL,thread2_entry,NULL);
-	check_result("thread2 created",result);
+    /*创建线程2,线程入口是thread2_entry, 属性参数设为NULL选择默认值，入口参数为NULL*/
+    result = pthread_create(&tid2,NULL,thread2_entry,NULL);
+    check_result("thread2 created",result);
 
-	/*创建线程3,线程入口是thread3_entry, 属性参数设为NULL选择默认值，入口参数为NULL*/
-	result = pthread_create(&tid3,NULL,thread3_entry,NULL);
-	check_result("thread3 created",result);
+    /*创建线程3,线程入口是thread3_entry, 属性参数设为NULL选择默认值，入口参数为NULL*/
+    result = pthread_create(&tid3,NULL,thread3_entry,NULL);
+    check_result("thread3 created",result);
 
 
-	return 0;
+    return 0;
 }
 
 ```
@@ -2075,7 +2075,7 @@ typedef struct pthread_attr pthread_attr_t;
 /*线程属性结构体*/
 struct pthread_attr
 {
-    void*      stack_base;		/* 线程栈的地址 */
+    void*      stack_base;        /* 线程栈的地址 */
     rt_uint32_t stack_size;     /* 线程栈大小 */
     rt_uint8_t priority;        /* 线程优先级 */
     rt_uint8_t detachstate;     /*线程的分离状态 */
@@ -2093,9 +2093,9 @@ struct pthread_attr
     int pthread_attr_destroy(pthread_attr_t *attr);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-        attr	指向线程属性的指针
+        attr    指向线程属性的指针
 -----------------------------------------------------------------------
 **函数功能**
 
@@ -2119,9 +2119,9 @@ pthread_attr_destroy()函数对attr指向的属性去初始化，之后可以再
 -----------------------------------------------------------------------
          参数   描述
 --------------  -------------------------------------------------------
-         attr	指向线程属性的指针
-		
-		 state	线程分离状态
+         attr    指向线程属性的指针
+        
+         state    线程分离状态
 -----------------------------------------------------------------------
 **函数功能**
 
@@ -2152,11 +2152,11 @@ pthread_attr_destroy()函数对attr指向的属性去初始化，之后可以再
     int pthread_attr_getschedparam(pthread_attr_t const *attr,struct sched_param   *param)；
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-        attr	指向线程属性的指针
+        attr    指向线程属性的指针
       
-	   param    指向调度参数的指针
+       param    指向调度参数的指针
 -----------------------------------------------------------------------
 **函数功能**
 
@@ -2173,7 +2173,7 @@ pthread_attr_setschedparam()函数设置线程的优先级。使用param对线�
 
 struct sched_param
 {
-    int sched_priority;	/* 线程优先级 */
+    int sched_priority;    /* 线程优先级 */
 };
 
 ```
@@ -2187,11 +2187,11 @@ struct sched_param
     int pthread_attr_getstacksize(pthread_attr_t const *attr, size_t *stack_size);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-         attr	指向线程属性的指针
-		
-     stack_size	线程堆栈大小
+         attr    指向线程属性的指针
+        
+     stack_size    线程堆栈大小
 -----------------------------------------------------------------------
 **函数功能**
 
@@ -2211,10 +2211,10 @@ pthread_attr_setstacksize()函数可以设置堆栈大小，单位是字节。�
     int pthread_attr_getstack(pthread_attr_t const *attr,void **stack_base, size_t *stack_size);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-         attr	指向线程属性的指针
-		 
+         attr    指向线程属性的指针
+         
      stack_size   线程堆栈大小
    
      stack_base   线程堆栈地址
@@ -2301,14 +2301,14 @@ static pthread_t tid2;
 /* 函数返回值检查 */
 static void check_result(char* str,int result)
 {
-	if (0 == result)
-	{
-		printf("%s successfully!\n",str);
-	}
-	else
-	{
-		printf("%s failed! error code is %d\n",str,result);
-	}	
+    if (0 == result)
+    {
+        printf("%s successfully!\n",str);
+    }
+    else
+    {
+        printf("%s failed! error code is %d\n",str,result);
+    }    
 }
 /* 线程入口函数*/
 static void* thread_entry(void* parameter)
@@ -2321,7 +2321,7 @@ static void* thread_entry(void* parameter)
         /* 打印输出线程计数值 */
         printf("thread%d count: %d\n", no, count ++);
 
-        sleep(2);	/* 休眠2秒 */
+        sleep(2);    /* 休眠2秒 */
     }
 }
 
@@ -2329,7 +2329,7 @@ static void* thread_entry(void* parameter)
 int rt_application_init()
 {
     int result;
-    pthread_attr_t attr;  	/* 线程属性 */
+    pthread_attr_t attr;      /* 线程属性 */
     struct sched_param prio;  /* 线程优先级 */
 
     prio.sched_priority = 8;  /* 优先级设置为8 */
@@ -2360,9 +2360,9 @@ int rt_application_init()
     int pthread_cancel(pthread_t thread);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-        thread	线程句柄
+        thread    线程句柄
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -2377,11 +2377,11 @@ int rt_application_init()
     int pthread_setcancelstate(int state, int *oldstate);
 ```
 -----------------------------------------------------------------------
-         参数   描述
---------------  -------------------------------------------------------		
-		state	有两种值：PTHREAD_CANCEL_ENABLE：取消使能 PTHREAD_CANCEL_DISABLE：取消不使能（线程创建时的默认值）
+         参数    描述
+--------------  -------------------------------------------------------        
+        state    有两种值：PTHREAD_CANCEL_ENABLE：取消使能 PTHREAD_CANCEL_DISABLE：取消不使能（线程创建时的默认值）
 
-	   oldstate	保存原来的取消状态
+       oldstate    保存原来的取消状态
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -2396,11 +2396,11 @@ int rt_application_init()
     int pthread_setcanceltype(int type, int *oldtype);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-        type	有2种值：PTHREAD_CANCEL_DEFFERED：线程收到取消请求后继续运行至下一个取消点再结束。（线程创建时的默认值）PTHREAD_CANCEL_ASYNCHRONOUS：线程立即结束。
+        type    有2种值：PTHREAD_CANCEL_DEFFERED：线程收到取消请求后继续运行至下一个取消点再结束。（线程创建时的默认值）PTHREAD_CANCEL_ASYNCHRONOUS：线程立即结束。
 
-	 oldtype	保存原来的取消类型
+     oldtype    保存原来的取消类型
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -2478,62 +2478,62 @@ static pthread_t tid2;
 /* 函数返回值检查 */
 static void check_result(char* str,int result)
 {
-	if (0 == result)
-	{
-		printf("%s successfully!\n",str);
-	}
-	else
-	{
-		printf("%s failed! error code is %d\n",str,result);
-	}
+    if (0 == result)
+    {
+        printf("%s successfully!\n",str);
+    }
+    else
+    {
+        printf("%s failed! error code is %d\n",str,result);
+    }
 }
 /* 线程1入口函数 */
 static void* thread1_entry(void* parameter)
 {
     int count = 0;
-	/* 设置线程1的取消状态使能，取消类型为线程收到取消点后马上结束 */
-	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
-	
-	while(1)
-	{
-		/* 打印线程计数值输出 */
-		printf("thread1 run count: %d\n",count ++);
-        sleep(2);	/* 休眠2秒 */
-	}
+    /* 设置线程1的取消状态使能，取消类型为线程收到取消点后马上结束 */
+    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+    
+    while(1)
+    {
+        /* 打印线程计数值输出 */
+        printf("thread1 run count: %d\n",count ++);
+        sleep(2);    /* 休眠2秒 */
+    }
 }
 /* 线程2入口函数*/
 static void* thread2_entry(void* parameter)
 {
     int count = 0;
-	sleep(8);
-	/* 向线程1发送取消请求 */
-	pthread_cancel(tid1);
-	/* 阻塞等待线程1运行结束 */
-	pthread_join(tid1,NULL);
+    sleep(8);
+    /* 向线程1发送取消请求 */
+    pthread_cancel(tid1);
+    /* 阻塞等待线程1运行结束 */
+    pthread_join(tid1,NULL);
     printf("thread1 exited!\n");
-    /* 线程2打印信息开始输出 */	
-	while(1)
-	{
-		/* 打印线程计数值输出 */
-		printf("thread2 run count: %d\n",count ++);
-        sleep(2);	/* 休眠2秒 */
-	}			
+    /* 线程2打印信息开始输出 */    
+    while(1)
+    {
+        /* 打印线程计数值输出 */
+        printf("thread2 run count: %d\n",count ++);
+        sleep(2);    /* 休眠2秒 */
+    }            
 }
 /* 用户应用入口 */
 int rt_application_init()
 {
     int result;
-	/* 创建线程1,属性为默认值，分离状态为默认值joinable,
-	 入口函数是thread1_entry，入口函数参数为NULL */
-	result = pthread_create(&tid1,NULL,thread1_entry,NULL);
-	check_result("thread1 created",result);
+    /* 创建线程1,属性为默认值，分离状态为默认值joinable,
+     入口函数是thread1_entry，入口函数参数为NULL */
+    result = pthread_create(&tid1,NULL,thread1_entry,NULL);
+    check_result("thread1 created",result);
 
-	/* 创建线程2,属性为默认值，分离状态为默认值joinable,
-	 入口函数是thread2_entry，入口函数参数为NULL */
-	result = pthread_create(&tid2,NULL,thread2_entry,NULL);
-	check_result("thread2 created",result);
-	
+    /* 创建线程2,属性为默认值，分离状态为默认值joinable,
+     入口函数是thread2_entry，入口函数参数为NULL */
+    result = pthread_create(&tid2,NULL,thread2_entry,NULL);
+    check_result("thread2 created",result);
+    
     return 0;
 }
 
@@ -2545,11 +2545,11 @@ int rt_application_init()
     int pthread_once(pthread_once_t * once_control, void (*init_routine) (void));
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
- once_control	控制变量
+ once_control    控制变量
 
- init_routine	执行函数
+ init_routine    执行函数
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -2565,13 +2565,13 @@ int rt_application_init()
     void pthread_cleanup_push(void (*routine)(void*), void *arg);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-      execute	0或1，决定是否执行cleanup函数
+      execute    0或1，决定是否执行cleanup函数
 
-	  routine	指向清理函数的指针
+      routine    指向清理函数的指针
 
-	     arg	传递给清理函数的参数
+         arg    传递给清理函数的参数
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -2587,9 +2587,9 @@ pthread_cleanup_push()把指定的清理函数routine放到线程的清理函数
     pthread_t pthread_self (void);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-    pthread_t	线程句柄
+    pthread_t    线程句柄
 -----------------------------------------------------------------------
 **函数功能**
 
@@ -2605,9 +2605,9 @@ pthread_equal()返回0或1，相等则为1，不等则为0。pthread_self()返�
     int sched_get_priority_max(int policy);
 ```
 -----------------------------------------------------------------------
-         参数   描述
+         参数    描述
 --------------  -------------------------------------------------------
-       policy	2个值可选：SCHED_FIFO，SCHED_RR
+       policy    2个值可选：SCHED_FIFO，SCHED_RR
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -2663,7 +2663,7 @@ RT-Thread实现的互斥锁属性包括互斥锁类型和互斥锁作用域。
 -----------------------------------------------------------------------
          参数    描述
 --------------  -------------------------------------------------------
-        attr	指向互斥锁属性对象的指针
+        attr    指向互斥锁属性对象的指针
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -2683,9 +2683,9 @@ pthread_mutexattr_destroy()函数将会对attr指向的属性对象去初始化�
 -----------------------------------------------------------------------
          参数    描述
 --------------  -------------------------------------------------------
-        type	互斥锁类型
+        type    互斥锁类型
 
-	 pshared	有2个可选值:PTHREAD_PROCESS_PRIVATE：默认值，用于仅同步该进程中的线程。PTHREAD_PROCESS_SHARED：用于同步该进程和其他进程中的线程。
+     pshared    有2个可选值:PTHREAD_PROCESS_PRIVATE：默认值，用于仅同步该进程中的线程。PTHREAD_PROCESS_SHARED：用于同步该进程和其他进程中的线程。
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -2701,9 +2701,9 @@ pthread_mutexattr_destroy()函数将会对attr指向的属性对象去初始化�
 -----------------------------------------------------------------------
          参数    描述
 --------------  -------------------------------------------------------
-         type	互斥锁类型
+         type    互斥锁类型
 
-         attr	指向互斥锁属性对象的指针
+         attr    指向互斥锁属性对象的指针
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -2726,7 +2726,7 @@ pthread_mutexattr_destroy()函数将会对attr指向的属性对象去初始化�
 -----------------------------------------------------------------------
          参数    描述
 --------------  -------------------------------------------------------
-         attr	指向条件变量属性对象的指针
+         attr    指向条件变量属性对象的指针
 -----------------------------------------------------------------------
 **函数功能**
 
@@ -2743,7 +2743,7 @@ pthread_mutexattr_destroy()函数将会对attr指向的属性对象去初始化�
 -----------------------------------------------------------------------
          参数    描述
 --------------  -------------------------------------------------------
-         attr	 指向条件变量属性对象的指针
+         attr     指向条件变量属性对象的指针
 -----------------------------------------------------------------------
 **函数功能**
 
@@ -2783,7 +2783,7 @@ int pthread_rwlockattr_init (pthread_rwlockattr_t *attr);
 -----------------------------------------------------------------------
          参数    描述
 --------------  -------------------------------------------------------
-         attr	 指向读写锁属性的指针
+         attr     指向读写锁属性的指针
 -----------------------------------------------------------------------
 **函数功能**  使用默认值PTHREAD_PROCESS_PRIVATE初始化读写锁属性attr。
 
@@ -2797,8 +2797,8 @@ int pthread_rwlockattr_getpshared (const pthread_rwlockattr_t *attr, int *pshare
 -----------------------------------------------------------------------
          参数    描述
 --------------  -------------------------------------------------------
-         attr	指向读写锁属性的指针
-		
+         attr    指向读写锁属性的指针
+        
       pshared    指向保存读写锁作用域的指针
 -----------------------------------------------------------------------
 **函数功能**  获取读写锁作用域。
@@ -2826,7 +2826,7 @@ int pthread_barrierattr_init(pthread_barrierattr_t *attr);
 -----------------------------------------------------------------------
          参数    描述
 --------------  -------------------------------------------------------
-         attr	指向屏障属性的指针
+         attr    指向屏障属性的指针
 -----------------------------------------------------------------------
 **函数功能**   使用默认值PTHREAD_PROCESS_PRIVATE初始化屏障属性attr。
 
@@ -2840,9 +2840,9 @@ int pthread_barrierattr_getpshared(const pthread_barrierattr_t *attr, int *pshar
 -----------------------------------------------------------------------
         参数    描述
 --------------  -------------------------------------------------------
-        attr	指向屏障属性的指针
-		
-	 pshared	指向保存屏障作用域数据的指针
+        attr    指向屏障属性的指针
+        
+     pshared    指向保存屏障作用域数据的指针
 -----------------------------------------------------------------------
 **函数功能**   获取屏障的作用域。
 
@@ -2884,9 +2884,9 @@ int mq_getattr(mqd_t mqdes, struct mq_attr *mqstat);
 -----------------------------------------------------------------------
          参数    描述
 --------------  -------------------------------------------------------
-        mqdes	指向消息队列控制块的指针
+        mqdes    指向消息队列控制块的指针
       
-	   mqstat	指向保存获取数据的指针
+       mqstat    指向保存获取数据的指针
 -----------------------------------------------------------------------
 
 **函数功能**  获取消息队列属性。
