@@ -10,38 +10,38 @@ POSIX Threads简称Pthreads，POSIX是"Portable Operating System Interface"（�
 
 * 读写锁（read/write lock）和屏障（barrier）：包括读写锁和栏杆的创建、销毁、等待及相关属性设置等函数。
 
-* POSIX信号量（semaphore）和Pthreads一起使用，但不是Pthreads标准定义的一部分，被定义在POSIX.1b, Real-time extensions (IEEE Std1003.1b-1993)标准里。因此信号量相关函数的前缀是"sem_"而不是"pthread\_"。
+* POSIX信号量（semaphore）和Pthreads一起使用，但不是Pthreads标准定义的一部分，被定义在POSIX.1b, Real-time extensions (IEEE Std1003.1b-1993)标准里。因此信号量相关函数的前缀是"sem_"而不是"pthread_"。
 
 * 消息队列（Message queue）和信号量一样，和Pthreads一起使用，也不是Pthreads标准定义的一部分，被定义在IEEE Std 1003.1-2001标准里。消息队列相关函数的前缀是"mq_"。
 
 -----------------------------------------------------------------------
-               函数前缀   函数组
+               函数前缀    函数组
 -------------------------  ----------------------------------------------
-  pthread\_                线程本身和各种相关函数
+     pthread_                线程本身和各种相关函数
   
-  pthread\_attr\_          线程属性对象
+     pthread_attr_          线程属性对象
   
-  Pthread\_mutex\_         互斥锁
+     Pthread_mutex_         互斥锁
   
-  pthread\_mutexattr\_     互斥锁属性对象
+     pthread_mutexattr_     互斥锁属性对象
   
-  pthread\_cond\_          条件变量
+     pthread_cond_          条件变量
   
-  pthread\_condattr\_      条件变量属性对象
+     pthread_condattr_      条件变量属性对象
   
-  pthread\_rwlock\_        读写锁
+     pthread_rwlock_        读写锁
   
-  pthread\_rwlockattr\_    读写锁属性对象
+     pthread_rwlockattr_    读写锁属性对象
   
-  pthread\_spin\_          自旋锁
+     pthread_spin_          自旋锁
   
-  pthread\_barrier\_       栏杆
+     pthread_barrier_       栏杆
   
-  pthread\_barrierattr\_   栏杆属性对象
+     pthread_barrierattr_   栏杆属性对象
   
-  sem\_                    信号量
+     sem_                    信号量
   
-  mq\_                     消息队列
+     mq_                     消息队列
 -----------------------------------------------------------------------
 绝大部分Pthreads的函数执行成功则返回0值，不成功则返回一个包含在\<errno.h\>头文件中的错误代码。很多操作系统都支持Pthreads，比如Linux、MacOS X、 Android 和Solaris，因此使用Pthreads的函数编写的应用程序有很好的可移植性，可以在很多支持Pthreads的平台上直接编译运行。
 
@@ -60,17 +60,14 @@ RT-Thread实现了Pthreads的大部分函数和常量，按照POSIX标准定义�
 
 ### 线程句柄 ###
 ```c
-    typedef rt\_thread\_t pthread\_t;
+    typedef rt_thread_t pthread_t;
 ```
-pthread\_t是rt\_thread\_t类型的重定义，定义在pthread.h头文件里。rt\_thread\_t是RT-Thread的线程句柄（或线程标识符），是指向线程控制块的指针。在创建线程前需要先定义一个pthread\_t类型的变量。每个线程都对应了自己的线程控制块，线程控制块是操作系统用于控制线程的一个数据结构，它存放了线程的一些信息，例如优先级，线程名称和线程堆栈地址等。线程控制块及线程具体信息在RT-Thread编程手册的线程调度与管理一章有详细的介绍。
+pthread_t是rt_thread_t类型的重定义，定义在pthread.h头文件里。rt_thread_t是RT-Thread的线程句柄（或线程标识符），是指向线程控制块的指针。在创建线程前需要先定义一个pthread_t类型的变量。每个线程都对应了自己的线程控制块，线程控制块是操作系统用于控制线程的一个数据结构，它存放了线程的一些信息，例如优先级，线程名称和线程堆栈地址等。线程控制块及线程具体信息在RT-Thread编程手册的线程调度与管理一章有详细的介绍。
 
 ### 创建线程 ###
 
-**函数原型**
+**函数原型**  int pthread_create (pthread_t *tid, const pthread_attr_t *attr, void *(*start) (void *), void *arg);
 
-```c
-    int pthread_create (pthread_t *tid, const pthread_attr_t *attr, void *(*start) (void *), void *arg);
-```
 -----------------------------------------------------------------------
           参数  描述
 --------------  -------------------------------------------------------
@@ -82,11 +79,9 @@ pthread\_t是rt\_thread\_t类型的重定义，定义在pthread.h头文件里。
 		  
 		   arg  传递给线程入口函数的参数	  
 -----------------------------------------------------------------------
-**函数返回**
+**函数返回**  创建成功返回0，参数无效返回EINVAL，动态分配内存失败返回ENOMEM。
 
-创建成功返回0，参数无效返回EINVAL，动态分配内存失败返回ENOMEM。
-
-此函数创建一个线程，主要是对rt\_thread\_init()函数的封装。此函数会动态分配POSIX线程数据块和RT-Thread线程控制块，并把线程控制块的起始地址（线程ID）保存在tid指向的内存里，此线程标识符可用于在其他线程中操作此线程。并把attr指向的线程属性、start指向的线程入口函数及入口函数参数arg保存在线程数据块和线程控制块里。如果线程创建成功，线程就进入就绪态，参与系统的调度，如果线程创建失败，则会释放之前线程占有的资源。
+此函数创建一个线程，主要是对rt_thread_init()函数的封装。此函数会动态分配POSIX线程数据块和RT-Thread线程控制块，并把线程控制块的起始地址（线程ID）保存在tid指向的内存里，此线程标识符可用于在其他线程中操作此线程。并把attr指向的线程属性、start指向的线程入口函数及入口函数参数arg保存在线程数据块和线程控制块里。如果线程创建成功，线程就进入就绪态，参与系统的调度，如果线程创建失败，则会释放之前线程占有的资源。
 
 关于线程属性及相关函数会在线程高级编程一章里有详细介绍，一般情况下采用默认属性就可以。
 
@@ -170,9 +165,9 @@ int test()
 
 调用此函数，如果thread线程没有结束，则将thread线程属性的分离状态设置为detached，当thread线程结束时，系统将自动回收thread线程占用的资源。如果thread线程已经结束，将立刻回收thread线程占用的资源。
 
-使用方法：子线程调用pthread\_detach(pthread\_self())（pthread\_self()返回当前调用线程的线程句柄），或者其他线程调用pthread\_detach(thread\_id)。关于线程属性的分离状态会在线程高级编程里详细介绍。
+使用方法：子线程调用pthread_detach(pthread_self())（pthread_self()返回当前调用线程的线程句柄），或者其他线程调用pthread_detach(thread_id)。关于线程属性的分离状态会在线程高级编程里详细介绍。
 
-注意：一旦线程属性的分离状态设置为detached，该线程不能被pthread\_join()函数等待或者重新被设置为detached。
+注意：一旦线程属性的分离状态设置为detached，该线程不能被pthread_join()函数等待或者重新被设置为detached。
 
 #### 线程脱离示例代码 ####
 
@@ -267,9 +262,9 @@ int test()
 
 执行成功返回0，线程join自己返回EDEADLK，join一个分离状态为detached的线程返回EINVAL，找不到thread线程返回ESRCH。
 
-此函数会使调用该函数的线程以阻塞的方式等待线程分离属性为joinable的thread线程运行结束，并获得thread线程的返回值，返回值的地址保存在value\_ptr里，并释放thread线程占用的资源。
+此函数会使调用该函数的线程以阻塞的方式等待线程分离属性为joinable的thread线程运行结束，并获得thread线程的返回值，返回值的地址保存在value_ptr里，并释放thread线程占用的资源。
 
-pthread\_join()和pthread\_detach()函数功能类似，都是在线程结束后用来回收线程占用的资源。线程不能等待自己结束，thread线程的分离状态必须是joinable，一个线程只对应一次pthread\_join()调用。分离状态为joinable的线程仅当有其他线程对其执行了pthread\_join()后，它所占用的资源才会释放。因此为了避免内存泄漏，所有会结束运行的线程，分离状态要么已设为detached，要么使用pthread\_join()来回收其占用的资源。
+pthread_join()和pthread_detach()函数功能类似，都是在线程结束后用来回收线程占用的资源。线程不能等待自己结束，thread线程的分离状态必须是joinable，一个线程只对应一次pthread_join()调用。分离状态为joinable的线程仅当有其他线程对其执行了pthread_join()后，它所占用的资源才会释放。因此为了避免内存泄漏，所有会结束运行的线程，分离状态要么已设为detached，要么使用pthread_join()来回收其占用的资源。
 
 #### 等待线程结束示例代码 ####
 
@@ -363,11 +358,11 @@ int test()
 
 线程调用此函数会终止执行，如同进程调用exit()函数一样，并返回一个指向线程返回值的指针。线程退出由线程自身发起。
 
-* 若线程的分离状态为joinable，线程退出后该线程占用的资源并不会被释放，必须调用pthread\_join()函数释放线程占用的资源。
+* 若线程的分离状态为joinable，线程退出后该线程占用的资源并不会被释放，必须调用pthread_join()函数释放线程占用的资源。
 
 #### 线程退出示例代码 ####
 
-这个程序会初始化2个线程，它们拥有相同的优先级，相同优先级的线程是按照时间片轮转调度。2个线程属性的分离状态为默认值joinable，线程1先开始运行，打印一次信息后休眠2秒，之后打印退出信息然后结束运行。线程2调用pthread\_join()阻塞等待线程1结束，并回收线程1占用的资源，然后线程2每隔2秒钟会打印一次信息。
+这个程序会初始化2个线程，它们拥有相同的优先级，相同优先级的线程是按照时间片轮转调度。2个线程属性的分离状态为默认值joinable，线程1先开始运行，打印一次信息后休眠2秒，之后打印退出信息然后结束运行。线程2调用pthread_join()阻塞等待线程1结束，并回收线程1占用的资源，然后线程2每隔2秒钟会打印一次信息。
 
 ```c
 
@@ -445,13 +440,13 @@ int test()
 
 互斥锁的操作只有两种上锁或解锁，同一时刻只会有一个线程持有某个互斥锁。当有线程持有它时，互斥量处于闭锁状态，由这个线程获得它的所有权。相反，当这个线程释放它时，将对互斥量进行开锁，失去它的所有权。当一个线程持有互斥量时，其他线程将不能够对它进行解锁或持有它。
 
-对互斥锁的主要操作包括：调用pthread\_mutex\_init()初始化一个互斥锁，调用pthread\_mutex\_destroy()销毁互斥锁，调用pthread\_mutex\_lock()对互斥锁上锁，调用pthread\_mutex\_lock()对互斥锁解锁。
+对互斥锁的主要操作包括：调用pthread_mutex_init()初始化一个互斥锁，调用pthread_mutex_destroy()销毁互斥锁，调用pthread_mutex_lock()对互斥锁上锁，调用pthread_mutex_lock()对互斥锁解锁。
 
 使用互斥锁会导致一个潜在问题是线程优先级翻转。在RT-Thread操作系统中实现的是优先级继承算法。优先级继承是指，提高某个占有某种资源的低优先级线程的优先级，使之与所有等待该资源的线程中优先级最高的那个线程的优先级相等，然后执行，而当这个低优先级线程释放该资源时，优先级重新回到初始设定。因此，继承优先级的线程避免了系统资源被任何中间优先级的线程抢占。有关优先级反转的详细信息请参考RT-Thread编程手册任务间同步及通信一章互斥量一节有详细介绍。
 
 ### 互斥锁控制块 ###
 
-每个互斥锁对应一个互斥锁控制块，包含对互斥锁进行的控制的一些信息。创建互斥锁前必须先定义一个pthread\_mutex\_t类型的变量，pthread\_mutex\_t是pthread\_mutex的重定义，pthread\_mutex数据结构定义在pthread.h头文件里，数据结构如下：
+每个互斥锁对应一个互斥锁控制块，包含对互斥锁进行的控制的一些信息。创建互斥锁前必须先定义一个pthread_mutex_t类型的变量，pthread_mutex_t是pthread_mutex的重定义，pthread_mutex数据结构定义在pthread.h头文件里，数据结构如下：
 
 ```c
 
@@ -493,9 +488,9 @@ typedef struct rt_mutex* rt_mutex_t;		/* rt_mutext_t为指向互斥锁结构体�
 
 初始化成功返回0，参数无效返回EINVAL。
 
-此函数会初始化mutex互斥锁，并根据attr指向的互斥锁属性对象设置mutex属性，成功初始化后互斥锁处于未上锁状态，线程可以获取，此函数是对rt\_mutex\_init()函数的封装。
+此函数会初始化mutex互斥锁，并根据attr指向的互斥锁属性对象设置mutex属性，成功初始化后互斥锁处于未上锁状态，线程可以获取，此函数是对rt_mutex_init()函数的封装。
 
-除了调用pthread\_mutex\_init()函数创建一个互斥锁，还可以用宏PTHREAD\_MUTEX\_INITIALIZER来静态初始化互斥锁，方法：pthread\_mutex\_t mutex = PTHREAD\_MUTEX\_INITIALIZER（结构体常量），等同于调用pthread\_mutex\_init()时attr指定为NULL。
+除了调用pthread_mutex_init()函数创建一个互斥锁，还可以用宏PTHREAD_MUTEX_INITIALIZER来静态初始化互斥锁，方法：pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER（结构体常量），等同于调用pthread_mutex_init()时attr指定为NULL。
 
 关于互斥锁属性及相关函数会在线程高级编程一章里有详细介绍，一般情况下采用默认属性就可以。
 
@@ -515,7 +510,7 @@ typedef struct rt_mutex* rt_mutex_t;		/* rt_mutext_t为指向互斥锁结构体�
 
 销毁成功返回0，mutex为空或者mutex已经被销毁过返回EINVAL，互斥锁正在被使用返回EBUSY。
 
-此函数会销毁mutex互斥锁。销毁后互斥锁mutex处于未初始化状态。销毁以后互斥锁的属性和控制块参数将不在有效，但可以调用pthread\_mutex\_init()对销毁后的互斥锁重新初始化。但不需要销毁使用宏PTHREAD\_MUTEX\_INITIALIZER静态初始化的互斥锁。
+此函数会销毁mutex互斥锁。销毁后互斥锁mutex处于未初始化状态。销毁以后互斥锁的属性和控制块参数将不在有效，但可以调用pthread_mutex_init()对销毁后的互斥锁重新初始化。但不需要销毁使用宏PTHREAD_MUTEX_INITIALIZER静态初始化的互斥锁。
 
 当确定互斥锁没有被锁住，且没有线程阻塞在该互斥锁上，才可以销毁该互斥锁。
 
@@ -535,7 +530,7 @@ typedef struct rt_mutex* rt_mutex_t;		/* rt_mutext_t为指向互斥锁结构体�
 
 成功上锁返回0，参数无效返回EINVAL，互斥锁mutex不为嵌套锁的情况下线程重复调用返回EDEADLK。
 
-此函数对mutex互斥锁上锁，此函数是对rt\_mutex\_take()函数的封装。如果互斥锁mutex还没有被上锁，那么申请该互斥锁的线程将成功对该互斥锁上锁。如果互斥锁mutex已经被当前线程上锁，且互斥锁类型为嵌套锁，则该互斥锁的持有计数加1，当前线程也不会挂起等待（死锁），但线程必须对应相同次数的解锁。如果互斥锁mutex被其他线程上锁持有，则当前线程将被阻塞，一直到其他线程对该互斥锁解锁后，等待该互斥锁的线程将按照先进先出的原则获取互斥锁。
+此函数对mutex互斥锁上锁，此函数是对rt_mutex_take()函数的封装。如果互斥锁mutex还没有被上锁，那么申请该互斥锁的线程将成功对该互斥锁上锁。如果互斥锁mutex已经被当前线程上锁，且互斥锁类型为嵌套锁，则该互斥锁的持有计数加1，当前线程也不会挂起等待（死锁），但线程必须对应相同次数的解锁。如果互斥锁mutex被其他线程上锁持有，则当前线程将被阻塞，一直到其他线程对该互斥锁解锁后，等待该互斥锁的线程将按照先进先出的原则获取互斥锁。
 
 ### 非阻塞方式对互斥锁上锁 ###
 
@@ -553,7 +548,7 @@ typedef struct rt_mutex* rt_mutex_t;		/* rt_mutext_t为指向互斥锁结构体�
 
 成功上锁返回0，参数无效返回EINVAL，互斥锁mutex不为嵌套锁的情况下线程重复调用返回EDEADLK，互斥锁mutex已经被其他线程上锁返回EBUSY。
 
-此函数是pthread\_mutex\_lock()函数的非阻塞版本。区别在于如果互斥锁mutex已经被上锁，线程不会被阻塞，而是马上返回错误码。
+此函数是pthread_mutex_lock()函数的非阻塞版本。区别在于如果互斥锁mutex已经被上锁，线程不会被阻塞，而是马上返回错误码。
 
 ### 互斥锁解锁 ###
 
@@ -571,7 +566,7 @@ typedef struct rt_mutex* rt_mutex_t;		/* rt_mutext_t为指向互斥锁结构体�
 
 成功上锁返回0，参数无效返回EINVAL，解锁其他线程持有的类型为检错锁的互斥锁mutex返回EPERM。
 
-调用此函数给mutex互斥锁解锁，是对rt\_mutex\_release()函数的封装。当线程完成共享资源的访问后，应尽快释放占有的互斥锁，使得其他线程能及时获取该互斥锁。只有已经拥有互斥锁的线程才能释放它，每释放一次该互斥锁，它的持有计数就减1。当该互斥量的持有计数为零时（即持有线程已经释放所有的持有操作），互斥锁才变为可用，等待在该互斥锁上的线程将按先进先出方式被唤醒。如果线程的运行优先级被互斥锁提升，那么当互斥锁被释放后，线程恢复为持有互斥锁前的优先级。
+调用此函数给mutex互斥锁解锁，是对rt_mutex_release()函数的封装。当线程完成共享资源的访问后，应尽快释放占有的互斥锁，使得其他线程能及时获取该互斥锁。只有已经拥有互斥锁的线程才能释放它，每释放一次该互斥锁，它的持有计数就减1。当该互斥量的持有计数为零时（即持有线程已经释放所有的持有操作），互斥锁才变为可用，等待在该互斥锁上的线程将按先进先出方式被唤醒。如果线程的运行优先级被互斥锁提升，那么当互斥锁被释放后，线程恢复为持有互斥锁前的优先级。
 
 ### 互斥锁示例代码 ###
 
@@ -667,11 +662,11 @@ int test()
 
 条件变量可以用来通知共享数据状态。比如一个处理共享资源队列的线程发现队列为空，则此线程只能等待，直到有一个节点被添加到队列中，添加后在发一个条件变量信号激活等待线程。
 
-条件变量的主要操作包括：调用pthread\_cond\_init()对条件变量初始化，调用pthread\_cond\_destroy()销毁一个条件变量，调用pthread\_cond\_wait()等待一个条件变量，调用pthread\_cond\_signal()发送一个条件变量。
+条件变量的主要操作包括：调用pthread_cond_init()对条件变量初始化，调用pthread_cond_destroy()销毁一个条件变量，调用pthread_cond_wait()等待一个条件变量，调用pthread_cond_signal()发送一个条件变量。
 
 ### 条件变量控制块 ###
 
-每个条件变量对应一个条件变量控制块，包括对条件变量进行操作的一些信息。初始化一个条件变量前需要先定义一个pthread\_cond\_t条件变量控制块。pthread\_cond\_t是pthread\_cond结构体类型的重定义，定义在pthread.h头文件里。
+每个条件变量对应一个条件变量控制块，包括对条件变量进行操作的一些信息。初始化一个条件变量前需要先定义一个pthread_cond_t条件变量控制块。pthread_cond_t是pthread_cond结构体类型的重定义，定义在pthread.h头文件里。
 
 ```c
 
@@ -710,9 +705,9 @@ struct rt_semaphore
 
 初始化成功返回0，参数无效返回EINVAL。
 
-此函数会初始化cond条件变量，并根据attr指向的条件变量属性设置其属性，此函数是对rt\_sem\_init()函数的一个封装，基于信号量实现。初始化成功后条件变量处于不可用状态。
+此函数会初始化cond条件变量，并根据attr指向的条件变量属性设置其属性，此函数是对rt_sem_init()函数的一个封装，基于信号量实现。初始化成功后条件变量处于不可用状态。
 
-还可以用宏PTHREAD\_COND\_INITIALIZER静态初始化一个条件变量，方法：pthread\_cond\_t cond = PTHREAD\_COND\_INITIALIZER（结构体常量），等同于调用pthread\_cond\_init()时attr指定为NULL。
+还可以用宏PTHREAD_COND_INITIALIZER静态初始化一个条件变量，方法：pthread_cond_t cond = PTHREAD_COND_INITIALIZER（结构体常量），等同于调用pthread_cond_init()时attr指定为NULL。
 
 attr一般设置NULL使用默认值即可，具体会在线程高级编程一章介绍。
 
@@ -732,7 +727,7 @@ attr一般设置NULL使用默认值即可，具体会在线程高级编程一章
 
 销毁成功返回0，参数无效返回EINVAL，条件变量正在被使用返回EBUSY。
 
-此函数会销毁cond条件变量，销毁后cond处于未初始化状态。销毁之后条件变量的属性及控制块参数将不在有效，但可以调用pthread\_cond\_init()或者静态方式重新初始化。
+此函数会销毁cond条件变量，销毁后cond处于未初始化状态。销毁之后条件变量的属性及控制块参数将不在有效，但可以调用pthread_cond_init()或者静态方式重新初始化。
 
 销毁条件变量前需要确定没有线程被阻塞在该条件变量上，也不会等待获取、发信号或者广播。
 
@@ -776,7 +771,7 @@ attr一般设置NULL使用默认值即可，具体会在线程高级编程一章
 
 成功获取条件变量返回0，参数无效返回EINVAL，超时返回ETIMEDOUT。
 
-此函数和pthread\_cond\_wait()函数唯一的差别在于，如果条件变量不可用，线程将被阻塞abstime时长，超时后函数将直接返回ETIMEDOUT错误码，线程将会被唤醒进入就绪态。
+此函数和pthread_cond_wait()函数唯一的差别在于，如果条件变量不可用，线程将被阻塞abstime时长，超时后函数将直接返回ETIMEDOUT错误码，线程将会被唤醒进入就绪态。
 
 ### 发送满足条件信号量 ###
 
@@ -794,7 +789,7 @@ attr一般设置NULL使用默认值即可，具体会在线程高级编程一章
 
 只返回0，总是成功。
 
-此函数会发送一个信号且只唤醒一个等待cond条件变量的线程，是对rt\_sem\_release()函数的封装，也就是发送一个信号量。当信号量的值等于零，并且有线程等待这个信号量时，将唤醒等待在该信号量线程队列中的第一个线程，由它获取信号量。否则将把信号量的值加1。
+此函数会发送一个信号且只唤醒一个等待cond条件变量的线程，是对rt_sem_release()函数的封装，也就是发送一个信号量。当信号量的值等于零，并且有线程等待这个信号量时，将唤醒等待在该信号量线程队列中的第一个线程，由它获取信号量。否则将把信号量的值加1。
 
 ### 广播 ###
 
@@ -816,7 +811,7 @@ attr一般设置NULL使用默认值即可，具体会在线程高级编程一章
 
 ### 条件变量示例代码 ###
 
-这个程序是一个生产者消费者模型，有一个生产者线程，一个消费者线程，它们拥有相同的优先级。生产者每隔2秒会生产一个数字，放到head指向的链表里面，之后调用pthread\_cond\_signal()给消费者线程发信号，通知消费者线程链表里面有数据。消费者线程会调用pthread\_cond\_wait()等待生产者线程发送信号。
+这个程序是一个生产者消费者模型，有一个生产者线程，一个消费者线程，它们拥有相同的优先级。生产者每隔2秒会生产一个数字，放到head指向的链表里面，之后调用pthread_cond_signal()给消费者线程发信号，通知消费者线程链表里面有数据。消费者线程会调用pthread_cond_wait()等待生产者线程发送信号。
 
 ```c
 
@@ -942,11 +937,11 @@ int test()
 
 读写锁通常是基于互斥锁和条件变量实现的。一个线程可以对一个读写锁进行多次读写锁定，同样必须有对应次数的解锁。
 
-读写锁的主要操作包括：调用pthread\_rwlock\_init()初始化一个读写锁，写线程调用pthread\_rwlock\_wrlock()对读写锁写锁定，读线程调用pthread\_rwlock\_rdlock()对读写锁读锁定，当不需要使用此读写锁时调用pthread\_rwlock\_destroy()销毁读写锁。
+读写锁的主要操作包括：调用pthread_rwlock_init()初始化一个读写锁，写线程调用pthread_rwlock_wrlock()对读写锁写锁定，读线程调用pthread_rwlock_rdlock()对读写锁读锁定，当不需要使用此读写锁时调用pthread_rwlock_destroy()销毁读写锁。
 
 ### 读写锁控制块 ###
 
-每个读写锁对应一个读写锁控制块，包括对读写锁进行操作的一些信息。pthread\_rwlock\_t是pthread\_rwlock数据结构的重定义，定义在pthread.h头文件里。在创建一个读写锁之前需要先定义一个pthread\_rwlock\_t类型的数据结构。
+每个读写锁对应一个读写锁控制块，包括对读写锁进行操作的一些信息。pthread_rwlock_t是pthread_rwlock数据结构的重定义，定义在pthread.h头文件里。在创建一个读写锁之前需要先定义一个pthread_rwlock_t类型的数据结构。
 
 ```c
 
@@ -985,7 +980,7 @@ typedef struct pthread_rwlock pthread_rwlock_t;		/* 类型重定义 */
 
 此函数会初始化一个rwlock读写锁。此函数使用默认值初始化读写锁控制块的信号量和条件变量，相关计数参数初始为0值。初始化后的读写锁处于未上锁状态。
 
-还可以使用宏PTHREAD\_RWLOCK\_INITIALIZER来静态初始化读写锁，方法：pthread\_rwlock\_t mutex = PTHREAD\_RWLOCK\_INITIALIZER（结构体常量），等同于调用pthread\_rwlock\_init()时attr指定为NULL。
+还可以使用宏PTHREAD_RWLOCK_INITIALIZER来静态初始化读写锁，方法：pthread_rwlock_t mutex = PTHREAD_RWLOCK_INITIALIZER（结构体常量），等同于调用pthread_rwlock_init()时attr指定为NULL。
 
 attr一般设置NULL使用默认值即可，具体会在线程高级编程一章介绍。
 
@@ -1005,7 +1000,7 @@ attr一般设置NULL使用默认值即可，具体会在线程高级编程一章
 
 销毁成功返回0，参数无效返回EINVAL，读写锁目前正在被使用或者有线程等待该读写锁返回EBUSY，发生死锁返回EDEADLK。
 
-此函数会销毁一个rwlock读写锁，对应的会销毁读写锁里的互斥锁和条件变量。销毁之后读写锁的属性及控制块参数将不在有效，但可以调用pthread\_rwlock\_init()或者静态方式重新初始化读写锁。
+此函数会销毁一个rwlock读写锁，对应的会销毁读写锁里的互斥锁和条件变量。销毁之后读写锁的属性及控制块参数将不在有效，但可以调用pthread_rwlock_init()或者静态方式重新初始化读写锁。
 
 ### 读写锁读锁定 ###
 
@@ -1043,7 +1038,7 @@ attr一般设置NULL使用默认值即可，具体会在线程高级编程一章
 
 锁定成功返回0，参数无效返回EINVAL，发生死锁返回EDEADLK，读写锁目前被写锁定或者有写着线程阻塞在该读写锁上返回EBUSY。
 
-此函数和pthread\_rwlock\_rdlock()函数的不同在于，如果读写锁已经被写锁定，读者线程不会被阻塞，而是返回一个错误码EBUSY。
+此函数和pthread_rwlock_rdlock()函数的不同在于，如果读写锁已经被写锁定，读者线程不会被阻塞，而是返回一个错误码EBUSY。
 
 #### 指定阻塞时间对读写锁读锁定 ####
 
@@ -1063,7 +1058,7 @@ attr一般设置NULL使用默认值即可，具体会在线程高级编程一章
 
 锁定成功返回0，参数无效返回EINVAL，发生死锁返回EDEADLK，超时返回ETIMEDOUT。
 
-此函数和pthread\_rwlock\_rdlock()函数的不同在于，如果读写锁已经被写锁定，读者线程将会阻塞指定的abstime时长，超时后函数将返回错误码ETIMEDOUT，线程将会被唤醒进入就绪态。
+此函数和pthread_rwlock_rdlock()函数的不同在于，如果读写锁已经被写锁定，读者线程将会阻塞指定的abstime时长，超时后函数将返回错误码ETIMEDOUT，线程将会被唤醒进入就绪态。
 
 ### 读写锁写锁定 ###
 
@@ -1101,7 +1096,7 @@ attr一般设置NULL使用默认值即可，具体会在线程高级编程一章
 
 锁定成功返回0，参数无效返回EINVAL，发生死锁返回EDEADLK，读写锁目前被写锁定或者有写着线程阻塞在该读写锁上返回EBUSY。
 
-此函数和pthread\_rwlock\_wrlock()函数唯一的不同在于，如果已经有线程锁定该读写锁，即读写锁值不为0，则调用该函数的写者线程会直接返回一个错误代码，线程不会被阻塞。
+此函数和pthread_rwlock_wrlock()函数唯一的不同在于，如果已经有线程锁定该读写锁，即读写锁值不为0，则调用该函数的写者线程会直接返回一个错误代码，线程不会被阻塞。
 
 #### 指定阻塞时长写锁定读写锁 ####
 
@@ -1120,7 +1115,7 @@ attr一般设置NULL使用默认值即可，具体会在线程高级编程一章
 
 锁定成功返回0，参数无效返回EINVAL，发生死锁返回EDEADLK，超时返回ETIMEDOUT。
 
-此函数和pthread\_rwlock\_wrlock()函数唯一的不同在于，如果已经有线程锁定该读写锁，即读写锁值不为0，调用线程阻塞指定的abstime时长，超时后函数将返回错误码ETIMEDOUT，线程将会被唤醒进入就绪态。
+此函数和pthread_rwlock_wrlock()函数唯一的不同在于，如果已经有线程锁定该读写锁，即读写锁值不为0，调用线程阻塞指定的abstime时长，超时后函数将返回错误码ETIMEDOUT，线程将会被唤醒进入就绪态。
 
 ### 读写锁解锁 ###
 
@@ -1237,13 +1232,13 @@ int rt_application_init()
 
 ## 屏障 ##
 
-屏障是多线程同步的一种方法。barrier意为屏障或者栏杆，把先后到达的多个线程挡在同一栏杆前，直到所有线程到齐，然后撤下栏杆同时放行。先到达的线程将会阻塞，等到所有调用pthread\_barrier\_wait()函数的线程（数量等于屏障初始化时指定的count）都到达后，这些线程才会由阻塞状态进入就绪状态再次参与系统调度。
+屏障是多线程同步的一种方法。barrier意为屏障或者栏杆，把先后到达的多个线程挡在同一栏杆前，直到所有线程到齐，然后撤下栏杆同时放行。先到达的线程将会阻塞，等到所有调用pthread_barrier_wait()函数的线程（数量等于屏障初始化时指定的count）都到达后，这些线程才会由阻塞状态进入就绪状态再次参与系统调度。
 
-屏障是基于条件变量和互斥锁实现的。主要操作包括：调用pthread\_barrier\_init()初始化一个屏障，其他线程调用pthread\_barrier\_wait()，所有线程到期后线程唤醒进入准备状态，屏障不在使用调用pthread\_barrier\_destroy()销毁一个屏障。
+屏障是基于条件变量和互斥锁实现的。主要操作包括：调用pthread_barrier_init()初始化一个屏障，其他线程调用pthread_barrier_wait()，所有线程到期后线程唤醒进入准备状态，屏障不在使用调用pthread_barrier_destroy()销毁一个屏障。
 
 ### 屏障控制块 ###
 
-创建一个屏障前需要先定义一个pthread\_barrier\_t屏障控制块。pthread\_barrier\_t是pthread\_barrier结构体类型的重定义，定义在pthread.h头文件里。
+创建一个屏障前需要先定义一个pthread_barrier_t屏障控制块。pthread_barrier_t是pthread_barrier结构体类型的重定义，定义在pthread.h头文件里。
 
 ```c
 
@@ -1276,7 +1271,7 @@ typedef struct pthread_barrier pthread_barrier_t;
 
 初始化成功返回0，参数无效返回EINVAL。
 
-此函数会创建一个barrier屏障，并根据默认的参数对屏障控制块的条件变量和互斥锁初始化，初始化后指定的等待线程个数为count个，必须对应count个线程调用pthread\_barrier\_wait()。
+此函数会创建一个barrier屏障，并根据默认的参数对屏障控制块的条件变量和互斥锁初始化，初始化后指定的等待线程个数为count个，必须对应count个线程调用pthread_barrier_wait()。
 
 attr一般设置NULL使用默认值即可，具体会在线程高级编程一章介绍。
 
@@ -1296,7 +1291,7 @@ attr一般设置NULL使用默认值即可，具体会在线程高级编程一章
 
 销毁成功返回0，参数无效返回EINVAL。
 
-此函数会销毁一个barrier屏障。销毁之后屏障的属性及控制块参数将不在有效，但可以调用pthread\_barrier\_init()重新初始化。
+此函数会销毁一个barrier屏障。销毁之后屏障的属性及控制块参数将不在有效，但可以调用pthread_barrier_init()重新初始化。
 
 ### 等待屏障 ###
 
@@ -1318,7 +1313,7 @@ attr一般设置NULL使用默认值即可，具体会在线程高级编程一章
 
 ### 屏障示例代码 ###
 
-此程序会创建3个线程，初始化一个屏障，屏障等待线程数初始化为3。3个线程都会调用pthread\_barrier\_wait()等待在屏障前，当3个线程都到齐后，3个线程进入就绪态，之后会每隔2秒打印输出计数信息。
+此程序会创建3个线程，初始化一个屏障，屏障等待线程数初始化为3。3个线程都会调用pthread_barrier_wait()等待在屏障前，当3个线程都到齐后，3个线程进入就绪态，之后会每隔2秒打印输出计数信息。
 
 ```c
 
@@ -1419,7 +1414,7 @@ int rt_application_init()
 
 ## 信号量 ##
 
-信号量可以用于进程与进程之间，或者进程内线程之间的通信。每个信号量都有一个不会小于0的信号量值，对应信号量的可用数量。调用sem\_init()或者sem\_open()给信号量值赋初值，调用sem\_post()函数可以让信号量值加1，调用sem\_wait()可以让信号量值减1，如果当前信号量为0，调用sem\_wait()的线程被挂起在该信号量的等待队列上，直到信号量值大于0，处于可用状态。
+信号量可以用于进程与进程之间，或者进程内线程之间的通信。每个信号量都有一个不会小于0的信号量值，对应信号量的可用数量。调用sem_init()或者sem_open()给信号量值赋初值，调用sem_post()函数可以让信号量值加1，调用sem_wait()可以让信号量值减1，如果当前信号量为0，调用sem_wait()的线程被挂起在该信号量的等待队列上，直到信号量值大于0，处于可用状态。
 
 根据信号量的值（代表可用资源的数目）的不同，POSIX信号量可以分为：
 
@@ -1437,7 +1432,7 @@ RT-Thread操作系统的POSIX信号量主要是基于RT-Thread内核信号量的
 
 ### 信号量控制块 ###
 
-每个信号量对应一个信号量控制块，创建一个信号量前需要先定义一个sem\_t信号量控制块。sem\_t是posix\_sem结构体类型的重定义，定义在semaphore.h头文件里。
+每个信号量对应一个信号量控制块，创建一个信号量前需要先定义一个sem_t信号量控制块。sem_t是posix_sem结构体类型的重定义，定义在semaphore.h头文件里。
 
 ```c
 
@@ -1464,7 +1459,7 @@ typedef struct rt_semaphore* rt_sem_t;
 
 ### 无名信号量 ###
 
-无名信号量的值保存在内存中，一般用于线程间同步或互斥。在使用之前，必须先调用sem\_init()初始化。
+无名信号量的值保存在内存中，一般用于线程间同步或互斥。在使用之前，必须先调用sem_init()初始化。
 
 #### 无名信号量初始化 ####
 
@@ -1486,7 +1481,7 @@ typedef struct rt_semaphore* rt_sem_t;
 
 初始化成功返回0，否则返回-1。
 
-此函数初始化一个无名信号量sem，根据给定的或默认的参数对信号量相关数据结构进行初始化，并把信号量放入信号量链表里。初始化后信号量值为给定的初始值value。此函数是对rt\_sem\_create()函数的封装。
+此函数初始化一个无名信号量sem，根据给定的或默认的参数对信号量相关数据结构进行初始化，并把信号量放入信号量链表里。初始化后信号量值为给定的初始值value。此函数是对rt_sem_create()函数的封装。
 
 #### 销毁无名信号量 ####
 
@@ -1530,7 +1525,7 @@ typedef struct rt_semaphore* rt_sem_t;
 
 销毁成功返回0，否则返回-1。
 
-此函数会根据信号量名字name创建一个新的信号量或者打开一个已经存在的信号量。Oflag的可选值有0、O\_CREAT或O\_CREAT\|O\_EXCL。如果Oflag设置为O\_CREAT则会创建一个新的信号量。如果Oflag设置O\_CREAT\|O\_EXCL，如果信号量已经存在则会返回NULL，如果不存在则会创建一个新的信号量。如果Oflag设置为0，信号量不存在则会返回NULL。
+此函数会根据信号量名字name创建一个新的信号量或者打开一个已经存在的信号量。Oflag的可选值有0、O_CREAT或O_CREAT\|O_EXCL。如果Oflag设置为O_CREAT则会创建一个新的信号量。如果Oflag设置O_CREAT\|O_EXCL，如果信号量已经存在则会返回NULL，如果不存在则会创建一个新的信号量。如果Oflag设置为0，信号量不存在则会返回NULL。
 
 #### 分离有名信号量 ####
 
@@ -1604,7 +1599,7 @@ typedef struct rt_semaphore* rt_sem_t;
 
 成功返回0，否则返回-1。
 
-线程调用此函数获取信号量，是rt\_sem\_take(sem，RT\_WAITING\_FOREVER)函数的封装。若信号量值大于零，表明信号量可用，线程获得信号量，信号量值减1。若信号量值等于0，表明信号量不可用，线程阻塞进入挂起状态，并按照先进先出的方式排队等待，直到信号量可用。
+线程调用此函数获取信号量，是rt_sem_take(sem，RT_WAITING_FOREVER)函数的封装。若信号量值大于零，表明信号量可用，线程获得信号量，信号量值减1。若信号量值等于0，表明信号量不可用，线程阻塞进入挂起状态，并按照先进先出的方式排队等待，直到信号量可用。
 
 ### 非阻塞方式获取信号量 ###
 
@@ -1622,7 +1617,7 @@ typedef struct rt_semaphore* rt_sem_t;
 
 成功返回0，否则返回-1。
 
-此函数是sem\_wait()函数的非阻塞版，是rt\_sem\_take(sem,0)函数的封装。当信号量不可用时，线程不会阻塞，而是直接返回。
+此函数是sem_wait()函数的非阻塞版，是rt_sem_take(sem,0)函数的封装。当信号量不可用时，线程不会阻塞，而是直接返回。
 
 ### 指定阻塞时间等待信号量 ###
 
@@ -1642,7 +1637,7 @@ typedef struct rt_semaphore* rt_sem_t;
 
 成功返回0，否则返回-1。
 
-此函数和sem\_wait()函数的区别在于，若信号量不可用，线程将阻塞abs\_timeout时长，超时后函数返回-1，线程将被唤醒由阻塞态进入就绪态。
+此函数和sem_wait()函数的区别在于，若信号量不可用，线程将阻塞abs_timeout时长，超时后函数返回-1，线程将被唤醒由阻塞态进入就绪态。
 
 ### 发送信号量 ###
 
@@ -1660,13 +1655,13 @@ typedef struct rt_semaphore* rt_sem_t;
 
 成功返回0，否则返回-1。
 
-此函数将释放一个sem信号量，是rt\_sem\_release()函数的封装。若等待该信号量的线程队列不为空，表明有线程在等待该信号量，第一个等待该信号量的线程将由挂起状态切换到就绪状态，等待系统调度。若没有线程等待该信号量，该信号量值将加1。
+此函数将释放一个sem信号量，是rt_sem_release()函数的封装。若等待该信号量的线程队列不为空，表明有线程在等待该信号量，第一个等待该信号量的线程将由挂起状态切换到就绪状态，等待系统调度。若没有线程等待该信号量，该信号量值将加1。
 
 ### 无名信号量使用示例代码 ###
 
 信号量使用的典型案例是生产者消费者模型。一个生产者线程和一个消费者线程对同一块内存进行操作，生产者往共享内存填充数据，消费者从共享内存读取数据。
 
-此程序会创建2个线程，2个信号量，一个信号量表示共享数据为空状态，一个信号量表示共享数据不为空状态，一个互斥锁用于保护共享资源。生产者线程生产好数据后会给消费者发送一个full\_sem信号量，通知消费者线程有数据可用，休眠2秒后会等待消费者线程发送的empty\_sem信号量。消费者线程等到生产者发送的full\_sem后会处理共享数据，处理完后会给生产者线程发送empty\_sem信号量。程序会这样一直循环。
+此程序会创建2个线程，2个信号量，一个信号量表示共享数据为空状态，一个信号量表示共享数据不为空状态，一个互斥锁用于保护共享资源。生产者线程生产好数据后会给消费者发送一个full_sem信号量，通知消费者线程有数据可用，休眠2秒后会等待消费者线程发送的empty_sem信号量。消费者线程等到生产者发送的full_sem后会处理共享数据，处理完后会给生产者线程发送empty_sem信号量。程序会这样一直循环。
 
 ```c
 
@@ -1787,7 +1782,7 @@ int test()
 
 消息队列是另一种常用的线程间通讯方式，它能够接收来自线程或中断服务例程中不固定长度的消息，并把消息缓存在自己的内存空间中。其他线程也能够从消息队列中读取相应的消息，而当消息队列是空的时候，可以挂起读取线程。当有新的消息到达时，挂起的线程将被唤醒以接收并处理消息。
 
-消息队列主要操作包括：通过函数mq\_open()创建或者打开，调用mq\_send()发送一条消息到消息队列，调用mq\_receive()从消息队列获取一条消息，当消息队列不在使用时，可以调用mq\_unlink()删除消息队列。
+消息队列主要操作包括：通过函数mq_open()创建或者打开，调用mq_send()发送一条消息到消息队列，调用mq_receive()从消息队列获取一条消息，当消息队列不在使用时，可以调用mq_unlink()删除消息队列。
 
 POSIX消息队列主要用于进程间通信，RT-Thread操作系统的POSIX消息队列主要是基于RT-Thread内核消息队列的一个封装，主要还是用于系统内线程间的通讯。使用方式和RT-Thread内核的消息队列差不多。
 
@@ -1826,7 +1821,7 @@ typedef struct mqdes* mqd_t;  /* 消息队列控制块指针类型重定义 */
 
 成功则返回消息队列句柄，否则返回NULL。
 
-此函数会根据消息队列的名字name创建一个新的消息队列或者打开一个已经存在的消息队列。Oflag的可选值有0、O\_CREAT或O\_CREAT\|O\_EXCL。如果Oflag设置为O\_CREAT则会创建一个新的消息队列。如果Oflag设置O\_CREAT\|O\_EXCL，如果消息队列已经存在则会返回NULL，如果不存在则会创建一个新的消息队列。如果Oflag设置为0，消息队列不存在则会返回NULL。
+此函数会根据消息队列的名字name创建一个新的消息队列或者打开一个已经存在的消息队列。Oflag的可选值有0、O_CREAT或O_CREAT\|O_EXCL。如果Oflag设置为O_CREAT则会创建一个新的消息队列。如果Oflag设置O_CREAT\|O_EXCL，如果消息队列已经存在则会返回NULL，如果不存在则会创建一个新的消息队列。如果Oflag设置为0，消息队列不存在则会返回NULL。
 
 ### 分离消息队列 ###
 
@@ -1886,9 +1881,9 @@ typedef struct mqdes* mqd_t;  /* 消息队列控制块指针类型重定义 */
 
 成功返回0，否则返回-1。
 
-此函数用来向mqdes消息队列发送一条消息，是rt\_mq\_send()函数的封装。此函数把msg\_ptr指向的消息添加到mqdes消息队列中，发送的消息长度msg\_len必须小于或者等于创建消息队列时设置的最大消息长度。
+此函数用来向mqdes消息队列发送一条消息，是rt_mq_send()函数的封装。此函数把msg_ptr指向的消息添加到mqdes消息队列中，发送的消息长度msg_len必须小于或者等于创建消息队列时设置的最大消息长度。
 
-如果消息队列已经满，即消息队列中的消息数量等于最大消息数，发送消息的的线程或者中断程序会收到一个错误码（-RT\_EFULL）。
+如果消息队列已经满，即消息队列中的消息数量等于最大消息数，发送消息的的线程或者中断程序会收到一个错误码（-RT_EFULL）。
 
 ### 指定阻塞时间发送消息 ###
 
@@ -1940,7 +1935,7 @@ typedef struct mqdes* mqd_t;  /* 消息队列控制块指针类型重定义 */
 
 成功则返回消息长度，否则返回-1。
 
-此函数会把mqdes消息队列里面最老的消息移除消息队列，并把消息放到msg\_ptr指向的内存里。如果消息队列为空，调用mq\_receive()函数的线程将会阻塞，直到消息队列中消息可用。
+此函数会把mqdes消息队列里面最老的消息移除消息队列，并把消息放到msg_ptr指向的内存里。如果消息队列为空，调用mq_receive()函数的线程将会阻塞，直到消息队列中消息可用。
 
 ### 指定阻塞时间接受消息 ###
 
@@ -1964,7 +1959,7 @@ typedef struct mqdes* mqd_t;  /* 消息队列控制块指针类型重定义 */
 
 成功则返回消息长度，否则返回-1。
 
-此函数和mq\_receive()函数的区别在于，若消息队列为空，线程将阻塞abs\_timeout时长，超时后函数直接返回-1，线程将被唤醒由阻塞态进入就绪态。
+此函数和mq_receive()函数的区别在于，若消息队列为空，线程将阻塞abs_timeout时长，超时后函数直接返回-1，线程将被唤醒由阻塞态进入就绪态。
 
 ### 消息队列示例代码 ###
 
@@ -2109,9 +2104,9 @@ int test()
 
 #### 线程属性 ####
 
-RT-Thread实现的线程属性包括线程栈大小、线程优先级、线程分离状态、线程调度策略。pthread\_create()使用属性对象前必须先对属性对象进行初始化。设置线程属性之类的API函数应在创建线程之前就调用。线程属性的变更不会影响到已创建的线程。
+RT-Thread实现的线程属性包括线程栈大小、线程优先级、线程分离状态、线程调度策略。pthread_create()使用属性对象前必须先对属性对象进行初始化。设置线程属性之类的API函数应在创建线程之前就调用。线程属性的变更不会影响到已创建的线程。
 
-线程属性结构pthread\_attr\_t定义在pthread.h头文件里。线程属性结构如下：
+线程属性结构pthread_attr_t定义在pthread.h头文件里。线程属性结构如下：
 
 ```c
 
@@ -2151,9 +2146,9 @@ struct pthread_attr
 
 2个函数只返回0值，总是成功。
 
-使用pthread\_attr\_init()函数会使用默认值初始化线程属性结构体attr，等同于调用线程初始化函数时将此参数设置为NULL，使用前需要定义一个pthread\_attr\_t属性对象，此函数必须在pthread\_create()函数之前调用。
+使用pthread_attr_init()函数会使用默认值初始化线程属性结构体attr，等同于调用线程初始化函数时将此参数设置为NULL，使用前需要定义一个pthread_attr_t属性对象，此函数必须在pthread_create()函数之前调用。
 
-pthread\_attr\_destroy()函数对attr指向的属性去初始化，之后可以再次调用pthread\_attr\_init()函数对此属性对象重新初始化。
+pthread_attr_destroy()函数对attr指向的属性去初始化，之后可以再次调用pthread_attr_init()函数对此属性对象重新初始化。
 
 #### 线程的分离状态 ####
 
@@ -2177,9 +2172,9 @@ pthread\_attr\_destroy()函数对attr指向的属性去初始化，之后可以�
 
 2个函数只返回0值，总是成功。
 
-线程分离状态属性值state可以是PTHREAD\_CREATE\_JOINABL（非分离）和PTHREAD\_CREATE\_DETACHED（分离）。
+线程分离状态属性值state可以是PTHREAD_CREATE_JOINABL（非分离）和PTHREAD_CREATE_DETACHED（分离）。
 
-线程的分离状态决定一个线程以什么样的方式来回收自己运行结束后占用的资源。线程的分离状态有2种：joinable或者detached。当线程创建后，应该调用pthread\_join()或者pthread\_detach()回收线程结束运行后占用的资源。如果线程的分离状态为joinable其他线程可以调用pthread\_join()函数等待该线程结束并获取线程返回值，然后回收线程占用的资源。分离状态为detached的线程不能被其他的线程所join，自己运行结束后，马上释放系统资源。
+线程的分离状态决定一个线程以什么样的方式来回收自己运行结束后占用的资源。线程的分离状态有2种：joinable或者detached。当线程创建后，应该调用pthread_join()或者pthread_detach()回收线程结束运行后占用的资源。如果线程的分离状态为joinable其他线程可以调用pthread_join()函数等待该线程结束并获取线程返回值，然后回收线程占用的资源。分离状态为detached的线程不能被其他的线程所join，自己运行结束后，马上释放系统资源。
 
 #### 线程的调度策略 ####
 
@@ -2213,9 +2208,9 @@ pthread\_attr\_destroy()函数对attr指向的属性去初始化，之后可以�
 
 2个函数只返回0值，总是成功。
 
-pthread\_attr\_setschedparam()函数设置线程的优先级。使用param对线程属性优先级赋值。
+pthread_attr_setschedparam()函数设置线程的优先级。使用param对线程属性优先级赋值。
 
-参数struct sched\_param定义在sched.h里，结构如下：
+参数struct sched_param定义在sched.h里，结构如下：
 ```c
 
 struct sched_param
@@ -2224,7 +2219,7 @@ struct sched_param
 };
 
 ```
-结构体sched\_param的成员sched\_priority控制线程的优先级值。
+结构体sched_param的成员sched_priority控制线程的优先级值。
 
 #### 线程的堆栈大小 ####
 
@@ -2249,7 +2244,7 @@ struct sched_param
 
 2个函数只返回0值，总是成功。
 
-pthread\_attr\_setstacksize()函数可以设置堆栈大小，单位是字节。在大多数系统中需要做栈空间地址对齐（例如ARM体系结构中需要向4字节地址对齐）。
+pthread_attr_setstacksize()函数可以设置堆栈大小，单位是字节。在大多数系统中需要做栈空间地址对齐（例如ARM体系结构中需要向4字节地址对齐）。
 
 #### 线程堆栈大小和地址 ####
 
@@ -2473,21 +2468,21 @@ int test()
 
 此函数没有返回值。
 
-此函数在线程调用的地方创建一个取消点。主要由不包含取消点的线程调用，可以回应取消请求。如果在取消状态处于禁用状态下调用pthread\_testcancel()，则该函数不起作用。
+此函数在线程调用的地方创建一个取消点。主要由不包含取消点的线程调用，可以回应取消请求。如果在取消状态处于禁用状态下调用pthread_testcancel()，则该函数不起作用。
 
 #### 取消点 ####
 
-取消点也就是线程接受取消请求后会结束运行的地方，根据POSIX标准，pthread\_join()、pthread\_testcancel()、pthread\_cond\_wait()、pthread\_cond\_timedwait()、sem\_wait()等会引起阻塞的系统调用都是取消点。
+取消点也就是线程接受取消请求后会结束运行的地方，根据POSIX标准，pthread_join()、pthread_testcancel()、pthread_cond_wait()、pthread_cond_timedwait()、sem_wait()等会引起阻塞的系统调用都是取消点。
 
 RT-Thread包含的所有取消点如下：
 
-* mq\_receive()
+* mq_receive()
 
-* mq\_send()
+* mq_send()
 
-* mq\_timedreceive()
+* mq_timedreceive()
 
-* mq\_timedsend()
+* mq_timedsend()
 
 * msgrcv()
 
@@ -2495,25 +2490,25 @@ RT-Thread包含的所有取消点如下：
 
 * msync()
 
-* pthread\_cond\_timedwait()
+* pthread_cond_timedwait()
 
-* pthread\_cond\_wait()
+* pthread_cond_wait()
 
-* pthread\_join()
+* pthread_join()
 
-* pthread\_testcancel()
+* pthread_testcancel()
 
-* sem\_timedwait()
+* sem_timedwait()
 
-* sem\_wait()
+* sem_wait()
 
-* pthread\_rwlock\_rdlock()
+* pthread_rwlock_rdlock()
 
-* pthread\_rwlock\_timedrdlock()
+* pthread_rwlock_timedrdlock()
 
-* pthread\_rwlock\_timedwrlock()
+* pthread_rwlock_timedwrlock()
 
-* pthread\_rwlock\_wrlock()
+* pthread_rwlock_wrlock()
 
 #### 线程取消示例代码 ####
 
@@ -2634,7 +2629,7 @@ int test()
 
 2个函数都没有返回值。
 
-pthread\_cleanup\_push()把指定的清理函数routine放到线程的清理函数链表里，pthread\_cleanup\_pop()从清理函数链表头部取出第一项函数，若execute为非0值，则执行此函数。
+pthread_cleanup_push()把指定的清理函数routine放到线程的清理函数链表里，pthread_cleanup_pop()从清理函数链表头部取出第一项函数，若execute为非0值，则执行此函数。
 
 ### 其他线程相关函数 ###
 
@@ -2660,8 +2655,8 @@ pthread_equal()返回0或1，相等则为1，不等则为0。pthread_self()返�
 **函数原型**
 
 ```c
-    int sched\_get\_priority\_min(int policy);
-    int sched\_get\_priority\_max(int policy);
+    int sched_get_priority_min(int policy);
+    int sched_get_priority_max(int policy);
 ```
 -----------------------------------------------------------------------
           参数  描述
@@ -2723,9 +2718,9 @@ RT-Thread实现的互斥锁属性包括互斥锁类型和互斥锁作用域。
 
 成功返回0，参数无效返回EINVAL。
 
-pthread\_mutexattr\_init()函数将使用默认值初始化attr指向的属性对象，等同于调用pthread\_mutex\_init()函数时将属性参数设置为NULL。
+pthread_mutexattr_init()函数将使用默认值初始化attr指向的属性对象，等同于调用pthread_mutex_init()函数时将属性参数设置为NULL。
 
-pthread\_mutexattr\_destroy()函数将会对attr指向的属性对象去初始化，之后可以调用pthread\_mutexattr\_init()函数重新初始化。
+pthread_mutexattr_destroy()函数将会对attr指向的属性对象去初始化，之后可以调用pthread_mutexattr_init()函数重新初始化。
 
 #### 互斥锁作用域 ####
 
@@ -2767,11 +2762,11 @@ pthread\_mutexattr\_destroy()函数将会对attr指向的属性对象去初始�
 
 互斥锁的类型决定了一个线程在获取一个互斥锁时的表现方式，RT-Thread实现了3种互斥锁类型：
 
-* PTHREAD\_MUTEX\_NORMAL：普通锁，当一个线程加锁以后，其余请求锁的线程将形成一个等待队列，并在解锁后按先进先出方式获得锁。如果一个线程在不首先解除互斥锁的情况下尝试重新获得该互斥锁，不会产生死锁，而是返回错误码，和检错锁一样。
+* PTHREAD_MUTEX_NORMAL：普通锁，当一个线程加锁以后，其余请求锁的线程将形成一个等待队列，并在解锁后按先进先出方式获得锁。如果一个线程在不首先解除互斥锁的情况下尝试重新获得该互斥锁，不会产生死锁，而是返回错误码，和检错锁一样。
 
-* PTHREAD\_MUTEX\_RECURSIVE：嵌套锁，允许一个线程对同一个锁成功获得多次，需要相同次数的解锁释放该互斥锁。
+* PTHREAD_MUTEX_RECURSIVE：嵌套锁，允许一个线程对同一个锁成功获得多次，需要相同次数的解锁释放该互斥锁。
 
-* PTHREAD\_MUTEX\_ERRORCHECK：检错锁，如果一个线程在不首先解除互斥锁的情况下尝试重新获得该互斥锁，则返回错误。这样就保证当不允许多次加锁时不会出现死锁。
+* PTHREAD_MUTEX_ERRORCHECK：检错锁，如果一个线程在不首先解除互斥锁的情况下尝试重新获得该互斥锁，则返回错误。这样就保证当不允许多次加锁时不会出现死锁。
 
 ### 条件变量属性 ###
 
