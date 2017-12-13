@@ -1,5 +1,7 @@
 # POSIX接口 #
 
+## Pthreads简介 ##
+
 POSIX Threads简称Pthreads，POSIX是"Portable Operating System Interface"（可移植操作系统接口） 的缩写，POSIX是IEEE Computer Society为了提高不同操作系统的兼容性和应用程序的可移植性而制定的一套标准。Pthreads是线程的POSIX标准，被定义在POSIX.1c, Threads extensions (IEEE Std1003.1c-1995)标准里，该标准定义了一套C程序语言的类型、函数和常量。定义在pthread.h头文件和一个线程库里，大约有100个API，所有API都带有"pthread_"前缀，可以分为4大类：
 
 * 线程管理（Thread management）：包括线程创建（creating）、分离（detaching）、连接（joining）及设置和查询线程属性的函数等。
@@ -15,37 +17,37 @@ POSIX Threads简称Pthreads，POSIX是"Portable Operating System Interface"（�
 * 消息队列（Message queue）和信号量一样，和Pthreads一起使用，也不是Pthreads标准定义的一部分，被定义在IEEE Std 1003.1-2001标准里。消息队列相关函数的前缀是"mq_"。
 
 -----------------------------------------------------------------------
-         函数前缀           函数组
+                 函数前缀           函数组
 -------------------------  ----------------------------------------------
-     pthread_               线程本身和各种相关函数
+                 pthread_           线程本身和各种相关函数
   
-     pthread_attr_          线程属性对象
+            pthread_attr_           线程属性对象
   
-     Pthread_mutex_         互斥锁
+           Pthread_mutex_           互斥锁
   
-     pthread_mutexattr_     互斥锁属性对象
+       pthread_mutexattr_           互斥锁属性对象
   
-     pthread_cond_          条件变量
+            pthread_cond_           条件变量
   
-     pthread_condattr_      条件变量属性对象
+        pthread_condattr_           条件变量属性对象
   
-     pthread_rwlock_        读写锁
+          pthread_rwlock_           读写锁
   
-     pthread_rwlockattr_    读写锁属性对象
+      pthread_rwlockattr_           读写锁属性对象
   
-     pthread_spin_          自旋锁
+            pthread_spin_           自旋锁
   
-     pthread_barrier_       屏障
+         pthread_barrier_           屏障
   
-     pthread_barrierattr_   屏障属性对象
+     pthread_barrierattr_           屏障属性对象
   
-     sem_                   信号量
+                    sem_           信号量
   
-     mq_                    消息队列
+                     mq_           消息队列
 -----------------------------------------------------------------------
 绝大部分Pthreads的函数执行成功则返回0值，不成功则返回一个包含在\<errno.h\>头文件中的错误代码。很多操作系统都支持Pthreads，比如Linux、MacOS X、 Android 和Solaris，因此使用Pthreads的函数编写的应用程序有很好的可移植性，可以在很多支持Pthreads的平台上直接编译运行。
 
-## 在RT-Thread中使用POSIX ##
+### 在RT-Thread中使用POSIX ###
 
 在RT-Thread中使用POSIX API接口包括几个部分：libc（例如newlib），file system，pthread等。需要在rtconfig.h中打开相关的选项：
 ```c
@@ -68,18 +70,20 @@ pthread_t是rt_thread_t类型的重定义，定义在pthread.h头文件里。rt_
 
 **函数原型**
 ```c
-int pthread_create (pthread_t *tid, const pthread_attr_t *attr, void *(*start) (void *), void *arg);
+int pthread_create (pthread_t *tid,
+                   const pthread_attr_t *attr,
+                   void *(*start) (void *), void *arg);
 ```
 -----------------------------------------------------------------------
          参数    描述
 --------------  -------------------------------------------------------
          tid    指向线程句柄(线程标识符)的指针，不能为NULL
 
-         attr    指向线程属性的指针，如果使用NULL，则使用默认的线程属性
+         attr   指向线程属性的指针，如果使用NULL，则使用默认的线程属性
 
          star   线程入口函数地址
           
-        arg    传递给线程入口函数的参数      
+        arg     传递给线程入口函数的参数      
 -----------------------------------------------------------------------
 **函数返回**
 
@@ -439,7 +443,9 @@ int rt_application_init()
 
 互斥锁的操作只有两种上锁或解锁，同一时刻只会有一个线程持有某个互斥锁。当有线程持有它时，互斥量处于闭锁状态，由这个线程获得它的所有权。相反，当这个线程释放它时，将对互斥量进行开锁，失去它的所有权。当一个线程持有互斥量时，其他线程将不能够对它进行解锁或持有它。
 
-对互斥锁的主要操作包括：调用pthread_mutex_init()初始化一个互斥锁，调用pthread_mutex_destroy()销毁互斥锁，调用pthread_mutex_lock()对互斥锁上锁，调用pthread_mutex_lock()对互斥锁解锁。
+对互斥锁的主要操作包括：调用pthread_mutex_init()初始化一个互斥锁，调用   
+pthread_mutex_destroy()销毁互斥锁，调用pthread_mutex_lock()对互斥锁上锁，调用   
+pthread_mutex_lock()对互斥锁解锁。
 
 使用互斥锁会导致一个潜在问题是线程优先级翻转。在RT-Thread操作系统中实现的是优先级继承算法。优先级继承是指，提高某个占有某种资源的低优先级线程的优先级，使之与所有等待该资源的线程中优先级最高的那个线程的优先级相等，然后执行，而当这个低优先级线程释放该资源时，优先级重新回到初始设定。因此，继承优先级的线程避免了系统资源被任何中间优先级的线程抢占。
 
@@ -490,7 +496,9 @@ typedef struct rt_mutex* rt_mutex_t;        /* rt_mutext_t为指向互斥锁结�
 
 此函数会初始化mutex互斥锁，并根据attr指向的互斥锁属性对象设置mutex属性，成功初始化后互斥锁处于未上锁状态，线程可以获取，此函数是对rt_mutex_init()函数的封装。
 
-除了调用pthread_mutex_init()函数创建一个互斥锁，还可以用宏PTHREAD_MUTEX_INITIALIZER来静态初始化互斥锁，方法：pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER（结构体常量），等同于调用pthread_mutex_init()时attr指定为NULL。
+除了调用pthread_mutex_init()函数创建一个互斥锁，还可以用宏   
+PTHREAD_MUTEX_INITIALIZER来静态初始化互斥锁，方法：pthread_mutex_t mutex =    
+PTHREAD_MUTEX_INITIALIZER（结构体常量），等同于调用pthread_mutex_init()时attr指定为NULL。
 
 关于互斥锁属性及相关函数会在线程高级编程一章里有详细介绍，一般情况下采用默认属性就可以。
 
@@ -657,7 +665,8 @@ int rt_application_init()
 
 条件变量可以用来通知共享数据状态。比如一个处理共享资源队列的线程发现队列为空，则此线程只能等待，直到有一个节点被添加到队列中，添加后在发一个条件变量信号激活等待线程。
 
-条件变量的主要操作包括：调用pthread_cond_init()对条件变量初始化，调用pthread_cond_destroy()销毁一个条件变量，调用pthread_cond_wait()等待一个条件变量，调用pthread_cond_signal()发送一个条件变量。
+条件变量的主要操作包括：调用pthread_cond_init()对条件变量初始化，调用   
+pthread_cond_destroy()销毁一个条件变量，调用pthread_cond_wait()等待一个条件变量，调用pthread_cond_signal()发送一个条件变量。
 
 ### 条件变量控制块 ###
 
@@ -672,7 +681,8 @@ struct pthread_cond
 };
 typedef struct pthread_cond pthread_cond_t;
 
-rt_semaphore是RT-Thread内核里定义的一个数据结构，是信号量控制块，定义在rtdef.h头文件里
+rt_semaphore是RT-Thread内核里定义的一个数据结构，是信号量控制块，   
+定义在rtdef.h头文件里
 
 struct rt_semaphore
 {
@@ -701,7 +711,9 @@ struct rt_semaphore
 
 此函数会初始化cond条件变量，并根据attr指向的条件变量属性设置其属性，此函数是对rt_sem_init()函数的一个封装，基于信号量实现。初始化成功后条件变量处于不可用状态。
 
-还可以用宏PTHREAD_COND_INITIALIZER静态初始化一个条件变量，方法：pthread_cond_t cond = PTHREAD_COND_INITIALIZER（结构体常量），等同于调用pthread_cond_init()时attr指定为NULL。
+还可以用宏PTHREAD_COND_INITIALIZER静态初始化一个条件变量，方法：   
+pthread_cond_t cond = PTHREAD_COND_INITIALIZER（结构体常量），等同于调用   
+pthread_cond_init()时attr指定为NULL。
 
 attr一般设置NULL使用默认值即可，具体会在线程高级编程一章介绍。
 
@@ -747,7 +759,9 @@ attr一般设置NULL使用默认值即可，具体会在线程高级编程一章
 
 **函数原型**
 ```c
-    int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex, const struct timespec *abstime);
+    int pthread_cond_timedwait(pthread_cond_t *cond,
+                              pthread_mutex_t *mutex,
+                              const struct timespec *abstime);
 ```
 -----------------------------------------------------------------------
          参数    描述
@@ -941,10 +955,10 @@ struct pthread_rwlock
     pthread_cond_t rw_condwriters;    /* 条件变量，供写者线程使用 */
     int rw_nwaitreaders;    /* 读者线程等待计数 */
     int rw_nwaitwriters;    /* 写者线程等待计数 */
-    int rw_refcount;    /* 读写锁值，为0值：未上锁,为 -1值: 被写者线程锁定, 大于0值：被读者线程锁定数量 */
+    /* 读写锁值，值为0：未上锁,值为-1：被写者线程锁定,大于0值：被读者线程锁定数量 */
+    int rw_refcount;
 };
 typedef struct pthread_rwlock pthread_rwlock_t;        /* 类型重定义 */
-
 
 ```
 
@@ -952,7 +966,8 @@ typedef struct pthread_rwlock pthread_rwlock_t;        /* 类型重定义 */
 
 **函数原型**
 ```c
-    int pthread_rwlock_init (pthread_rwlock_t *rwlock, const pthread_rwlockattr_t *attr);
+    int pthread_rwlock_init (pthread_rwlock_t *rwlock,
+                            const pthread_rwlockattr_t *attr);
 ```
 -----------------------------------------------------------------------
          参数    描述
@@ -967,7 +982,9 @@ typedef struct pthread_rwlock pthread_rwlock_t;        /* 类型重定义 */
 
 此函数会初始化一个rwlock读写锁。此函数使用默认值初始化读写锁控制块的信号量和条件变量，相关计数参数初始为0值。初始化后的读写锁处于未上锁状态。
 
-还可以使用宏PTHREAD_RWLOCK_INITIALIZER来静态初始化读写锁，方法：pthread_rwlock_t mutex = PTHREAD_RWLOCK_INITIALIZER（结构体常量），等同于调用pthread_rwlock_init()时attr指定为NULL。
+还可以使用宏PTHREAD_RWLOCK_INITIALIZER来静态初始化读写锁，方法：   
+pthread_rwlock_t mutex = PTHREAD_RWLOCK_INITIALIZER（结构体常量），等同于调用   
+pthread_rwlock_init()时attr指定为NULL。
 
 attr一般设置NULL使用默认值即可，具体会在线程高级编程一章介绍。
 
@@ -1029,7 +1046,8 @@ attr一般设置NULL使用默认值即可，具体会在线程高级编程一章
 **函数原型**
 
 ```c
-    int pthread_rwlock_timedrdlock (pthread_rwlock_t *rwlock, const struct timespec *abstime);
+    int pthread_rwlock_timedrdlock (pthread_rwlock_t *rwlock,
+                                   const struct timespec *abstime);
 ```
 -----------------------------------------------------------------------
          参数    描述
@@ -1084,7 +1102,8 @@ attr一般设置NULL使用默认值即可，具体会在线程高级编程一章
 
 **函数原型**
 ```c
-    int pthread_rwlock_timedwrlock (pthread_rwlock_t *rwlock, const struct timespec *abstime);
+    int pthread_rwlock_timedwrlock (pthread_rwlock_t *rwlock,
+                                   const struct timespec *abstime);
 ```
 -----------------------------------------------------------------------
          参数    描述
@@ -1234,7 +1253,9 @@ typedef struct pthread_barrier pthread_barrier_t;
 
 **函数原型**
 ```c
-    int pthread_barrier_init(pthread_barrier_t *barrier, const pthread_barrierattr_t *attr, unsigned count);
+    int pthread_barrier_init(pthread_barrier_t *barrier,
+                            const pthread_barrierattr_t *attr,
+                            unsigned count);
 ```
 -----------------------------------------------------------------------
          参数    描述
@@ -1243,13 +1264,14 @@ typedef struct pthread_barrier pthread_barrier_t;
 
      barrier    屏障句柄
 
-       count    指定的等待线程个数        
+       count    指定的等待线程个数
 -----------------------------------------------------------------------
 **函数返回**
 
 初始化成功返回0，参数无效返回EINVAL。
 
-此函数会创建一个barrier屏障，并根据默认的参数对屏障控制块的条件变量和互斥锁初始化，初始化后指定的等待线程个数为count个，必须对应count个线程调用pthread_barrier_wait()。
+此函数会创建一个barrier屏障，并根据默认的参数对屏障控制块的条件变量和互斥锁初始化，初始化后指定的等待线程个数为count个，必须对应count个线程   
+调用pthread_barrier_wait()。
 
 attr一般设置NULL使用默认值即可，具体会在线程高级编程一章介绍。
 
@@ -1828,7 +1850,10 @@ typedef struct mqdes* mqd_t;  /* 消息队列控制块指针类型重定义 */
 
 **函数原型**
 ```c
-    int mq_send(mqd_t mqdes, const char *msg_ptr, size_t msg_len, unsigned msg_prio);
+    int mq_send(mqd_t mqdes,
+                const char *msg_ptr, 
+                size_t msg_len,
+                unsigned msg_prio);
 ```
 -----------------------------------------------------------------------
          参数    描述
@@ -1853,7 +1878,11 @@ typedef struct mqdes* mqd_t;  /* 消息队列控制块指针类型重定义 */
 
 **函数原型**
 ```c
-    int mq_timedsend(mqd_t mqdes, const char *msg_ptr, size_t msg_len, unsigned msg_prio,const struct timespec *abs_timeout);
+    int mq_timedsend(mqd_t mqdes,
+                    const char *msg_ptr,
+                    size_t msg_len,
+                    unsigned msg_prio,
+                    const struct timespec *abs_timeout);
 ```
 -----------------------------------------------------------------------
          参数    描述
@@ -1878,7 +1907,10 @@ typedef struct mqdes* mqd_t;  /* 消息队列控制块指针类型重定义 */
 
 **函数原型**
 ```c
-    ssize_t mq_receive(mqd_t mqdes, char *msg_ptr, size_t msg_len, unsigned *msg_prio);
+    ssize_t mq_receive(mqd_t mqdes,
+                      char *msg_ptr,
+                      size_t msg_len,
+                      unsigned *msg_prio);
 ```
 -----------------------------------------------------------------------
          参数    描述
@@ -1901,7 +1933,11 @@ typedef struct mqdes* mqd_t;  /* 消息队列控制块指针类型重定义 */
 
 **函数原型**
 ```c
-    ssize_t mq_timedreceive(mqd_t  mqdes, char *msg_ptr, size_t msg_len, unsigned *msg_prio, const struct timespec *abs_timeout);
+    ssize_t mq_timedreceive(mqd_t mqdes,
+                           char *msg_ptr,
+                           size_t msg_len,
+                           unsigned *msg_prio,
+                           const struct timespec *abs_timeout);
 ```
 -----------------------------------------------------------------------
          参数    描述
@@ -2107,7 +2143,8 @@ struct pthread_attr
 
 使用pthread_attr_init()函数会使用默认值初始化线程属性结构体attr，等同于调用线程初始化函数时将此参数设置为NULL，使用前需要定义一个pthread_attr_t属性对象，此函数必须在pthread_create()函数之前调用。
 
-pthread_attr_destroy()函数对attr指向的属性去初始化，之后可以再次调用pthread_attr_init()函数对此属性对象重新初始化。
+pthread_attr_destroy()函数对attr指向的属性去初始化，之后可以再次调用   
+pthread_attr_init()函数对此属性对象重新初始化。
 
 #### 线程的分离状态 ####
 
@@ -2131,7 +2168,8 @@ pthread_attr_destroy()函数对attr指向的属性去初始化，之后可以再
 
 2个函数只返回0值，总是成功。
 
-线程分离状态属性值state可以是PTHREAD_CREATE_JOINABL（非分离）和PTHREAD_CREATE_DETACHED（分离）。
+线程分离状态属性值state可以是PTHREAD_CREATE_JOINABL（非分离）和   
+PTHREAD_CREATE_DETACHED（分离）。
 
 线程的分离状态决定一个线程以什么样的方式来回收自己运行结束后占用的资源。线程的分离状态有2种：joinable或者detached。当线程创建后，应该调用pthread_join()或者pthread_detach()回收线程结束运行后占用的资源。如果线程的分离状态为joinable其他线程可以调用pthread_join()函数等待该线程结束并获取线程返回值，然后回收线程占用的资源。分离状态为detached的线程不能被其他的线程所join，自己运行结束后，马上释放系统资源。
 
@@ -2148,8 +2186,10 @@ pthread_attr_destroy()函数对attr指向的属性去初始化，之后可以再
 
 **函数原型**
 ```c
-    int pthread_attr_setschedparam(pthread_attr_t *attr,struct sched_param const *param)；
-    int pthread_attr_getschedparam(pthread_attr_t const *attr,struct sched_param   *param)；
+    int pthread_attr_setschedparam(pthread_attr_t *attr,
+                                  struct sched_param const *param)；
+    int pthread_attr_getschedparam(pthread_attr_t const *attr,
+                                  struct sched_param *param)；
 ```
 -----------------------------------------------------------------------
          参数    描述
@@ -2207,17 +2247,21 @@ pthread_attr_setstacksize()函数可以设置堆栈大小，单位是字节。�
 
 **函数原型**
 ```c
-    int pthread_attr_setstack(pthread_attr_t *attr,void *stack_base,size_t stack_size);
-    int pthread_attr_getstack(pthread_attr_t const *attr,void **stack_base, size_t *stack_size);
+    int pthread_attr_setstack(pthread_attr_t *attr,
+                             void *stack_base,
+                             size_t stack_size);
+    int pthread_attr_getstack(pthread_attr_t const *attr,
+                              void **stack_base,
+                              size_t *stack_size);
 ```
 -----------------------------------------------------------------------
          参数    描述
 --------------  -------------------------------------------------------
          attr    指向线程属性的指针
          
-     stack_size   线程堆栈大小
+     stack_size    线程堆栈大小
    
-     stack_base   线程堆栈地址
+     stack_base    线程堆栈地址
 -----------------------------------------------------------------------
 **函数功能**
 
@@ -2577,7 +2621,8 @@ int rt_application_init()
 
 2个函数都没有返回值。
 
-pthread_cleanup_push()把指定的清理函数routine放到线程的清理函数链表里，pthread_cleanup_pop()从清理函数链表头部取出第一项函数，若execute为非0值，则执行此函数。
+pthread_cleanup_push()把指定的清理函数routine放到线程的清理函数链表里，   
+pthread_cleanup_pop()从清理函数链表头部取出第一项函数，若execute为非0值，则执行此函数。
 
 ### 其他线程相关函数 ###
 
@@ -2611,7 +2656,8 @@ pthread_equal()返回0或1，相等则为1，不等则为0。pthread_self()返�
 -----------------------------------------------------------------------
 **函数返回**
 
-sched_get_priority_min()返回值为0，RT-Thread里为最大优先级，sched_get_priority_max()返回值最小优先级。
+sched_get_priority_min()返回值为0，RT-Thread里为最大优先级，   
+sched_get_priority_max()返回值最小优先级。
 
 ### 其他线程相关桩函数 ###
 
@@ -2783,7 +2829,7 @@ int pthread_rwlockattr_init (pthread_rwlockattr_t *attr);
 -----------------------------------------------------------------------
          参数    描述
 --------------  -------------------------------------------------------
-         attr     指向读写锁属性的指针
+         attr    指向读写锁属性的指针
 -----------------------------------------------------------------------
 **函数功能**  使用默认值PTHREAD_PROCESS_PRIVATE初始化读写锁属性attr。
 
@@ -2803,7 +2849,8 @@ int pthread_rwlockattr_getpshared (const pthread_rwlockattr_t *attr, int *pshare
 -----------------------------------------------------------------------
 **函数功能**  获取读写锁作用域。
 
-**函数返回**  参数无效返回EINVAL，否则返回0，pshared指向的内存保存的值为PTHREAD_PROCESS_PRIVATE。
+**函数返回**  参数无效返回EINVAL，否则返回0，pshared指向的内存保存的值为   
+PTHREAD_PROCESS_PRIVATE。
 
 #### 读写锁属性相关桩函数 ####
 
