@@ -9,6 +9,9 @@ env是RT-Thread推出的辅助工具，用来配置基于RT-Thread操作系统�
 
 env工具提供了简单易用的配置剪裁工具，用来对内核和组件的功能进行配置，对组件进行自由裁剪，使系统以搭积木的方式进行构建。
 
+常用资料链接：
+* 论坛持续更新的env常见问题问答帖地址：`https://www.rt-thread.org/qa/thread-5699-1-1.html`
+
 ## 1.1 主要特性
 - menuconfig图形化配置界面，交互性好，操作逻辑强；
 - 丰富的文字帮助说明，配置无需查阅文档；
@@ -19,6 +22,8 @@ env工具提供了简单易用的配置剪裁工具，用来对内核和组件�
 - 软件包可在线下载，软件包持续集成，包可靠性高；
 ## 1.2 准备工作
 env工具包含了RT-Thread源代码开发编译环境和软件包管理系统。
+
+* 第一次使用推荐下载最新版本的env，并且在开始使用menuconfig配置工程之前使用一次` pkgs --upgrade` 命令来更新env的功能代码和软件包列表。
 
 * env环境编译器默认使用GNU GCC，工具链目录默认设置为 `env\tools\gnu_gcc\arm_gcc\mingw\bin`。版本为：gcc version 5.4.1 20160919 (release)。
 
@@ -58,6 +63,10 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 ![image](./figures/scons_done.png)
 
+
+
+如果你使用mdk/iar来进行项目开发，可以直接使用bsp中的工程文件或者使用：`scons --target=mdk/mdk4/mdk5/iar/cb -s`命令重新生成工程后在IDE中编译下载。
+
 ## 4. menuconfig的操作介绍
 ### 4.1 使用menuconfig配置工程
 
@@ -81,13 +90,30 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
   - Exit：直接退出当前的配置，当你更改了一些配置，但是又没有保存，此时会询问你是否要保存当前（已修改后的最新的）配置，然后再退出。
   - Help：针对你当前所在某个（行的）选项，查看其帮助信息。如果你对某个选项的功能不是很清楚就可以查看其Help，也可以可能查到写出到配置文件中的宏。
 
-### 4.2 直接使用已配置好的配置文件
+### 4.2 配置env工具
+
+新版本的env工具中加入了自动更新软件包和自动生成mdk/iar工程的选项，默认是不开启的。可以使用`menuconfig -s/--setting`来进行配置。
+* 使用 `menuconfig -s`命令进入env配置界面
+  ![image](./figures/menuconfig_s.png) 
+
+  ![image](./figures/env_config.png)
+* 如果选中了auto update pkgs config 那么会在你使用menuconfig功能后自动使用`pkgs --update`命令来下载并安装软件包，同时删除旧的软件包。这个功能是配合包管理器来使用的，当你想要下载在线软件包的时候就会用到。
+
+  ![image](./figures/auto_create_project.png)
+* 如果选中了auto create a mdk/iar project，那么在退出menuconfig界面之后就会自动生成一个你选中的工程。这个功能是为了方便的生成mdk/iar工程而使用的，避免多次使用scons命令来生成工程。
+
+
+
+### 4.3 直接使用已配置好的配置文件
 
 对于一些BSP，可能BSP本身会提供多种配置，一般以`config`结尾。这个时候可以直接使用这份配置文件，而不需要再行通过menuconfig来一项项进行配置。
 
 - 使用`menuconfig --config`命令后面加上存储的配置项可以选定配置文件并生成rtconfig.h文件。
 
   ![image](./figures/menuconfig_config_xx.png)
+
+
+
 
 ## 5. 包管理器
 
