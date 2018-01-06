@@ -23,8 +23,6 @@ env工具提供了简单易用的配置剪裁工具，用来对内核和组件�
 ## 1.2 准备工作
 env工具包含了RT-Thread源代码开发编译环境和软件包管理系统。
 
-* 第一次使用推荐下载最新版本的env，并且在开始使用menuconfig配置工程之前使用一次` pkgs --upgrade` 命令来更新env的功能代码和软件包列表。
-
 * env环境编译器默认使用GNU GCC，工具链目录默认设置为 `env\tools\gnu_gcc\arm_gcc\mingw\bin`。版本为：gcc version 5.4.1 20160919 (release)。
 
 * 在电脑上装好git，git的下载地址为`https://git-scm.com/downloads`,根据向导正确安装git，并将git添加到系统环境变量。软件包管理功能需要git的支持。
@@ -97,7 +95,7 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
   ![image](./figures/menuconfig_s.png) 
 
   ![image](./figures/env_config.png)
-* 如果选中了auto update pkgs config 那么会在你使用menuconfig功能后自动使用`pkgs --update`命令来下载并安装软件包，同时删除旧的软件包。这个功能是配合包管理器来使用的，当你想要下载在线软件包的时候就会用到。
+* 如果选中了auto update pkgs config 那么会在使用menuconfig功能后自动使用`pkgs --update`命令来下载并安装软件包，同时删除旧的软件包。本功能在下载在线软件包时使用。
 
   ![image](./figures/auto_create_project.png)
 * 如果选中了auto create a mdk/iar project，那么在退出menuconfig界面之后就会自动生成一个你选中的工程。这个功能是为了方便的生成mdk/iar工程而使用的，避免多次使用scons命令来生成工程。
@@ -111,9 +109,6 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 - 使用`menuconfig --config`命令后面加上存储的配置项可以选定配置文件并生成rtconfig.h文件。
 
   ![image](./figures/menuconfig_config_xx.png)
-
-
-
 
 ## 5. 包管理器
 
