@@ -61,9 +61,7 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 ![image](./figures/scons_done.png)
 
-
-
-如果你使用mdk/iar来进行项目开发，可以直接使用bsp中的工程文件或者使用：`scons --target=mdk/mdk4/mdk5/iar/cb -s`命令重新生成工程后在IDE中编译下载。
+如果使用mdk/iar来进行项目开发，可以直接使用bsp中的工程文件或者使用：`scons --target=mdk/mdk4/mdk5/iar/cb -s`命令重新生成工程后在IDE中编译下载。
 
 ## 4. menuconfig的操作介绍
 ### 4.1 使用menuconfig配置工程
