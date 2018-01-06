@@ -100,8 +100,6 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
   ![image](./figures/auto_create_project.png)
 * 如果选中了auto create a mdk/iar project，那么在退出menuconfig界面之后就会自动生成一个你选中的工程。这个功能是为了方便的生成mdk/iar工程而使用的，避免多次使用scons命令来生成工程。
 
-
-
 ### 4.3 直接使用已配置好的配置文件
 
 对于一些BSP，可能BSP本身会提供多种配置，一般以`config`结尾。这个时候可以直接使用这份配置文件，而不需要再行通过menuconfig来一项项进行配置。
