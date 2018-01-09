@@ -168,10 +168,12 @@ rt-thread软件包环境主要以命令行控制台为主，同时以字符型�
 ## 6.高级篇
 ### 6.1如何给自己的bsp添加menuconfig支持
 - menuconfig是rt-thread 3.0 以上版本的特性，推荐将rt-thread更新到最新3.0以上版本。
-- 目前rt-thread还没有对所有的bsp做menuconfig的支持，也就是说有些bsp暂时还不能使用menuconfig来进行配置，这些bsp会逐渐完善起来。
-  已经支持的bsp有`stm32f429-apollo,stm32f429-disco,lpc54608-LPCXpresso`等。
+
+- 目前rt-thread还没有对所有的bsp做menuconfig的支持，也就是说有些bsp暂时还不能使用menuconfig来进行配置，这些bsp会逐渐完善起来。已经支持的bsp有`stm32f429-apollo,stm32f429-disco,lpc54608-LPCXpresso`等。
+
 - menuconfig中选项的修改方法：
   如果想在menuconfig的配置项中添加宏定义，则可以修改bsp下的Kconfig文件，修改方法可以在网络中搜索`Kconfig语法`关键字获得详细的说明文档，也可以参考RT-Thread中的Kconfig文件或者已经支持过menuconfig的bsp中的Kconfig文件。
+
 - 为新的bsp添加menuconfig功能之前，需要熟悉已经做好的bsp里面menuconfig的操作，知道menuconfig命令配置界面中的选项是以Kconfig文件中的语句为准，配置过后生成rtconfig.h文件，上一次的配置被存放在.config文件中。理解了这几个概念，就可以动手为新的bsp添加menuconfig功能了。
 
 #### 6.1.1 给新的bsp添加menuconfig功能
