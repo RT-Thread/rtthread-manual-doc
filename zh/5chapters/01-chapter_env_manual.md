@@ -12,7 +12,7 @@ env工具提供了简单易用的配置剪裁工具，用来对内核和组件�
 常用资料链接：
 * 论坛持续更新的env常见问题问答帖地址：`https://www.rt-thread.org/qa/thread-5699-1-1.html`
 
-## 1.1 主要特性
+### 1.1 主要特性
 - menuconfig图形化配置界面，交互性好，操作逻辑强；
 - 丰富的文字帮助说明，配置无需查阅文档；
 - 使用灵活，自动处理依赖，功能开关彻底；
@@ -20,8 +20,8 @@ env工具提供了简单易用的配置剪裁工具，用来对内核和组件�
 - 使用scons工具生成工程，提供编译环境，操作简单；
 - 提供多种软件包，模块化软件包耦合关联少，可维护性好；
 - 软件包可在线下载，软件包持续集成，包可靠性高；
-## 1.2 准备工作
-env工具包含了RT-Thread源代码开发编译环境和软件包管理系统。
+### 1.2 准备工作
+env工具包含了rt-thread源代码开发编译环境和软件包管理系统。
 
 * env环境编译器默认使用GNU GCC，工具链目录默认设置为 `env\tools\gnu_gcc\arm_gcc\mingw\bin`。版本为：gcc version 5.4.1 20160919 (release)。
 
@@ -31,7 +31,7 @@ env工具包含了RT-Thread源代码开发编译环境和软件包管理系统�
 
 ## 2.打开env控制台
 
-RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型界面来进行辅助，使得尽量减少修改配置文件的方式即可搭建好RT-Thread开发环境的方式。
+rt-thread软件包环境主要以命令行控制台为主，同时以字符型界面来进行辅助，使得尽量减少修改配置文件的方式即可搭建好rt-thread开发环境的方式。
 
 ![image](./figures/console_exe.png)
 
@@ -43,17 +43,17 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 ## 3.env的使用方法
 
-### 第一步：切换到BSP根目录
+### 第一步：切换到bsp根目录
 
-- 打开控制台后，可以在命令行模式下使用cd命令切换到你想要配置的BSP根目录中。
+- 打开控制台后，可以在命令行模式下使用cd命令切换到你想要配置的bsp根目录中。
 
-例如工程目录为:`rt-thread\bsp\stm32f429-apollo`，在命令行下使用cd命令切换到的BSP根目录。如果env和rt-thread不在一个盘符，可以先使用`e:`或者`d:`命令切换盘符，然后再使用cd命令。
+例如工程目录为:`rt-thread\bsp\stm32f429-apollo`，在命令行下使用cd命令切换到的bsp根目录。如果env和rt-thread不在一个盘符，可以先使用`e:`或者`d:`命令切换盘符，然后再使用cd命令。
 
 ![image](./figures/cd_stm32f429_apollo.png)
 
-### 第二步：BSP的编译
+### 第二步：bsp的编译
 
-- env中携带了`Python & scons`环境，只需在`rt-thread\bsp\stm32f429-apollo` 目录中运行`scons`命令即可根据`rtconfig.h`中的配置使用默认的ARM_GCC工具链编译BSP。
+- env中携带了`Python & scons`环境，只需在`rt-thread\bsp\stm32f429-apollo` 目录中运行`scons`命令即可根据`rtconfig.h`中的配置使用默认的ARM_GCC工具链编译bsp。
 
 ![image](./figures/use_scons.png)
 
@@ -66,7 +66,7 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 ## 4. menuconfig的操作介绍
 ### 4.1 使用menuconfig配置工程
 
-- 在设备工程目录中可以使用`menuconfig`命令对BSP的配置进行修改，可以看到`menuconfig`的界面，如下图：
+- 在设备工程目录中可以使用`menuconfig`命令对bsp的配置进行修改，可以看到`menuconfig`的界面，如下图：
 
 ![image](./figures/menuconfig_window.png)
 
@@ -100,7 +100,7 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 ### 4.3 直接使用已配置好的配置文件
 
-对于一些BSP，可能BSP本身会提供多种配置，一般以`config`结尾。这个时候可以直接使用这份配置文件，而不需要再行通过menuconfig来一项项进行配置。
+对于一些bsp，可能bsp本身会提供多种配置，配置文件一般以`config`结尾。这个时候可以直接使用这份配置文件，而不需要再行通过menuconfig来一项项进行配置。
 
 - 使用`menuconfig --config`命令后面加上存储的配置项可以选定配置文件并生成rtconfig.h文件。
 
@@ -137,13 +137,13 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 #### 第一步：更新env的在线软件包仓库列表 (如果软件包列表已经更新，可忽略这步)
 
-- 使用`pkgs --upgrade`命令来更新env的软件包仓库列表。
+- 使用`pkgs --upgrade`命令可以更新env的软件包列表，同时更新env功能脚本。
 
 ![image](./figures/pkgs_upgrade.png)
 
 #### 第二步：配置所需的软件包
 
-- 支持在线下载的软件包在RT-thread online packages选项中，使用menuconfig来选择项目所需要的软件包，然后通过pkgs --update命令来更新项目中的软件包。如果不想要某个软件包，可以在menuconfig的配置中去掉包选项，然后再次使用`pkgs --update`命令更新即可。
+- 支持在线下载的软件包在rt-thread online packages选项中，使用menuconfig来选择项目所需要的软件包，然后通过pkgs --update命令来更新项目中的软件包。如果不想要某个软件包，可以在menuconfig的配置中去掉包选项，然后再次使用`pkgs --update`命令更新即可。
 
 ##### 1.选中所需软件包：
 
@@ -166,13 +166,34 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 如果解压出的软件包被人为修改，那么在删除软件包的时候会提示是否要删除被修改的文件。如果选择保留文件，那么请自行保存好这些文件，避免在下次更新包时被覆盖。
 
 ## 6.高级篇
-### 6.1关于menuconfig的支持
+### 6.1如何给自己的bsp添加menuconfig支持
+- menuconfig是rt-thread 3.0 以上版本的特性，推荐将rt-thread更新到最新3.0以上版本。
 
-- 目前RT-Thread还没有对所有的bsp做menuconfig的支持，也就是说有些bsp暂时还不能使用menuconfig来进行配置，这些BSP会逐渐完善起来。
-  已经支持的bsp有`stm32f429-apollo,stm32f429-disco,lpc54608-LPCXpresso`等。
+- 目前rt-thread还没有对所有的bsp做menuconfig的支持，也就是说有些bsp暂时还不能使用menuconfig来进行配置，这些bsp会逐渐完善起来。已经支持的bsp有`stm32f429-apollo,stm32f429-disco,lpc54608-LPCXpresso`等。
 
 - menuconfig中选项的修改方法：
   如果想在menuconfig的配置项中添加宏定义，则可以修改bsp下的Kconfig文件，修改方法可以在网络中搜索`Kconfig语法`关键字获得详细的说明文档，也可以参考RT-Thread中的Kconfig文件或者已经支持过menuconfig的bsp中的Kconfig文件。
+
+- 为新的bsp添加menuconfig功能之前，需要熟悉已经做好的bsp里面menuconfig的操作，知道menuconfig命令配置界面中的选项是以Kconfig文件中的语句为准，配置过后生成rtconfig.h文件，上一次的配置被存放在.config文件中。理解了这几个概念，就可以动手为新的bsp添加menuconfig功能了。
+
+#### 6.1.1 给新的bsp添加menuconfig功能
+
+方法如下：
+
+- 将已经支持menuconfig功能的bsp里面的kconfig文件拷贝到新的bsp中。
+- 注意修改Kconfig中的RTT_ROOT值为rt-thread所在目录，否则可能提示找不到RTT_ROOT。
+- 使用menuconfig命令开始配置即可。
+
+#### 6.1.2 给已有的bsp添加menuconfig功能
+
+方法如下：
+
+- 首先备份一下bsp内的rtconfig.h文件。
+- 使用scons --genconfig命令来根据已有的rtconfig.h文件生成.config文件。
+- 将已经支持menuconfig功能的bsp里面的kconfig文件拷贝到新的bsp中。
+- 注意修改Kconfig中的RTT_ROOT值为rt-thread所在目录，否则可能提示找不到RTT_ROOT。
+- 使用menuconfig命令来配置bsp。menuconfig会读取第二步生成的.config文件，配置保存过后，会生成一份新的.config和rtconfig.h。
+- 对比新老的rtconfig.h文件，使用menuconfig进行适当的修改。
 
 ### 6.2如何制作一个软件包
 ### 6.3如何制作一个软件包下载索引
@@ -232,4 +253,4 @@ package.json文件内容如下：
 
 ![image](./figures/pkgs_comon_json.png)
 
-这样我们就制作好一个下载索引包了，如果还有不懂的地方可以参考已有的软件包，或在RT-Thread论坛中提出来，我们会第一时间回答你的疑问，并且对env中存在的问题进行优化。谢谢你的参与。
+这样我们就制作好一个下载索引包了，如果还有不懂的地方可以参考已有的软件包，或在rt-thread论坛中提出来，我们会第一时间回答你的疑问，并且对env中存在的问题进行优化。谢谢你的参与。
