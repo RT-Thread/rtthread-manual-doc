@@ -90,12 +90,15 @@ RT-Thread 软件包环境主要以命令行控制台为主，同时以字符型�
 
 新版本的env工具中加入了自动更新软件包和自动生成mdk/iar工程的选项，默认是不开启的。可以使用`menuconfig -s/--setting`来进行配置。
 * 使用 `menuconfig -s`命令进入env配置界面
-  ![image](./figures/menuconfig_s.png) 
 
+  ![image](./figures/menuconfig_s.png) 
+  
   ![image](./figures/env_config.png)
+  
 * 如果选中了auto update pkgs config 那么会在使用menuconfig功能后自动使用`pkgs --update`命令来下载并安装软件包，同时删除旧的软件包。本功能在下载在线软件包时使用。
 
   ![image](./figures/auto_create_project.png)
+  
 * 如果选中了auto create a mdk/iar project，那么在退出menuconfig界面之后就会自动生成一个你选中的工程。这个功能是为了方便的生成mdk/iar工程而使用的，避免多次使用scons命令来生成工程。
 
 ### 4.3 直接使用已配置好的配置文件
