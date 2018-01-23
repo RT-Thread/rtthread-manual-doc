@@ -382,30 +382,59 @@ def generate_ebook(options)
             figure_title = 'Figure'
         end
 
-        dir = File.expand_path(File.join(Dir.getwd, lang))
-        #puts File.join(Dir.getwd, lang)
+        prefacefiles = "#$root/#{lang}/#{options['preface-files']}"
+        chapterfiles = "#$root/#{lang}/#{options['chapter-files']}"
+        appendixfiles = "#$root/#{lang}/#{options['appendix-files']}"
+
         book_content = ""
-        Dir[File.join(dir, '**', '*.md')].sort.each do |input|
+
+        puts "\n\tParsing preface markdown...  "
+        Dir["#{prefacefiles}"].sort.map do |input|
             puts "\tProcessing #{input}"
             content = File.read(input)
             content.gsub!(/Insert\s+(.*)(\.png)\s*\n?\s*#{figure_title}\s+(.*)/, '![\3](figures/\1-tn\2 "\3")')
-            book_content << content
+            book_content << content + ("\n\n")
         end
 
-        File.open("#{name}.#{lang}.md", 'w') do |output|
+        puts "\n\tParsing chapter markdown...  "
+        Dir["#{chapterfiles}"].sort.map do |input|
+            puts "\tProcessing #{input}"
+            content = File.read(input)
+            content.gsub!(/Insert\s+(.*)(\.png)\s*\n?\s*#{figure_title}\s+(.*)/, '![\3](figures/\1-tn\2 "\3")')
+            book_content << content + ("\n\n")
+        end
+
+        puts "\n\tParsing appendix markdown...  "
+        Dir["#{appendixfiles}"].sort.map do |input|
+            puts "\tProcessing #{input}"
+            content = File.read(input)
+            content.gsub!(/Insert\s+(.*)(\.png)\s*\n?\s*#{figure_title}\s+(.*)/, '![\3](figures/\1-tn\2 "\3")')
+            book_content << content + ("\n\n")
+        end
+
+        print "\n\tCreating markdown for #{lang}... "
+        dir = "md/#{lang}"
+        mkdir_p(dir)
+
+        File.open("#{dir}/#{name}.#{lang}.md", 'w') do |output|
             output.write(book_content)
         end
+
+        puts "\tRunning pandoc:"
+        cd(dir)
+        puts "#$root"
         options["outputformat"].each do | format |
             system('pandoc',
                '--standalone', 
                '--toc',
-               '--template=template.html',
-               '--epub-metadata', 'epub/metadata.xml',
-               '--epub-stylesheet', 'epub/book.css', # this doesn't work 
+               '--epub-metadata', "#$root/epub/metadata.xml",
+               '--epub-stylesheet', "#$root/epub/book.css", # this doesn't work
                '--output', "#{name}.#{lang}.#{format}",
-               "title.#{lang}.txt", # little strange, if this put under epub, pandoc reports error
+               "#$root/title.#{lang}.txt", # little strange, if this put under epub, pandoc reports error
                "#{name}.#{lang}.md")
           # pandoc -S --epub-metadata=metadata.xml -o progit.epub title.txt
+            cd($root)
+            mv("#{dir}/#{name}.#{lang}.#{format}", "#$root/#{name}.#{lang}.#{format}")
             puts("#{name}.#{lang}.#{format} is generated")
         end
     end
