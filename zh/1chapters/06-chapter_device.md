@@ -1337,8 +1337,8 @@ int rt_application_init()
 		device_thread_entry, RT_NULL,
 		1024, 25, 7);
 	/* 创建成功则启动线程*/
-	if (thread_!= RT_NULL)
-		rt_thread_startup(&thread);
+	if (thread!= RT_NULL)
+		rt_thread_startup(thread);
 }
 ~~~
 
