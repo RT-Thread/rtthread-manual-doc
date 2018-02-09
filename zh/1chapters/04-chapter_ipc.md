@@ -1829,7 +1829,7 @@ static char mb_str2[] = "this is another mail!";
 /* 线程1入口 */
 static void thread1_entry(void* parameter)
 {
-    unsigned char* str;
+    rt_uint32_t str;
 
     while (1)
     {
