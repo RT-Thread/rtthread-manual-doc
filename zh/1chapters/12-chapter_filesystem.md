@@ -653,7 +653,7 @@ FAT文件系统扇区大小
 	/* Maximum sector size to be handled. */
 	#define RT_DFS_ELM_MAX_SECTOR_SIZE  512
 
-这个洪用于指定FatFs的内部扇区大小，注意，这个宏需要大于等于实际硬件驱动的扇区大小。例如，某spi flash芯片扇区为4096字节，则上述宏需要修改为4096，否则FatFs从驱动读入数据时就会发生数组越界而导致系统崩溃（新版本在系统执行时给出警告信息）。
+这个宏用于指定FatFs的内部扇区大小，注意，这个宏需要大于等于实际硬件驱动的扇区大小。例如，某spi flash芯片扇区为4096字节，则上述宏需要修改为4096，否则FatFs从驱动读入数据时就会发生数组越界而导致系统崩溃（新版本在系统执行时给出警告信息）。
 
 	/* Number of volumes (logical drives) to be used. */
 	#define RT_DFS_ELM_DRIVES                        2
