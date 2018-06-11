@@ -474,6 +474,15 @@ void rt_hw_us_delay(rt_uint32_t us)
 
     /* 获得当前时间 */
     delta = SysTick->VAL;
+    
+    /* 判断到达延时前会不会发生SysTick更新事件 */
+    if (delta < us)
+    {
+          /* wait current OSTick left time gone */
+          while (SysTick->VAL < us);
+          us -= delta;
+          delta = SysTick->LOAD;
+      }
 
     /* 循环获得当前时间，直到达到指定的时间后退出循环 */
     while (delta - SysTick->VAL< us);
