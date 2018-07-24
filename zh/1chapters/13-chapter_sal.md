@@ -6,7 +6,6 @@
 
 - 抽象、统一多种网络协议栈接口；
 - 支持标准 BSD Socket API；
-- 自定义协议栈或网络实现的注册方式；
 - 统一的 FD 管理，便于使用 read/write  poll/select 来操作网络功能；
 
 ## 网络框架 ##
@@ -101,10 +100,10 @@ SAL 组件主要实现的两个功能：支持多个协议栈接入和统一抽�
 上面配置选项可以直接在 `rtconfig.h` 文件中添加使用，也可以通过组件包管理工具 ENV 配置选项加入，ENV 工具中具体配置路径如下：
 
     RT-Thread Components  ---> 
-        Network stack  --->
+        Network  --->
             Socket abstraction layer  --->  
             [*] Enable socket abstraction layer
-                protocol family type  --->
+                protocol stack implement --->
             [*]    Enable BSD socket operated by file system API
             (4)    the number of protocol family 
 
@@ -155,7 +154,7 @@ SAL 组件抽象出标准 BSD Socket API 接口，如下是对常用网络接口
 
           返回  描述
 
-            0   成功，返回一个代表套接字描述符的整数
+          >=0   成功，返回一个代表套接字描述符的整数
 
            -1   失败 
 -----------------------------------------------------------------------
@@ -165,15 +164,15 @@ SAL 组件抽象出标准 BSD Socket API 接口，如下是对常用网络接口
  协议族
 
 - PF_INET： IPv4 
-- PF_INET6： IPv6.
+- PF_INET6： IPv6
 
 **type** 
 
 协议类型
 
-- SOCK_STREAM： 可靠的面向连接的服务或者 Stream Sockets
-- SOCK_DGRAM： 数据包服务或者 Datagram Sockets
-- SOCK_RAW： 网络层的原始协议
+- SOCK_STREAM：流套接字
+- SOCK_DGRAM： 数据报套接字
+- SOCK_RAW：   原始套接字
 
 ### 绑定套接字（bind） ###
 
