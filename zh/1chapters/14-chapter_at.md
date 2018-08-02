@@ -838,4 +838,4 @@ int at_client_port_init(void)
 
     int at_client_port_init(void);
 
-该函数为 AT Client 移植初始化函数，完成了整个 AT Client 的移植，改函数中主要对 URC 数据列表进行初始化。
+该函数为 AT Client 移植初始化函数，完成了整个 AT Client 的移植，该函数中主要对 URC 数据列表进行初始化。
