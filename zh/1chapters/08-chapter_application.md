@@ -1,184 +1,276 @@
-# 应用模块 #
+# 动态模块 #
 
-在传统桌面操作系统中，用户空间和内核空间是分开的，应用程序运行在用户空间，内核以及内核模块则运行于内核空间，其中内核模块可以动态加载与删除以扩展内核功能，而在小型嵌入式设备领域，通常并不区分内核态与用户态，并且整个系统通常编译成一个单独的固件下载到单片机芯片的Flash中。自RT-Thread 0.4.0版开始引入了一种称为RT-Thread application module（应用模块）的技术，它提供了一种动态加载或卸载应用程序的功能，应用程序可以独立编译，并存储外部存储介质上，如SD卡、SPI Flash，甚至可以通过网络传输。但RT-Thread依然没有区分用户空间与内核空间，应用模块兼顾应用程序和内核模块的属性，是两者的结合体，所以称作应用模块。为书写简单，下文将RT-Thread application module简称为应用模块或模块。
+在传统桌面操作系统中，用户空间和内核空间是分开的，应用程序运行在用户空间，内核以及内核模块则运行于内核空间，其中内核模块可以动态加载与删除以扩展内核功能。`dlmodule` 则是RT-Thread下，在内核空间对外提供的动态模块加载机制的软件组件。在RT-Thread v3.1.0以前的版本中，这也称之为应用模块（Application Module），在RT-Thread v3.1.0及之后，则回归传统，以动态模块命名。
 
-[TODO] 更新使用应用模块为使用[rtthread-apps](https://github.com/RT-Thread/rtthread-apps)的方式 ；加入RTM_EXPORT宏描述。
+`dlmodule`组件更多的是一个ELF格式加载器，把单独编译的一个elf文件的代码段，数据段加载到内存中，并对其中的符号进行解析，绑定到内核导出的API地址上。动态模块elf文件主要放置于RT-Thread下的文件系统上。
 
 ## 功能和限制 ##
 
-应用模块为RT-Thread提供一种类似桌面系统安装卸载应用程序的功能，功能十分灵活。从实现上讲，这是一种将内核和应用分开的机制，通过这种机制，内核和应用可以分开编译，并在运行时通过内核中的模块加载器将编译好的应用加载到内核中运行。
+动态模块为RT-Thread提供了动态加载程序模块的机制，因为也独立于内核编译，所以使用方式比较灵活。从实现上讲，这是一种将内核和动态模块分开的机制，通过这种机制，内核和动态模块可以分开编译，并在运行时通过内核中的模块加载器将编译好的动态模块加载到内核中运行。
 
-当前RT-Thread支持应用模块的架构包括ARM7、ARM9、Cortex-M3/M4/M7。RT-Thread内核固件部分可使用多种编译器工具链，如GCC, ARMCC、IAR等工具链；但应用模块部分编译只支持GCC工具链。因此编译RT-Thread模块需下载GCC工具，例如CodeSourcery的arm-none-eabi工具链。
+在RT-Thread的动态模块中，目前支持两种格式：
 
-应用模块也有一定限制，它仅支持加载到RAM中运行（因为需要在内存中把符号进行绝对化固定下来），而不能直接在flash上运行，因此，耗费的RAM会更多一些（在Flash上直接XIP执行的Cortex-M处理器不见得合适）。
+* `.mo` 则是编译出来时以`.mo`做为后缀名的可执行动态模块；它可以被加载，并且系统中会自动创建一个主线程执行这个动态模块中的`main`函数；同时这个`main(int argc, char** argv)`函数也可以接受命令行上的参数。
+* `.so` 则是编译出来时以`.so`做为后缀名的动态库；它可以被加载，并驻留在内存中，并提供一些函数集由其他程序（内核里的代码或动态模块）来使用。
 
-## 使用应用模块 ##
+当前RT-Thread支持应用模块的架构主要包括ARM类架构，未来会扩展到x86，MIPS，以及RISC-V等架构上。RT-Thread内核固件部分可使用多种编译器工具链，如GCC, ARMCC、IAR等工具链；但动态模块部分编译当前只支持GNU GCC工具链编译。因此编译RT-Thread模块需下载GCC工具，例如CodeSourcery的arm-none-eabi工具链。一般的，最好内核和动态模块使用一样的工具链进行编译（这样不会在libc上产生不一致的行为）。另外，动态模块一般只能加载到RAM中使用，并进行符号解析绑定到内核导出的API地址上，而不能基于Flash直接以XIP方式运行（因为Flash上也不能够再行修改其中的代码段）。
 
-要想在板子测试使用应用模块，需要编译一个支持应用模块的RT-Thread主程序以及独立编译的应用模块程序。下面将分为两部分介绍。
+## 使用动态模块 ##
 
-### 编译主程序 ###
+当要在系统中测试使用动态模块，需要编译一份支持动态模块的固件，以及需要运行的动态模块。下面将固件和动态模块的编译方式分为两部分进行介绍。
 
-在rtconfig.h中打开如下宏（如果不存在则手动添加）
+### 编译固件 ###
 
-    #define RT_USING_MODULE
+当要使用动态模块时，需要在固件的配置中打开对应的选项，如下配置：
 
-然后重新编译主工程。读者需要参考SCons构建系统那一章学习如何编译RT-Thread源代码。将编译好的主程序下载到芯片中运行。
+```
+   RT-Thread Components  --->
+       POSIX layer and C standard library  --->
+	       [*] Enable dynamic module with dlopen/dlsym/dlclose feature
+```
 
-注意：
+也需要在bsp对应的rtconfig.py中设置动态模块编译时需要用到的配置参数：
 
-1. 如果是手动创建RT-Thread的MDK工程，需要在链接选项中应加入`--keep __rtmsym_*`参数
-2. 某些分支bsp目录下的startup.c可能未加入`rt_module_system_init()`函数
+```Python
+    M_CFLAGS = CFLAGS + ' -mlong-calls -fPIC '
+    M_CXXFLAGS = CXXFLAGS + ' -mlong-calls -fPIC'
+    M_LFLAGS = DEVICE + CXXFLAGS + ' -Wl,--gc-sections,-z,max-page-size=0x4' +\
+                                    ' -shared -fPIC -nostartfiles -nostdlib -static-libgcc'
+    M_POST_ACTION = STRIP + ' -R .hash $TARGET\n' + SIZE + ' $TARGET \n'
+    M_BIN_PATH = r'E:\qemu-dev310\fatdisk\root'
+```
 
-### 使用应用模块 ###
+相关的解释如下：
 
-RT-Thread源码中提供了几个应用模块的基本例子，它们位于RT-Thread源码树的example/module目录下，目前该目录下共有如下目录和文件
+* M_CFLAGS - 动态模块编译时用到的C代码编译参数，一般此处以PIC方式进行编译（即代码地址支持浮动方式执行）；
+* M_CXXFLAGS - 动态模块编译时用到的C++代码编译参数，参数和上面的`M_CFLAGS`类似；
+* M_LFLAGS - 动态模块进行链接时的参数。同样是PIC方式，并且是按照共享库方式链接（部分链接）；
+* M_POST_ACTIOn - 动态模块编译完成后要进行的动作，这里会对elf文件进行strip下，以减少elf文件的大小；
+* M_BIN_PATH - 当动态模块编译成功时，对应的动态模块文件是否需要复制到统一的地方；
 
-- example/module/basicapp/  一个简单的应用模块工程
-- example/module/tetris/    一个使用RTGUI的俄罗斯方块的应用模块工程
-- example/module/SConstruct  应用模块工程的构建脚本
-- example/module/rtconfig.py 应用模块工程的配置脚本，需要配置工具链路径和bsp，默认为mini2440分支
-- example/module/rtconfig_lm3s.py lm3s8962分支的应用工程配置脚本模板， 使用时需更名为rtconfig.py
-- example/module/README 使用说明
+基本上来说，ARM9、Cortex-A、Cortex-M系列的这些编译配置参数是一样的。
 
-这里以stm32f10x bsp为例，编译一个stm32的应用模块程序，起名为test。假如工作目录为D:/work，复制以下文件或目录到work目录下，
+内核固件也会通过`RTM(function)`的方式导出一些函数API给动态模块使用，这些导出符号可以在msh下通过命令
 
-- $RTT_ROOT/example/module/basicapp/ `-->` work/basicap/ `-->` work/test
-- $RTT_ROOT/example/module/SConstruct `-->` work/SConstruct
+    list_symbols
 
-并将work目录下的basicapp重命名为test。
+列出固件中所有导出的符号信息。`dlmodule`加载器也是把动态模块中需要解析的符号按照这里导出的符号表来进行解析，完成最终的绑定动作。
 
-由于stm32f10x属于arm-cortex M3架构，因此复制rtconfig_lm32s.py到work目录下，并重命名为rtconfig.py，如下所示
+这段符号表会放在一个专门的，名字是RTMSymTab的section中，所以对应的固件链接脚本也需要保留这块区域，而不会被链接器优化移除掉。可以在链接脚本中添加对应的信息：
 
-- $RTT_ROOT/example/module/rtconfig_lm3s.py `-->` work/rtconfig.py
+```text
+        /* section information for modules */
+        . = ALIGN(4);
+        __rtmsymtab_start = .;
+        KEEP(*(RTMSymTab))
+        __rtmsymtab_end = .;
+```
 
-打开work/rtconfig.py文件，并做如下修改
+然后在bsp工程目录下执行`scons`正确无误地生成固件后，在bsp工程目录下执行：
 
-1. 修改BSP为stm32f10x
-2. 首先确保ARM GCC已经安装，并修改EXEC_PATH为你的编译器路径
+    scons --target=ua -s
 
-在笔者的机器上，修改后的work/rtconfig.py如下所示：
+来生成编译动态模块时需要包括的内核头文件搜索路径及全局宏定义。
 
-	# bsp name
-	BSP = 'stm32f10x'
-	
-	# toolchains
-	EXEC_PATH 	= r'C:\Program Files (x86)\CodeSourcery\Sourcery_CodeBench_Lite_for_ARM_EABI\bin'
-	PREFIX = 'arm-none-eabi-'
-	CC = PREFIX + 'gcc'
-	CXX = PREFIX + 'g++'
-	AS = PREFIX + 'gcc'
-	AR = PREFIX + 'ar'
-	LINK = PREFIX + 'gcc'
-	TARGET_EXT = 'so'
-	SIZE = PREFIX + 'size'
-	OBJDUMP = PREFIX + 'objdump'
-	OBJCPY = PREFIX + 'objcopy'
-	
-	DEVICE = ' -mcpu=cortex-m3'
-	CFLAGS = DEVICE + ' -mthumb -mlong-calls -Dsourcerygxx -O0 -fPIC'
-	AFLAGS = ' -c' + DEVICE + ' -x assembler-with-cpp'
-	LFLAGS = DEVICE + ' -mthumb -Wl,-z,max-page-size=0x4 -shared -fPIC -e main -nostdlib'
-	
-	CPATH = ''
-	LPATH = ''
+### 建立动态模块 ###
 
-在work目录下打开命令行，执行如下命令编译应用模块
+在github上有一份独立仓库： [rtthread-apps](https://github.com/RT-Thread/rtthread-apps) ，这份仓库中放置了一些和动态模块，动态库相关的示例。
 
-	scons --app=test
+其目录结构如下：
 
-如果没有错误，会在work/test下生成build/stm32f10x/目录，其中test.so为RT-Thread应用模块。
+| 目录名 | 说明 |
+| ----- | ---- |
+| cxx | 演示了如何在动态模块中使用C++进行编程 |
+| hello | 最简单的`hello world`示例 |
+| lib | 动态库的示例 |
+| md5 | 为一个文件产生 md5 码 |
+| tools | 动态模块编译时需要使用到的Python/SConscript脚本 |
+| ymodem | 通过串口以 YModem协议下载一个文件到文件系统上 |
 
-将test.so拷贝到SD或其他设备中。然后在开发板中运行第一步编译的支持了RT-Thread应用模块的主程序。加入test.so已经被置于SD卡，并且将SD卡挂载到RT-Thread根目录下，则在finsh Shell中运行
-	
-	finsh>>exec("/test.so")
+可以把这份git clone到本地，然后在命令行下以scons工具进行编译，如果是Windows平台，推荐使用RT-Thread/ENV工具。
 
-可以看到如下效果，test.so正确运行。
+进入控制台命令行后，进入到这个rtthread-apps repo所在的目录（同样的，请保证这个目录所在全路径不包含空格，中文字符等字符），并设置好两个变量：
 
-    Hello RT-Thread 1 101
-    Hello RT-Thread 2 102
-    Hello RT-Thread 3 103
-    Hello RT-Thread 4 104
-    Hello RT-Thread 5 105
-    Hello RT-Thread 6 106
-    Hello RT-Thread 7 107
-    Hello RT-Thread 8 108
-    Hello RT-Thread 9 109
-    Hello RT-Thread 10 110
-    Hello RT-Thread 11 111
-    Hello RT-Thread 12 112
-    Hello RT-Thread 13 113
-    ……
+* RTT_ROOT - 指向到RT-Thread代码的根目录；
+* BSP_ROOT - 指向到BSP的工程目录；
 
-读者也可以尝试example/module目录下的其他应用模块示例，也可以自己编写应用模块程序。尽情享受应用模块带来的灵活吧~，限制你的只有想象力！
+Windows下可以使用(假设使用的BSP是qemu-vexpress-a9)：
 
-## 应用模块API ##
+    set RTT_ROOT=d:\your_rtthread
+	set RTT_ROOT=d:\your_rtthread\bsp\qemu-vexpress-a9
 
-除了可以通过finsh手动加载应用模块外，也可以在主程序中使用RT-Thread提供的应用模块API来加载或卸载应用模块。
+来设置对应的环境变量。然后使用如下命令来编译动态模块，例如hello的例子：
 
-	rt_module_t rt_module_open(const char *path)
+    scons --app=hello
+
+编译成功后，它会在rtthread-apps/hello目录下生成hello.mo文件。
+
+也可以编译动态库，例如lib的例子：
+
+    scons --lib=lib
+
+编译成功后，它会在rtthread-apps/lib目录下生成lib.so文件。
+
+我们可以把这些mo、so文件放到RT-Thread文件系统下。在msh下，可以简单的以`hello`命令方式执行`hello.mo`动态模块：
+
+    msh />ls
+	Directory /:
+	hello.mo            1368
+	lib.so              1376
+	msh />hello
+	msh />Hello, world
+
+调用hello后，会执行hello.mo里的main函数，执行完毕后退出对应的动态模块。其中`hello/main.c`的代码如下：
+
+```c
+#include <stdio.h>
+
+int main(int argc, char *argv[])
+{
+    printf("Hello, world\n");
+
+    return 0;
+}
+```
+
+## 动态模块相关API ##
+
+除了可以通过msh直接加载并执行动态模块外，也可以在主程序中使用RT-Thread提供的动态模块API来加载或卸载应用模块。
+
+`struct rt_dlmodule *dlmodule_load(const char* pgname);`
 
 **函数参数**
 
-
------------------------------------------------------------------------
-          参数  描述
---------------  -------------------------------------------------------
-          path  模块完整路径名；
------------------------------------------------------------------------
+| 参数 | 描述 |
+| ---- | ---- |
+| pgname | 动态模块的路径 |
 
 **函数返回**
 
 正确加载返回模块指针，否则返回NULL
 
-这个函数从文件系统中加载应用模块到内存中运行，若正确加载返回该模块的指针。
+这个函数从文件系统中加载应用模块到内存中，若正确加载返回该模块的指针。这个函数并不会创建一个线程去执行这个动态模块，仅仅把模块加载到内存中，并解析其中的符号地址。
 
-	rt_module_t rt_module_find(const char *name)
-
-**函数参数**
-
-
------------------------------------------------------------------------
-          参数  描述
---------------  -------------------------------------------------------
-          name  模块名；
------------------------------------------------------------------------
-
-**函数返回**
-
-如果找到则返回模块指针，否则返回NULL
-
-这个函数根据模块名查找系统已加载的模块，若找到返回该模块的指针。
-
-	rt_err_t rt_module_destroy(rt_module_t module)
+`struct rt_dlmodule *dlmodule_exec(const char* pgname, const char* cmd, int cmd_size);`
 
 **函数参数**
 
-
------------------------------------------------------------------------
-          参数  描述
---------------  -------------------------------------------------------
-        module  模块指针；
------------------------------------------------------------------------
+| 参数 | 描述 |
+| ---- | ---- |
+| pgname | 动态模块的路径 |
+| cmd | 包括动态模块命令自身的命令行字符串 |
+| cmd_size | 命令行字符串大小 |
 
 **函数返回**
 
-成功返回RT_EOK ；失败返回-RT_ERROR。
+加载并运行动态模块成功则返回动态模块指针，否则返回NULL
 
-这个函数会销毁应用模块占用的RT-Thread内核对象，如信号量、互斥量、mempool等，如果它使用了的话。
+这个函数根据`pgname`路径加载动态模块，并启动一个线程来执行这个动态模块的`main`函数，同时`cmd`会作为命令行参数传递给动态模块的`main`函数入口。
 
-	rt_err_t rt_module_unload(rt_module_t module)
+`void dlmodule_exit(int ret_code);`
 
 **函数参数**
 
-
------------------------------------------------------------------------
-          参数  描述
---------------  -------------------------------------------------------
-        module  模块指针；
------------------------------------------------------------------------
+| 参数 | 描述 |
+| ---- | ---- |
+| ret_code | 模块的返回参数 |
 
 **函数返回**
 
-成功返回RT_EOK ；失败返回-RT_ERROR。
+无
 
-这个函数会销毁应用模块的线程以及子线程。
+这个函数由模块运行时调用，它可以设置模块退出的返回值`ret_code`，然后从模块退出。
+
+`struct rt_dlmodule *dlmodule_find(const char *name);`
+
+**函数参数**
+
+| 参数 | 描述 |
+| ---- | ---- |
+| name | 模块名称 |
+
+**函数返回**
+
+如果系统中有对应的动态模块，则返回这个动态模块的指针；否则返回NULL。
+
+这个函数以`name`查找系统中是否已经有加载的动态模块。
+
+`struct rt_dlmodule *dlmodule_self(void);`
+
+**函数参数**
+
+无
+
+**函数返回**
+
+返回调用上下文环境下动态模块本身；如果不处于动态模块运行上下文环境内，则返回NULL。
+
+这个函数返回调用上下文环境下动态模块的指针。
+
+`rt_uint32_t dlmodule_symbol_find(const char *sym_str);`
+
+**函数参数**
+
+| 参数 | 描述 |
+| ---- | ---- |
+| name | 模块名称 |
+
+**函数返回**
+
+如果系统中有对应的动态模块，则返回这个动态模块的指针；否则返回NULL。
+
+这个函数以`name`查找系统中是否已经有加载的动态模块。
+
+## 标准的libdl API ##
+
+在RT-Thread dlmodule中也支持POSIX标准的libdl API，类似于把一个动态库加载到内存中（并解析其中的一些符号信息），由这份动态库提供对应的函数操作集。支持的libdl API包括如下。
+
+libdl API需要包含的头文件
+
+```c
+#include <dlfcn.h>
+```
+
+`void * dlopen (const char * pathname, int mode);`
+
+**函数参数**
+
+| 参数 | 描述 |
+| ---- | ---- |
+| pathname | 动态库路径名称 |
+| mode | 打开动态库时的模式，在RT-Thread中并未使用 |
+
+**函数返回**
+
+打开成功，返回动态库的句柄指针（实质是`struct dlmodule`结构体指针）；否则返回NULL
+
+这个函数类似`dlmodule_load`的功能，会从文件系统上加载动态库，并返回动态库的句柄指针。
+
+`void*dlsym(void *handle, const char *symbol);`
+
+**函数参数**
+
+| 参数 | 描述 |
+| ---- | ---- |
+| handle | 动态库句柄，应该是`dlopen`的返回值 |
+| symbol | 要返回的符号地址 |
+
+**函数返回**
+
+打开成功，返回对应符号的地址，否则返回NULL。
+
+这个函数在动态库`handle`中查找是否存在`symbol`的符号，如果存在返回它的地址。
+
+`int dlclose (void *handle);`
+
+**函数参数**
+
+| 参数 | 描述 |
+| ---- | ---- |
+| handle | 动态库句柄 |
+
+**函数返回**
+
+关闭成功，返回0；否则返回负数。
+
+这个函数会关闭`handle`指向的动态库，从内存中卸载掉。需要注意的是，当动态库关闭后，原来通过`dlsym`返回的符号地址将不再可用。如果依然尝试去访问，可能会引起fault错误。
