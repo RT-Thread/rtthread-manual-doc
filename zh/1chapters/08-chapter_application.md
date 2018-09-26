@@ -13,7 +13,7 @@
 * `.mo` 则是编译出来时以`.mo`做为后缀名的可执行动态模块；它可以被加载，并且系统中会自动创建一个主线程执行这个动态模块中的`main`函数；同时这个`main(int argc, char** argv)`函数也可以接受命令行上的参数。
 * `.so` 则是编译出来时以`.so`做为后缀名的动态库；它可以被加载，并驻留在内存中，并提供一些函数集由其他程序（内核里的代码或动态模块）来使用。
 
-当前RT-Thread支持应用模块的架构主要包括ARM类架构，未来会扩展到x86，MIPS，以及RISC-V等架构上。RT-Thread内核固件部分可使用多种编译器工具链，如GCC, ARMCC、IAR等工具链；但动态模块部分编译当前只支持GNU GCC工具链编译。因此编译RT-Thread模块需下载GCC工具，例如CodeSourcery的arm-none-eabi工具链。一般的，最好内核和动态模块使用一样的工具链进行编译（这样不会在libc上产生不一致的行为）。另外，动态模块一般只能加载到RAM中使用，并进行符号解析绑定到内核导出的API地址上，而不能基于Flash直接以XIP方式运行（因为Flash上也不能够再行修改其中的代码段）。
+当前RT-Thread支持应用模块的架构主要包括ARM类架构和x86架构，未来会扩展到MIPS，以及RISC-V等架构上。RT-Thread内核固件部分可使用多种编译器工具链，如GCC, ARMCC、IAR等工具链；但动态模块部分编译当前只支持GNU GCC工具链编译。因此编译RT-Thread模块需下载GCC工具，例如CodeSourcery的arm-none-eabi工具链。一般的，最好内核和动态模块使用一样的工具链进行编译（这样不会在libc上产生不一致的行为）。另外，动态模块一般只能加载到RAM中使用，并进行符号解析绑定到内核导出的API地址上，而不能基于Flash直接以XIP方式运行（因为Flash上也不能够再行修改其中的代码段）。
 
 ## 使用动态模块 ##
 
@@ -97,7 +97,7 @@
 Windows下可以使用(假设使用的BSP是qemu-vexpress-a9)：
 
     set RTT_ROOT=d:\your_rtthread
-	set RTT_ROOT=d:\your_rtthread\bsp\qemu-vexpress-a9
+    set BSP_ROOT=d:\your_rtthread\bsp\qemu-vexpress-a9
 
 来设置对应的环境变量。然后使用如下命令来编译动态模块，例如hello的例子：
 
@@ -114,11 +114,11 @@ Windows下可以使用(假设使用的BSP是qemu-vexpress-a9)：
 我们可以把这些mo、so文件放到RT-Thread文件系统下。在msh下，可以简单的以`hello`命令方式执行`hello.mo`动态模块：
 
     msh />ls
-	Directory /:
-	hello.mo            1368
-	lib.so              1376
-	msh />hello
-	msh />Hello, world
+       Directory /:
+       hello.mo            1368
+       lib.so              1376
+       msh />hello
+       msh />Hello, world
 
 调用hello后，会执行hello.mo里的main函数，执行完毕后退出对应的动态模块。其中`hello/main.c`的代码如下：
 
