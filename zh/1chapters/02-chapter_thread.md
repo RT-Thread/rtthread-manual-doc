@@ -131,7 +131,7 @@ RT-Thread实时操作系统提供一系列的操作系统调用接口，使得�
 
 ![线程转换图](../../figures/rt_thread_states.png)
 
-线程通过调用函数rt_thread_create/init进入到初始状态（RT_THREAD_INIT）；再通过调用函数rt_thread_startup进入到就绪状态（RT_THREAD_READY）；当处于就绪状态的线程调用rt_thread_delay，rt_sem_take，rt_mb_recv等函数或由于获取不到资源时，将进入到挂起状态（RT_THREAD_SUSPEND）；处于挂起状态的线程，如果等待超时依然未能获得资源或由于其他线程释放了资源，那么它将返回到就绪状态。挂起状态的线程，如果调用rt_thread_delete/detach将更改为关闭状态（RT_THREAD_CLOSE）；而运行状态的线程，如果运行结束会在线程最后部分执行rt_thread_exit函数而更改为关闭状态（RT_THREAD_CLOSE）。
+线程通过调用函数rt_thread_create/init进入到初始状态（RT_THREAD_INIT）；再通过调用函数rt_thread_startup进入到就绪状态（RT_THREAD_READY）；当处于运行状态的线程调用rt_thread_delay，rt_sem_take，rt_mb_recv等函数或由于获取不到资源时，将进入到挂起状态（RT_THREAD_SUSPEND）；处于挂起状态的线程，如果等待超时依然未能获得资源或由于其他线程释放了资源，那么它将返回到就绪状态。挂起状态的线程，如果调用rt_thread_delete/detach将更改为关闭状态（RT_THREAD_CLOSE）；而运行状态的线程，如果运行结束会在线程最后部分执行rt_thread_exit函数而更改为关闭状态（RT_THREAD_CLOSE）。
 
 ## 空闲线程 ##
 
