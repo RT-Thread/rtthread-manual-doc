@@ -313,7 +313,9 @@ SCons内置函数。其参数包括三个：
 
 ### SConscript示例1 ###
 
-bsp/stm32f10x/application/SConcript
+**说明:** 添加当前目录文件.
+
+**参考文件:** bsp/stm32f10x/application/SConcript
 
 ~~~~ {#SConscript .python .numberLines startFrom="1"}
 
@@ -342,7 +344,9 @@ Return('group')
 
 ### SConscript示例2 ###
 
-component/finsh/SConscript
+**说明:** 根据条件添加链接指令.
+
+**参考文件:** component/finsh/SConscript
 
 ~~~~ {#SConscript .python .numberLines startFrom="1"}
 
@@ -383,7 +387,9 @@ DefinGroup同样将finsh目录下的所有文件创建为finsh组。
 
 ### SConscript示例3 ###
 
-bsp/stm32f10x/SConscript
+**说明:** 遍历路径添加文件.
+
+**参考文件:** bsp/stm32f10x/SConscript
 
 ~~~~ {#SConscript .python .numberLines startFrom="1"}
 
@@ -410,10 +416,39 @@ Return('objs')
 	objs = objs + SConscript(os.path.join(d, 'SConscript'))
 
 上面这一句中使用了SCons提供的一个内置函数`SConscript`，它可以读入一个新的SConscript文件，并将SConscript文件中所指明的源码加入编译列表中来。
+根据SConscript文件的返回值可以看到objs其实是在添加group。
+因此,可以修改`stm32f10x-HAL/applications/SConscript`文件如下:
+~~~~ {#SConscript .python .numberLines startFrom="1"}
+Import('RTT_ROOT')
+Import('rtconfig')
+from building import *
+
+cwd = GetCurrentDir()
+src = Glob('*.c')
+CPPPATH = [cwd, str(Dir('#'))]
+group = DefineGroup('Applications', src, depend = [''], CPPPATH = CPPPATH)
+
+# 遍历添加applications目录下的SConscript文件
+usr_path = cwd
+list = os.listdir(usr_path)
+for d in list:
+    path = os.path.join(usr_path, d)
+    if os.path.isfile(os.path.join(path, 'SConscript')):
+        g_tmp=SConscript(os.path.join(d, 'SConscript'))
+        group=group+g_tmp
+
+
+
+Return('group')
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+而application/xxx/SConscript文件可以直接使用示例1的SConscript文件就可以实现在app目录下添加用户文件了
 
 ### SConscript示例4 ###
 
-stm32f10x/drivers/SConscript
+**说明:** 根据依赖添加文件.
+
+**参考文件:** stm32f10x/drivers/SConscript
+
 
 ~~~~ {#SConscript .python .numberLines startFrom="1"}
 
