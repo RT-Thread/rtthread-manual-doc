@@ -425,7 +425,7 @@ from building import *
 
 cwd = GetCurrentDir()
 src = Glob('*.c')
-CPPPATH = [cwd, str(Dir('#'))]
+CPPPATH = [cwd]
 group = DefineGroup('Applications', src, depend = [''], CPPPATH = CPPPATH)
 
 # 遍历添加applications目录下的SConscript文件
