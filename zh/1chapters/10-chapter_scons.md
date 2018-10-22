@@ -437,8 +437,6 @@ for d in list:
         g_tmp=SConscript(os.path.join(d, 'SConscript'))
         group=group+g_tmp
 
-
-
 Return('group')
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 而application/xxx/SConscript文件可以直接使用示例1的SConscript文件就可以实现在app目录下添加用户文件了
