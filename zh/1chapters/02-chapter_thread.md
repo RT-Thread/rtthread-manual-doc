@@ -472,7 +472,7 @@ static void thread2_entry(void* parameter)
 int rt_application_init()
 {
     /* 创建线程1 */
-    tid1 = rt_thread_create("t1", /* 线程1的名称是t1 */
+    tid1 = rt_thread_create("t1", /* 线程的名称是t1 */
         thread1_entry, RT_NULL,   /* 入口是thread1_entry，参数是RT_NULL */
         THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
     if (tid1 != RT_NULL) /* 如果获得线程控制块，启动这个线程 */
@@ -480,8 +480,8 @@ int rt_application_init()
     else
         return -1;
 
-    /* 创建线程1 */
-    tid2 = rt_thread_create("t2", /* 线程1的名称是t2 */
+    /* 创建线程2 */
+    tid2 = rt_thread_create("t2", /* 线程的名称是t2 */
         thread2_entry, RT_NULL,   /* 入口是thread2_entry，参数是RT_NULL */
         THREAD_STACK_SIZE, THREAD_PRIORITY - 1, THREAD_TIMESLICE);
     if (tid2 != RT_NULL) /* 如果获得线程控制块，启动这个线程 */
