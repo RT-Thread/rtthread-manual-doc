@@ -1,2 +1,0 @@
-% RT-Thread Programming Manual
-% RT-Thread Studio
