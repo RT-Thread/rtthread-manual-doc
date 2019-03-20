@@ -1,2 +1,0 @@
-% RT-Thread Programming Guide
-% RT-Thread Development Team

@@ -1,9 +1,0 @@
----
-  name: rtthread_manual 
-  build: pdf,html
-  lang: zh
-  license: ccbyncnd30
-  config: latex/config.yml
-  template: latex/template.tex
-  preface-files: 0preface/*.md
-  chapter-files: 1chapters/*.md
