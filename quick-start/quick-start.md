@@ -10,7 +10,7 @@ Next, we will select the MDK-ARM integrated development environment as the targe
 
 ## Preparation 
 
-MDK development environment: MDK-ARM 5.24 (official or evaluation version, version 5.14 and above) needs to be installed. This version is also a relatively new version, which can provide relatively complete debugging functions. How to install can be referred to the  [Keil MDK Installation](../keil-installation/keil-installation.md). 
+MDK development environment: MDK-ARM 5.24 (official or evaluation version, version 5.14 and above) needs to be installed. This version is also a relatively new version, which can provide relatively complete debugging functions. How to install can be referred to the  [Keil MDK Installation](./keil-installation/keil-installation.md). 
 
 ## First acquaintance with RT-Thread
 
