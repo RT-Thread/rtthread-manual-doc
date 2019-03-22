@@ -16,7 +16,7 @@ MDK development environment: MDK-ARM 5.24 (official or evaluation version, versi
 
 As an operating system, what is the code size of RT-Thread? Before we can figure this out, the first thing we need to do is to get an example of RT-Thread that corresponds to this manual. This example can be obtained from the following link:
 
-[RT-Thread Simulator Sample](./rtthread_simulator_v0.1.0.7z)
+[RT-Thread Simulator Sample](./rtthread_simulator_v0.1.0.zip)
 
 This example is a zip file, unzip it. Here, we decompressed it to D:/. The directory structure after decompression is as shown below:
 
