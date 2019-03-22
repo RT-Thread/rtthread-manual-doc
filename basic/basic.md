@@ -84,7 +84,7 @@ int $Sub$$main(void)
 
 Here, the`$Sub$$main`function simply calls the rtthread_startup() function. RT-Thread allows multiple platforms and multiple compilers, and the rtthread_startup() function is a uniform entry point specified by RT-Thread, so the `$Sub$$main` function simply only needs to call the rtthread_startup() function (RT-Thread compiled using compiler GNU GCC is an example where it jumps directly from the assembly startup code section to the rtthread_startup() function and start the execution of the first C code). The rtthread_startup() function can be found in the code of components.c, the startup process of RT-Thread is as shown below:
 
-![系统启动流程](figures/03Startup_process.png)
+![System startup process](figures/03Startup_process.png)
 
 Code for the rtthread_startup() function is as follows:
 
