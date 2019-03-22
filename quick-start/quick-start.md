@@ -1,4 +1,4 @@
-# Keil Simulator STM32F103 Start Guide
+# Start Guide: Simulate STM32F103 on keil simulator
 
 Because of its particularity, the embedded operating system is often closely related to the hardware platform. Specific embedded operating system can only run on specific hardware. For those who are new to the RT-Thread operating system, it is not easy to get a hardware module that is compatible with the RT-Thread operating system. However, with the development of computer technology, we can use software to simulate a  hardware module that has the ability to run RT-Thread operating system. This is the simulation environment called MDK-ARM produced by the company ARM. 
 
@@ -10,9 +10,9 @@ Next, we will select the MDK-ARM integrated development environment as the targe
 
 ## Preparation 
 
-MDK development environment: MDK-ARM 5.24 (official or evaluation version, version 5.14 and above) needs to be installed. This version is also a relatively new version, which can provide relatively complete debugging functions. How to install can be referred to the  [Keil MDK Installation](../keil/keil.md). 
+MDK development environment: MDK-ARM 5.24 (official or evaluation version, version 5.14 and above) needs to be installed. This version is also a relatively new version, which can provide relatively complete debugging functions. How to install can be referred to the  [Keil MDK Installation](../keil-installation/keil-installation.md). 
 
-## First Look at RT-Thread
+## First acquaintance with RT-Thread
 
 As an operating system, what is the code size of RT-Thread? Before we can figure this out, the first thing we need to do is to get an example of RT-Thread that corresponds to this manual. This example can be obtained from the following link:
 
@@ -58,7 +58,7 @@ Now let's click the button from the toolbar on the top the window,![img](./figur
 
 ![编译工程](./figures/9.png)
 
-The result of the compilation is displayed in the "Build" bar at the bottom of the window. If nothing else, it will say "0 Error(s), * Warning(s)." on the last line, that is, there are no errors or warnings.
+The result of the compilation is displayed in the "Build Output" bar at the bottom of the window. If nothing else, it will say "0 Error(s), * Warning(s)." on the last line, that is, there are no errors or warnings.
 
 After compiling RT-Thread/STM32, we can simulate running RT-Thread through the MDK-ARM simulator. Click ![img](./figures/debug.jpg)at the top right of the window or directly hit Ctrl+F5 to enter the simulation interface and hit F5 to start, then click the button in the toolbar shown in the screen shot or select “View→Serial Windows→UART#1” in the menu bar to open the serial port 1 window. You can see that the output of the serial port only shows the LOGO of RT-Thread. This is because the user code is empty and the result of its simulation is as shown:
 
