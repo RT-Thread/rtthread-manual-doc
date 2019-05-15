@@ -5,4 +5,5 @@
 * [Kernel Basics](basic/basic.md)
 * [Thread Management](thread/thread.md)
 * [Clock&Timer Management](timer/timer.md)
+* [Thread Synchronization](thread-sync/thread-sync.md)
 
