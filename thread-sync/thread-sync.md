@@ -1,4 +1,4 @@
-Thread Synchronization
+Inter-thread Synchronization
 ==========
 
 In a multi-threaded real-time system, the completion of a task can often be accomplished through coordination of multiple threads, so how do these multiple threads collaborate well with each other to perform without errors? Here is an example.
@@ -574,7 +574,7 @@ Semaphore can also be easily applied to interrupting synchronization between thr
 The value of the semaphore is initially 0. When the FinSH thread attempts to obtain the semaphore, it will be suspended because the semaphore value is 0. When the console device has data input, an interrupt is generated to enter the interrupt service routine. In the interrupt service routine, it reads the data of the console device, puts the read data into the UART buffer for buffering, and then releases the semaphore. The semaphore release will wake up the shell thread. After the interrupt service routine has finished, if there are no ready threads with higher priority than the shell thread in the system, the shell thread will hold the semaphore and run, obtaining the input data from the UART buffer.
 
 !!! note "NOTE"
-    The mutual exclusion between interrupts and threads cannot be done by means of semaphores (locks), but by means of switch interrupts.
+​    The mutual exclusion between interrupts and threads cannot be done by means of semaphores (locks), but by means of switch interrupts.
 
 #### Resource Count
 
@@ -1007,7 +1007,7 @@ test OK.
 The routine demonstrates how to use the mutex. Thread 3 holds the mutex first, and then thread 2 tries to hold the mutex, at which point thread 3's priority is raised to the same level as thread 2.
 
 !!! note "NOTE"
-    It is important to remember that mutexes cannot be used in interrupt service routines.
+​    It is important to remember that mutexes cannot be used in interrupt service routines.
 
 ### Occasions to Use Mutex
 
