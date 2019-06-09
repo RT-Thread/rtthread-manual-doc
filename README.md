@@ -8,4 +8,5 @@
 * [Inter-thread Synchronization](thread-sync/thread-sync.md)
 * [Inter-thread Communication](thread-comm/thread-comm.md)
 * [Memory Management](memory/memory.md)
+* [Interrupt Management](interrupt/interrupt.md)
 
