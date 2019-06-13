@@ -99,7 +99,7 @@ Note the [WEAK] after the code, which is the symbol weakening identifier. The sy
 
 Take the SysTick interrupt as an example. In the system startup code, you need to fill in the SysTick_Handler interrupt entry function, and then implement the function to respond to the SysTick interrupt. The interrupt handler function sample program is as follows:
 
-```{.c}
+```c
 void SysTick_Handler(void)
 {
     /* enter interrupt */
@@ -128,7 +128,7 @@ For Cortex-M, this part of work is done automatically by hardware. When an inter
 
 2) Inform the kernel to enter the interrupt state, call the rt_interrupt_enter() function, and add 1 to the global variable rt_interrupt_nest to record the number of levels of interrupt nesting. The code is as follows.
 
-```{.c}
+```c
 void rt_interrupt_enter(void)
 {
     rt_base_t level;
@@ -155,7 +155,7 @@ The main work done by interrupt follow-up procedure is:
 
 1） Inform the kernel to leave the interrupt state and reduce the global variable rt_interrupt_nest by 1 through calling the rt_interrupt_leave() function. The code is as follows.
 
-```{.c}
+```c
 void rt_interrupt_leave(void)
 {
     rt_base_t level;
@@ -196,7 +196,7 @@ In order to illustrate the implementation of the bottom half processing in RT-Th
 
 The program in this example creates an nwt thread that will block on the nw_bh_sem signal after it starts to run. Once this semaphore is released, the next nw_packet_parser process will be executed to begin the *Bottom Half* event processing.
 
-```{.c}
+```c
 /*
  * program list: interrupt bottom half processing example
  */
@@ -240,7 +240,7 @@ int main(void)
 
 Let's take a look at how Top Half is handled in demo_nw_isr and how Bottom Half is opened, as in the following example.
 
-```{.c}
+```c
 void demo_nw_isr(int vector, void *param)
 {
     /* When the network device receives the data, it is met with an interrupt exception and starts executing this ISR. */
@@ -269,7 +269,7 @@ In order to isolate the operating system from the underlying exceptions and inte
 
 The system associates the user's interrupt handler with the specified interrupt number. You can call the following interface to mount a new interrupt service routine:
 
-```{.c}
+```c
 rt_isr_handler_t rt_hw_interrupt_install(int vector,
                                         rt_isr_handler_t  handler,
                                         void *param,
@@ -300,7 +300,7 @@ Usually before the ISR is ready to process an interrupt signal, we need to mask 
 
 Masking the interrupt source ensures that the hardware state or data will not be disturbed during the following processing. The following function interface can be called:
 
-```{.c}
+```c
 void rt_hw_interrupt_mask(int vector);
 ```
 
@@ -317,7 +317,7 @@ Input parameters of rt_hw_interrupt_mask()
 
 In order to avoid losing the hardware interrupt signal as much as possible, the following function interface can be called to enable the blocked interrupt source:
 
-```{.c}
+```c
 void rt_hw_interrupt_umask(int vector);
 ```
 
@@ -336,7 +336,7 @@ Input parameters of rt_hw_interrupt_umask()
 
 The global interrupt switch, also known as the interrupt lock, is the easiest way to disable multi-threaded access to critical sections by shutting down the interrupts to ensure that the current thread is not interrupted by other events (because the entire system no longer responds to those external events that could trigger a thread rescheduling), that is, the current thread will not be preempted unless the thread voluntarily gives up control of the processor. When you need to shut off the interrupt of the entire system , you can call the following function interface:
 
-```{.c}
+```c
 rt_base_t rt_hw_interrupt_disable(void);
 ```
 
@@ -350,7 +350,7 @@ The following table describes the return values for this function:
 
 To resume interrupt can also be understood as turn on an interrupt. The rt_hw_interrupt_enable() function is used to "enable" interrupts, which resumes the interrupt state before the rt_hw_interrupt_disable() function is called. If the interrupt state is turned off before the rt_hw_interrupt_disable() function is called, then the interrupt state is still turned off after calling this function. Resuming interrupts are often used in pairs with turning off interrupts. The function interface called is as follows:
 
-```{.c}
+```c
 void rt_hw_interrupt_enable(rt_base_t level);
 ```
 
@@ -366,7 +366,7 @@ The following table describes the input parameters for this function:
 
 For example, to ensure that a line of code (such as assignments) is running mutually exclusively , the quickest way is to use interrupt locks instead of semaphores or mutexes:
 
-```{.c}
+```c
     /* turn off the interrupt */
     level = rt_hw_interrupt_disable();
     a = a + value;
@@ -376,7 +376,7 @@ For example, to ensure that a line of code (such as assignments) is running mutu
 
 When using an interrupt lock, you need to ensure that the interrupt is turned off for a very short time, such as a = a + value in the above code; you can also switch to another method, such as using semaphores:
 
-```{.c}
+```c
     /* get semaphore lock */
     rt_sem_take(sem_lock, RT_WAITING_FOREVER);
     a = a + value;
@@ -392,7 +392,7 @@ In RT-Thread, the API for switching global interrupts supports multi-level nesti
 
 Simple nested interrupt use
 
-```{.c}
+```c
 #include <rthw.h>
 
 void global_interrupt_demo(void)
@@ -420,7 +420,7 @@ This feature can bring great convenience to the development of the code. For exa
 
 When the entire system is interrupted by an interrupt and enters the interrupt handler function, it needs to inform the kernel that it has entered the interrupt state. In this case, the following interfaces can be used:
 
-```{.c}
+```c
 void rt_interrupt_enter(void);
 void rt_interrupt_leave(void);
 ```
@@ -437,7 +437,7 @@ However, if the interrupt service routine does not call kernel-related functions
 
 In the upper application, the rt_interrupt_get_nest() interface is called when the kernel needs to know that it has entered the interrupt state or the currently nested interrupt depth. It will return rt_interrupt_nest. as follows:
 
-```{.c}
+```c
 rt_uint8_t rt_interrupt_get_nest(void);
 ```
 
@@ -454,7 +454,7 @@ Interrupt and Polling
 
 When the drive peripheral is working, whether the programming mode is triggered by interrupt mode or polling mode is often the first problem to be considered by the driver developer, and there is a difference between the real-time operating system and the time-sharing operating system when it comes to this problem.  Because the polling mode itself adopts the sequential execution mode:  corresponding processing is done after finding corresponding event.   Therefore, the polling mode is relatively simple and clear in terms of implementation. For example, to write data to the serial port, the program code writes the next data only when the serial controller finishes writing a data (otherwise the data is discarded). The corresponding code can look like this:
 
-```{.c}
+```c
 /* polling mode writes data to the serial port */
     while (size)
     {
@@ -490,7 +490,7 @@ This is an interrupted application routine: when multiple threads access the sam
 
 Use switch interrupts to access global variables  
 
-```{.c}
+```c
 #include <rthw.h>
 #include <rtthread.h>
 
