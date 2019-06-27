@@ -10,4 +10,12 @@
 * [Memory Management](memory/memory.md)
 * [Interrupt Management](interrupt/interrupt.md)
 * [Kernel-Porting](kernel-porting/kernel-porting.md)
+* [I/O Device Framework](device/device.md)
+* [PIN Device](device/pin/pin.md)
+* [ADC Device](device/adc/adc.md)
+* [I2C Device](device/i2c/i2c.md)
+* [SPI Device](device/spi/spi.md)
+* [PWM Device](device/pwm/pwm.md)
+* [RTC Device](device/rtc/rtc.md)
+* [HWTIMER Device](device/hwtimer/hwtimer.md)
 

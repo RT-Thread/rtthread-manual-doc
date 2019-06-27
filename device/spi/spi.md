@@ -576,7 +576,7 @@ rt_err_t rt_qspi_send_then_recv(struct rt_qspi_device *device,
 
 The send_buf parameter contains the sequence of commands that will be sent.
 
-### Receive Data
+### Send Data
 
 ```c
 rt_err_t rt_qspi_send(struct rt_qspi_device *device, const void *send_buf, rt_size_t length)
@@ -612,7 +612,7 @@ rt_err_t rt_spi_take_bus(struct rt_spi_device *device);
 | RT_EOK   | Successful |
 | Other Errors | Failed     |
 
-### Select the CS
+### Select CS
 
 After obtaining the usage right of the bus from the device, you need to set the corresponding chip selection signal to be valid. You can use the following function to select the CS:
 
