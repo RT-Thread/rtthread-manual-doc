@@ -68,7 +68,7 @@ Use Python-based [scons](http://www.scons.org) for command-line builds.
 **Get the Env Tool**: To better help developers, the RT-Thread team also provides Env tools (or Env scripts for Linux/MacOS). On Windows, Env tool is a development assistant tool launched by RT-Thread. It provides compiling and building environment, graphical system configuration and software package management functions for project projects based on RT-Thread operating system. Its built-in menuconfig provides a simple and easy-to-use configuration tailoring tool, which can tailor the kernel, components and software packages freely, so that the system can be built in the way of building blocks.
 
 - [Download Env Tool]()
-- [Env User manual]()
+- [User manual of Env](env/env.md)
 
 # Getting Started
 
