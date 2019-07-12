@@ -32,6 +32,7 @@
 - [HWTIMER Device](device/hwtimer/hwtimer.md)
 - [WATCHDOG Device](device/watchdog/watchdog.md)
 - [WLAN Device](device/wlan/wlan.md)
+- [Sensor Device](device/sensor/sensor.md)
 
 **Components**
 
