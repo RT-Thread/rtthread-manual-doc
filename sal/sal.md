@@ -1,4 +1,4 @@
-# SAL Socket Abstraction Layer
+# Socket Abstraction Layer: SAL
 
 ## SAL Introduction
 

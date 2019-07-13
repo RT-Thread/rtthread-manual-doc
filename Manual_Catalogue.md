@@ -1,7 +1,7 @@
 # RT-Thread Programming-Manual(En)
 
-- [Introduction](introduction/introduction.md)
-- [Quick Start](quick-start/quick-start.md)
+- [RT-Thread Introduction](introduction/introduction.md)
+- [Start Guide: Simulate STM32F103 on KEIL simulator](quick-start/quick-start.md)
 
 **Kernel**
 
@@ -12,7 +12,7 @@
 - [Inter-thread Communication](thread-comm/thread-comm.md)
 - [Memory Management](memory/memory.md)
 - [Interrupt Management](interrupt/interrupt.md)
-- [Kernel-Porting](kernel-porting/kernel-porting.md)
+- [Kernel Porting](kernel-porting/kernel-porting.md)
 
 **Tool**
 
@@ -25,7 +25,7 @@
 - [PIN Device](device/pin/pin.md)
 - [UART Device](device/uart/uart.md)
 - [ADC Device](device/adc/adc.md)
-- [I2C Device](device/i2c/i2c.md)
+- [I2C Bus Device](device/i2c/i2c.md)
 - [SPI Device](device/spi/spi.md)
 - [PWM Device](device/pwm/pwm.md)
 - [RTC Device](device/rtc/rtc.md)
@@ -36,24 +36,16 @@
 
 **Components**
 
-- [FinSH](finsh/finsh.md)
-
+- [FinSH Console](finsh/finsh.md)
 - [Virtual File System](filesystem/filesystem.md)
-
 - [utest Framework](utest/utest.md)
-
 - [Dynamic Module: dlmodule](dlmodule/dlmodule.md)
-
-- [SAL Socket Abstraction Layer](sal/sal.md)
-
+- [Socket Abstraction Layer: SAL](sal/sal.md)
 - [AT Commands](at/at.md)
-
 - [POSIX Interface](posix/posix.md)
-
 - [Ulog Log](ulog/ulog.md)
-
-  
-
+- [Power Management: PM](pm/pm.md)
+- [Network Framework](network/network.md)
 
 
 
