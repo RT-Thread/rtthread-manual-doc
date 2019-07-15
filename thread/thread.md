@@ -121,7 +121,7 @@ Each thread has a time slice parameter, but time slice is only valid for ready-s
 
 "Entry" in Thread Control Block is the thread's entry function, which is a function for the thread to achieve intended functionality. The thread's entry function is designed by the user. There are generally two forms of code:
 
--**Infinite Loop Mode：**
+**Infinite Loop Mode**：
 
 In real-time systems, threads are usually passive: this is determined by the characteristics of the real-time system, which usually waits for external events to occur, and then performs the appropriate services:
 
@@ -139,9 +139,9 @@ void thread_entry(void* paramenter)
 
 It seems that threads have no restrictions on program execution and that all operations can be performed. But as a real-time system, a real-time system with clear priorities, if a program in a thread is stuck in an infinite loop, then threads with a lower priorities will not be executed. Therefore, one thing that must be noted in the real-time operating system is that the thread cannot be stuck in an infinite loop operation, and there must be an action to relinquish the use of the CPU, such as calling a delay function in the loop or actively suspending. The purpose of user designing a infinite loop thread is to let this thread be continuously scheduled and run by the system and never be deleted.
 
--**Sequential Execution or Finite-Cycle Mode: **
+**Sequential Execution or Finite-Cycle Mode**: 
 
-Such as simple sequential statements, do whlie () or for () loop, etc., these threads will not cycle or permanently loop. They can be described as a "one-off" threads and will surely be executed. After the execution is complete, the thread will be automatically deleted by the system.
+Such as simple sequential statements, do `whlie()` or `for()` loop, etc., these threads will not cycle or permanently loop. They can be described as a "one-off" threads and will surely be executed. After the execution is complete, the thread will be automatically deleted by the system.
 
 ```c
 static void thread_entry(void* paraemter)

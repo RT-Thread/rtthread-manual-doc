@@ -1,5 +1,4 @@
-Inter-thread Synchronization
-==========
+# Inter-thread Synchronization
 
 In a multi-threaded real-time system, the completion of a task can often be accomplished through coordination of multiple threads, so how do these multiple threads collaborate well with each other to perform without errors? Here is an example.
 
@@ -569,7 +568,7 @@ Locks, a single lock is often applied to multiple threads accessing the same sha
 
 Semaphore can also be easily applied to interrupting synchronization between threads, such as an interrupt trigger. When interrupting service routine, thread needs to be notifies to perform corresponding data processing. At this time, the initial value of the semaphore can be set to 0. When the thread tries to hold this semaphore, since the initial value of the semaphore is 0, the thread will then suspends on this semaphore until the semaphore is released. When the interrupt is triggered, hardware-related actions are firstly performed, such as reading corresponding data from the hardware I/O port, and confirming the interrupt to clear interrupt source, and then releasing a semaphore to wake up the corresponding thread for subsequent data processing. For example, the processing of FinSH threads is as shown in the following figure.
 
-![FinSH Interrupt, Inter-thread Synchronization Diagram](figures/06inter_ths_commu2.png)
+![sync between ISR and FinSH thread](figures/06inter_ths_commu2.png)
 
 The value of the semaphore is initially 0. When the FinSH thread attempts to obtain the semaphore, it will be suspended because the semaphore value is 0. When the console device has data input, an interrupt is generated to enter the interrupt service routine. In the interrupt service routine, it reads the data of the console device, puts the read data into the UART buffer for buffering, and then releases the semaphore. The semaphore release will wake up the shell thread. After the interrupt service routine has finished, if there are no ready threads with higher priority than the shell thread in the system, the shell thread will hold the semaphore and run, obtaining the input data from the UART buffer.
 
