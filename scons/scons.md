@@ -40,7 +40,7 @@ If it is a chip on the ARM platform, you can use the Env tool and enter the scon
 
 If the user wants to use another compiler that the BSP already supports to compile the project, or if the BSP is a non-ARM platform chip, then you can't compile the project directly with the scons command. You need to install the corresponding compiler yourself and specify the compiler path to use. Before compiling the project, you can use the following two commands in the Env command line interface to specify the compiler path for the MDK and the compiler path to MDK.
 
-```{.c}
+```c
 set RTT_CC=keil
 set RTT_EXEC_PATH=C:/Keilv5
 ```
@@ -64,7 +64,7 @@ Clear the compilation target. This command clears the temporary and target files
 
 If you use mdk/iar for project development, when you open or close some components, you need to use one of the following commands to regenerate the corresponding customized project, then compile and download in mdk/iar.
 
-```{.c}
+```c
 scons --target=iar
 scons --target=mdk4
 scons --target=mdk5
@@ -74,7 +74,7 @@ In the Env command line window, enter the BSP project directory to be compiled. 
 
 Under `bsp/simulator` directory , you can use the following command to generate a project for vs2012 or a project for vs2005.
 
-```{.c}
+```c
 scons --target=vs2012
 Scons --target=vs2005
 ```
@@ -99,7 +99,7 @@ Build a project framework. Using this command will generate the `dist` directory
 
 By default, output compiled with the scons command does not display compilation parameters as follows:
 
-```{.c}
+```c
 D:\repository\rt-thread\bsp\stm32f10x>scons
 scons: Reading SConscript files ...
 scons: done reading SConscript files.
@@ -113,7 +113,7 @@ CC build\components\drivers\serial\serial.o
 
 The effect of using the scons –verbose command is as follows:
 
-```{.c}
+```c
 armcc -o build\src\mempool.o -c --device DARMSTM --apcs=interwork -ID:/Keil/ARM/
 RV31/INC -g -O0 -DUSE_STDPERIPH_DRIVER -DSTM32F10X_HD -Iapplications -IF:\Projec
 t\git\rt-thread\applications -I. -IF:\Project\git\rt-thread -Idrivers -IF:\Proje
@@ -194,7 +194,7 @@ Below we will use a few SConscript as an example to explain how to use the scons
 
 Let's start with the SConcript file in the stm32f10x-HAL BSP directory. This file manages all the other SConscript files under the BSP, as shown below.
 
-```{.c}
+```c
 import os
 cwd = str(Dir('#'))
 objs = []
@@ -222,7 +222,7 @@ With this SConscript file, the source code required by the BSP project is added 
 
 So what about stm32f10x-HAL BSP other SConcript files? Let's take a look at the SConcript file in the drivers directory, which will manage the source code under the drivers directory. The drivers directory is used to store the underlying driver code implemented by the driver framework provided by RT-Thread.
 
-```{.c}
+```c
 Import('rtconfig')
 from building import *
 
@@ -278,7 +278,7 @@ The last line uses DefineGroup to create a group called Drivers, which correspon
 
 Let's take a look at the SConcript file in the applications directory, which will manage the source code under the applications directory for the user's own application code.
 
-```{.c}
+```c
 from building import *
 
 cwd = GetCurrentDir()
@@ -302,7 +302,7 @@ To sum up, this source program will add all c programs in the current directory 
 
 Below is the contents of the RT-Thread source code `component/finsh/SConscript` file, which will manage the source code under the finsh directory.
 
-```{.c}
+```c
 Import('rtconfig')
 from building import *
 
@@ -404,7 +404,7 @@ Take also hello.c and hello.h mentioned above for example, these two files will 
 
 Noticed that there is an additional SConscript file in the folder. If you want to add some of your own source code to the SCons build environment, you can usually create or modify an existing SConscript file. Refer to the above analysis of the SConscript file for the RT-Thread source code. The contents of this new hello module SConscript file are as follows:
 
-```{.c}
+```c
 from building import *
 
 cwd          = GetCurrentDir()
@@ -466,7 +466,7 @@ The above simply enumerates the configuration options for adding your own module
 
 If you want to add an extra library to your project, you need to pay attention to the naming of the binary library by different toolchains. For example, the GCC toolchain, which recognizes library names such as `libabc.a`, specifies `abc` instead of `libabc` when specifying a library. So you need to pay special attention to the SConscript file when linking additional libraries. In addition, when specifying additional libraries, it is also a good idea to specify the corresponding library search path. Here is an example:
 
-```{.c}
+```c
 Import('rtconfig')
 from building import *
 
@@ -491,7 +491,7 @@ LIBPATH specifies the path to the library, and LIBS specifies the name of the li
 
 When we compile the project using the scons command, the project is compiled according to the compiler configuration options of `rtconfig.py`. The following code is part of the rtconfig.py code in the stm32f10x-HAL BSP directory.
 
-```{.c}
+```c
 import os
 
 # toolchains options
@@ -572,7 +572,7 @@ Suppose a compiler is installed under `D:\Dir1\Dir2`. The following are the corr
 
 If the rtconfig.py file has the following code, comment out the following code when configuring your own compiler.
 
-```{.c}
+```c
 if os.getenv('RTT_CC'):
 	CROSS_TOOL = os.getenv('RTT_CC')
 ... ...

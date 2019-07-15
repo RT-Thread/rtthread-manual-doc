@@ -86,9 +86,7 @@ There are three modes of uart data receiving and sending: interrupt mode, pollin
 
 The DMA (Direct Memory Access) transfer mode does not require the CPU to directly control the transfer, and does not have the process of reserving the scene and restoring the scene as they have in the interrupt processing mode. The DMA controller opens a path for directly transferring data to the RAM and the I/O device, which saves CPU resources to do other things. Using DMA transfer can continuously acquire or send a piece of information without taking up interrupts or delays, which is useful when communication is frequent or when large pieces of information are to be transmitted.
 
-!!! note "Precautions"
-
-     * RT_DEVICE_FLAG_STREAM: Stream mode is used to output a string to the serial terminal: when the output character is `"\n"` (corresponding to the hexadecimal value 0x0A), a ``\r"` is automatically output in front (corresponding to hexadecimal value is 0x0D).
+>RT_DEVICE_FLAG_STREAM: Stream mode is used to output a string to the serial terminal: when the output character is `"\n"` (corresponding to the hexadecimal value 0x0A), a ``\r"` is automatically output in front (corresponding to hexadecimal value is 0x0D).
 
 The stream mode `RT_DEVICE_FLAG_STREAM` can be used with the receive and send mode parameter with the "|" logic.
 
@@ -211,8 +209,7 @@ The configuration parameters provided by RT-Thread can be defined as the followi
 
 When the uart device is opened using interrupt receive mode, the uart driver framework will open a buffer according to the size of RT_SERIAL_RB_BUFSZ to save the received data. When the underlying driver receives a data, it will put the data into the buffer in the interrupt service program.
 
-!!! note "Precautions"
-     The default size of the receive data buffer is 64 bytes.  If the number of received data in one-time is too large and the data is not read in time, the data of the buffer will be overwritten by the newly received data, resulting in data loss. It is recommended to increase the buffer.
+>The default size of the receive data buffer is 64 bytes.  If the number of received data in one-time is too large and the data is not read in time, the data of the buffer will be overwritten by the newly received data, resulting in data loss. It is recommended to increase the buffer.
 
 A sample for configuring uart hardware parameters such as data bits, check bits, stop bits, and so on are shown below：
 

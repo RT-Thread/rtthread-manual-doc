@@ -23,7 +23,7 @@ When you want to use the dynamic modules in your system, you need to compile a f
 
 When you want to use the dynamic module, you need to open the corresponding option in the firmware configuration, use menuconfig to open the following configuration:
 
-```{.c}
+```c
    RT-Thread Components  --->
        POSIX layer and C standard library  --->
 	       [*] Enable dynamic module with dlopen/dlsym/dlclose feature
@@ -31,7 +31,7 @@ When you want to use the dynamic module, you need to open the corresponding opti
 
 Also open the configuration options of the file system:
 
-```{.c}
+```c
    RT-Thread Components  --->
         Device virtual file system  --->
 	           [*] Using device virtual file system
@@ -106,7 +106,7 @@ After entering the console command line, enter the directory where the `rtthread
 
 Use follow commands on Windows in Env tool(assuming the BSP used is qemu-vexpress-a9):
 
-```{.c}
+```c
 set RTT_ROOT=d:\your_rtthread
 set BSP_ROOT=d:\your_rtthread\bsp\qemu-vexpress-a9
 ```
@@ -129,7 +129,7 @@ After compiling successfully, it will generate the `lib.so` file in the `rtthrea
 
 We can put these `mo` and `so` files under the RT-Thread file system. Under msh, you can simply execute the  `hello.mo`  dynamic module as a `hello` command:
 
-```{.c}
+```c
 msh />ls
 Directory /:
 hello.mo            1368
@@ -140,7 +140,7 @@ msh />Hello, world
 
 After calling hello, the main function in `hello.mo` will be executed, and the corresponding dynamic module will be exited after execution. The code for `hello/main.c` is as follows:
 
-```{.c}
+```c
 #include <stdio.h>
 
 int main(int argc, char *argv[])
@@ -157,7 +157,7 @@ In addition to dynamically loading and executing dynamic modules via msh, dynami
 
 ### Load Dynamic Module
 
-```{.c}
+```c
 struct rt_dlmodule *dlmodule_load(const char* pgname);
 ```
 
@@ -172,7 +172,7 @@ This function loads the dynamic module from the file system into memory, and if 
 
 ### Execute Dynamic Module
 
-```{.c}
+```c
 struct rt_dlmodule *dlmodule_exec(const char* pgname, const char* cmd, int cmd_size);
 ```
 
@@ -189,7 +189,7 @@ This function loads the dynamic module according to the  `pgname` path and start
 
 ### Exit Dynamic Module
 
-```{.c}
+```c
 void dlmodule_exit(int ret_code);
 ```
 
@@ -201,7 +201,7 @@ This function is called by the module runtime, it can set the return value of th
 
 ### Find Dynamic Modules
 
-```{.c}
+```c
 struct rt_dlmodule *dlmodule_find(const char *name);
 ```
 
@@ -216,7 +216,7 @@ This function uses `name` to find out if there is already a dynamic module loade
 
 ### Return Dynamic Module
 
-```{.c}
+```c
 struct rt_dlmodule *dlmodule_self(void);
 ```
 
@@ -229,7 +229,7 @@ This function returns a pointer of the dynamic module in the calling context.
 
 ### Find Symbol
 
-```{.c}
+```c
 rt_uint32_t dlmodule_symbol_find(const char *sym_str);
 ```
 
@@ -248,7 +248,7 @@ The POSIX standard libdl API is also supported in RT-Thread dlmodule. It is simi
 
 ### Open Dynamic Library
 
-```{.c}
+```c
 void * dlopen (const char * pathname, int mode);
 ```
 
@@ -264,7 +264,7 @@ This function is similar to the `dlmodule_load` , which loads the dynamic librar
 
 ### Find Symbol
 
-```{.c}
+```c
 void* dlsym(void *handle, const char *symbol);
 ```
 

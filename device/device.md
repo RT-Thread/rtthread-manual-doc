@@ -99,7 +99,7 @@ When the system serves a write operation with a large amount of data, the device
 
 The driver layer is responsible for creating device instances and registering them in the I/O Device Manager. You can create device instances in a statically declared manner or dynamically create them with the following interfaces:
 
-```{.c}
+```c
 rt_device_t rt_device_create(int type, int attach_size);
 ```
 
@@ -140,7 +140,7 @@ A description of each method of operation is shown in the following table:
 
 When a dynamically created device is no longer needed, it can be destroyed using the following function:
 
-```{.c}
+```c
 void rt_device_destroy(rt_device_t device);
 ```
 
@@ -150,7 +150,7 @@ void rt_device_destroy(rt_device_t device);
 
 After the device is created, it needs to be registered to the I/O Device Manager for the application to access. The functions for registering the device are as follows: 
 
-```{.c}
+```c
 rt_err_t rt_device_register(rt_device_t dev, const char* name, rt_uint8_t flags);
 ```
 
@@ -163,8 +163,7 @@ rt_err_t rt_device_register(rt_device_t dev, const char* name, rt_uint8_t flags)
 | RT_EOK     | registration success |
 | -RT_ERROR | registration failed, dev is empty or name already exists |
 
-!!! note "NOTE"
-    It should be avoided to repeatedly register registered devices and to register devices with the same name. 
+>It should be avoided to repeatedly register registered devices and to register devices with the same name. 
 
 flags parameters support the following parameters (multiple parameters can be supported in OR logic):
 
@@ -200,7 +199,7 @@ msh />
 
 When the device is logged off, the device will be removed from the device manager and the device will no longer be found through the device. Logging out of the device does not release the memory occupied by the device control block. The function to log off of the device is as follows:
 
-```{.c}
+```c
 rt_err_t rt_device_unregister(rt_device_t dev);
 ```
 
@@ -256,7 +255,7 @@ The application accesses the hardware device through the I/O device management i
 
 The application obtains the device handle based on the device name, which in turn allows the device to operate. To find device, use function below:
 
-```{.c}
+```c
 rt_device_t rt_device_find(const char* name);
 ```
 
@@ -271,7 +270,7 @@ rt_device_t rt_device_find(const char* name);
 
 Once the device handle is obtained, the application can initialize the device using the following functions:
 
-```{.c}
+```c
 rt_err_t rt_device_init(rt_device_t dev);
 ```
 
@@ -282,14 +281,13 @@ rt_err_t rt_device_init(rt_device_t dev);
 | RT_EOK   | device initialization succeeded |
 | Error Code | device initialization failed |
 
-!!! note "NOTE"
-    When a device has been successfully initialized, calling this interface will not repeat initialization.
+>When a device has been successfully initialized, calling this interface will not repeat initialization.
 
 ### Open and Close Device
 
 Through the device handle, the application can open and close the device. When the device is opened, it will detect whether the device has been initialized. If it is not initialized, it will call the initialization interface to initialize the device by default. Open the device with the following function:
 
-```{.c}
+```c
 rt_err_t rt_device_open(rt_device_t dev, rt_uint16_t oflags);
 ```
 
@@ -317,13 +315,11 @@ oflags supports the following parameters:
 #define RT_DEVICE_FLAG_DMA_TX 0x800   /* open the device in DMA mode */
 ```
 
-!!! note "NOTE"
-
-  If the upper application needs to set the device's receive callback function, it must open the device as RT_DEVICE_FLAG_INT_RX or RT_DEVICE_FLAG_DMA_RX, otherwise the callback function will not be called.
+>If the upper application needs to set the device's receive callback function, it must open the device as RT_DEVICE_FLAG_INT_RX or RT_DEVICE_FLAG_DMA_RX, otherwise the callback function will not be called.
 
 After the application opens the device to complete reading and writing, if no further operations are needed, you can close the device using the following functions:
 
-```{.c}
+```c
 rt_err_t rt_device_close(rt_device_t dev);
 ```
 
@@ -335,14 +331,13 @@ rt_err_t rt_device_close(rt_device_t dev);
 | \-RT_ERROR | device has been completely closed and cannot be closed repeatedly |
 | Other Error Code | failed to close device |
 
-!!! note "NOTE"
-    Device interfaces `rt_device_open()` and  `rt_device_close()` need to used in pairs. Open a device requires close the device, so that the device will be completely closed, otherwise the device will remain on.
+>Device interfaces `rt_device_open()` and  `rt_device_close()` need to used in pairs. Open a device requires close the device, so that the device will be completely closed, otherwise the device will remain on.
 
 ### Control Device
 
 By commanding the control word, the application can also control the device with the following function:
 
-```{.c}
+```c
 rt_err_t rt_device_control(rt_device_t dev, rt_uint8_t cmd, void* arg);
 ```
 
@@ -371,7 +366,7 @@ The generic device command for the parameter `cmd` can be defined as follows:
 
 Application can read data from the device by the following function:
 
-```{.c}
+```c
 rt_size_t rt_device_read(rt_device_t dev, rt_off_t pos,void* buffer, rt_size_t size);
 ```
 
@@ -389,7 +384,7 @@ Calling this function will read the data from the dev device and store it in the
 
 Writing data to the device can be done by the following function:
 
-```{.c}
+```c
 rt_size_t rt_device_write(rt_device_t dev, rt_off_t pos,const void* buffer, rt_size_t size);
 ```
 
@@ -409,7 +404,7 @@ Calling this function will write the data in the buffer to the *dev* device . Th
 
 When the hardware device receives the data, the following function can be used to call back another function to set the data receiving indication to notify the upper application thread that the data arrives:
 
-```{.c}
+```c
 rt_err_t rt_device_set_rx_indicate(rt_device_t dev, rt_err_t (*rx_ind)(rt_device_t dev,rt_size_t size));
 ```
 
@@ -424,7 +419,7 @@ The callback of this function will be provided by the user. When the hardware de
 
 When the application calls `rt_device_write()` to write data, if the bottom hardware can support automatic sending, the upper application can set a callback function. This callback function is called after the bottom hardware data has been sent (for example, when the DMA transfer is complete or the FIFO has been written to complete, triggered interrupt). Use the following function to set the device with a send completion indication. The function parameters and return values are as follows:
 
-```{.c}
+```c
 rt_err_t rt_device_set_tx_complete(rt_device_t dev, rt_err_t (*tx_done)(rt_device_t dev,void *buffer));
 ```
 

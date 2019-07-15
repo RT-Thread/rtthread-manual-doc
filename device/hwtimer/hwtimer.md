@@ -148,8 +148,7 @@ The command control words available for the hardware timer device are as follows
 
 Get the timer parameter arg,which is a pointer to the structure struct rt_hwtimer_info, to save the obtained information.
 
-!!! note "NOTE"
-     Setting frequency is valid only when the timer hardware and driver support sets the counting frequency. Generally, the default frequency of the driving setting can be used.
+>Setting frequency is valid only when the timer hardware and driver support sets the counting frequency. Generally, the default frequency of the driving setting can be used.
 
 When setting the timer mode, the parameter arg can take the following values：
 
@@ -311,8 +310,7 @@ hw_dev = rt_device_find(HWTIMER_DEV_NAME);
 rt_device_close(hw_dev);
 ```
 
-!!! note "NOTE"
-    Timing errors may occur. Assume that the counter has a maximum value of 0xFFFF, a counting frequency of 1Mhz, and a timing time of 1 second and 1 microsecond. Since the timer can only count up to 65535us at a time, the timing requirement for 1000001us can be completed 20 times at 50000us, and the calculation error will be 1us.
+>Timing errors may occur. Assume that the counter has a maximum value of 0xFFFF, a counting frequency of 1Mhz, and a timing time of 1 second and 1 microsecond. Since the timer can only count up to 65535us at a time, the timing requirement for 1000001us can be completed 20 times at 50000us, and the calculation error will be 1us.
 
 ## Hardware Timer Device Usage Example
 

@@ -33,5 +33,4 @@ Here, you can click "Finish" to complete the installation of the entire MDK-ARM 
 
 With a useful took like MDK-ARM, you can start the RT-Thread operating system easily and explore real-time operating systems.
 
-!!! tip "TIP"
-    Note: There is a charge for Official version of MDK-ARM. If you want to be able to compile larger binaries, please purchase the official version of MDK-ARM. RT-Thread operating system also supports GNU GCC compiler by Free Software Foundation which is an open source compiler. For more information on how to use GNU related tools, please refer to the related documentation on RT-Thread website.
+>Note: There is a charge for Official version of MDK-ARM. If you want to be able to compile larger binaries, please purchase the official version of MDK-ARM. RT-Thread operating system also supports GNU GCC compiler by Free Software Foundation which is an open source compiler. For more information on how to use GNU related tools, please refer to the related documentation on RT-Thread website.

@@ -91,8 +91,7 @@ now = time(RT_NULL);
 rt_kprintf("%s\n", ctime(&now));
 ```
 
-!!! note "Precaution"
-    Currently only one RTC device is allowed in the system and the name is `"rtc"`.
+>Currently only one RTC device is allowed in the system and the name is `"rtc"`.
 
 ## Functional Configuration
 
