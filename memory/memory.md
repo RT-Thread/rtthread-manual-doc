@@ -39,8 +39,7 @@ The small memory management algorithm is mainly for system with less resources a
 
 Either one or none of these memory heap management algorithms can be chosen when the system is running. These memory heap management algorithms provide the same API interface to the application.
 
-!!! note "NOTE"
-    Because the memory heap manager needs to meet the security allocation in multi-threaded conditions, which means mutual exclusion between multiple threads needs to be taken into consideration, so please do not allocate or release dynamic memory blocks in interrupt service routine, which may result in the current context being suspended.
+>Because the memory heap manager needs to meet the security allocation in multi-threaded conditions, which means mutual exclusion between multiple threads needs to be taken into consideration, so please do not allocate or release dynamic memory blocks in interrupt service routine, which may result in the current context being suspended.
 
 ### Small Memory Management Algorithm
 
@@ -92,8 +91,7 @@ The allocator needs to find the zone node where the memory block is located, and
 
 memheap management algorithm is suitable for systems with multiple memory heaps that are not contiguous. Using memheap memory management can simplify the use of multiple memory heaps in the system: when there are multiple memory heaps in the system, the user only needs to initialize multiple needed memheaps during system initialization and turn on the memheap function to glue multiple memheaps (addresses can be discontinuous) for the system's heap allocation.
 
-!!! note "NOTE"
-    The original heap function will be turned off after memheap is turned on. Both can only be selected by turning RT_USING_MEMHEAP_AS_HEAP on or off.
+>The original heap function will be turned off after memheap is turned on. Both can only be selected by turning RT_USING_MEMHEAP_AS_HEAP on or off.
 
 Working mechanism of memheap is shown in the figure below. First, add multiple blocks of memory to the memheap_item linked list to glue. The allocation of a memory block starts with allocating memory from default memory heap. When it can not be allocated, memheap_item linked list is looked up, and an attempt is made to allocate a memory block from another memory heap. The application doesn't care which memory heap the currently allocated memory block is on, as if it were operating a memory heap.
 
@@ -103,7 +101,7 @@ Working mechanism of memheap is shown in the figure below. First, add multiple b
 
 When using the memory heap, heap initialization must be done at system initialization, which can be done through the following function interface:
 
-```{.c}
+```c
 void rt_system_heap_init(void* begin_addr, void* end_addr);
 ```
 
@@ -118,7 +116,7 @@ Input parameter for rt_system_heap_init()
 
 When using memheap heap memory, you must initialize the heap memory at system initialization, which can be done through the following function interface: 
 
-```{.c}
+```c
 rt_err_t rt_memheap_init(struct rt_memheap  *memheap,
                         const char	*name,
                         void		*start_addr,
@@ -148,7 +146,7 @@ Operations of the memory heap are as shown in the following figure, including: i
 
 Allocate a memory block of user-specified size from the memory heap. The function interface is as follows: 
 
-```{.c}
+```c
 void *rt_malloc(rt_size_t nbytes);
 ```
 
@@ -165,7 +163,7 @@ Input parameters and return values of rt_malloc()
 
 After the application uses the memory applied from the memory allocator, it must be released in time, otherwise it will cause a memory leak. The function interface for releasing the memory block is as follows:
 
-```{.c}
+```c
 void rt_free (void *ptr);
 ```
 
@@ -181,7 +179,7 @@ Input parameters of rt_free()
 
 Re-allocating the size of the memory block (increase or decrease) based on the allocated memory block can be done through the following function interface:
 
-```{.c}
+```c
 void *rt_realloc(void *rmem, rt_size_t newsize);
 ```
 
@@ -200,7 +198,7 @@ Input parameters and return values of rt_realloc()
 
 Allocating multiple memory blocks with contiguous memory addresses from the memory heap can be done through the following function interface:
 
-```{.c}
+```c
   void *rt_calloc(rt_size_t count, rt_size_t size);
 ```
 
@@ -220,7 +218,7 @@ Input parameters and return values of rt_calloc()
 
 When allocating memory blocks, user can set a hook function. The function interface called is as follows:
 
-```{.c}
+```c
 void rt_malloc_sethook(void (*hook)(void *ptr, rt_size_t size));
 ```
 
@@ -234,7 +232,7 @@ Input parameters for rt_malloc_sethook()
 
 The hook function interface is as follows:
 
-```{.c}
+```c
 void hook(void *ptr, rt_size_t size)；
 ```
 
@@ -249,7 +247,7 @@ Allocate hook function interface parameters
 
 When releasing memory, user can set a hook function, the function interface called is as follows:
 
-```{.c}
+```c
 void rt_free_sethook(void (*hook)(void *ptr));
 ```
 
@@ -263,7 +261,7 @@ Input parameters for rt_free_sethook()
 
 The hook function interface is as follows:
 
-```{.c}
+```c
 void hook(void *ptr);
 ```
 
@@ -281,7 +279,7 @@ This is an example of a memory heap application. This program creates a dynamic 
 
 Memory heap management
 
-```{.c}
+```c
 #include <rtthread.h>
 
 #define THREAD_PRIORITY      25
@@ -382,7 +380,7 @@ The memory pool control block is a data structure used by the operating system t
 
 In the RT-Thread real-time operating system, the memory pool control block is represented by the structure `struct rt_mempool`. Another C expression, `rt_mp_t`, represents the memory block handle. The implementation in C language is a pointer pointing to the memory pool control block. For details, see the following code:
 
-```{.c}
+```c
 struct rt_mempool
 {
     struct rt_object parent;
@@ -425,7 +423,7 @@ Memory pool control block is a structure that contains important parameters rela
 
 To create a memory pool, a memory pool object is created first and then a memory heap is allocated from the heap. Creating a memory pool is a prerequisite for allocating and releasing memory blocks from the corresponding memory pool. After the memory pool is created, thread then can perform operations like application, release and so on. To creating a memory pool, use the following function interface. This function returns a memory pool object that has been created.
 
-```{.c}
+```c
 rt_mp_t rt_mp_create(const char* name,
                      rt_size_t block_count,
                      rt_size_t block_size);
@@ -446,7 +444,7 @@ Input parameters and return values for rt_mp_create()
 
 Deleting memory pool will delete the memory pool object and release the applied memory. Use the following function interface:
 
-```{.c}
+```c
 rt_err_t rt_mp_delete(rt_mp_t mp);
 ```
 
@@ -464,7 +462,7 @@ Input parameters and return values of rt_mp_delete()
 
 Memory pool Initialization is similar to memory pool creation, except that the memory pool initialization is for static memory management mode, and the memory pool control block is derived from static objects that the user applies in the system. In addition, unlike memory pool creation, the memory space used by the memory pool object here is a buffer space specified by user. User passes the pointer of the buffer to the memory pool control block, the rest of the initialization is the same as the creation of the memory pool. The function interface is as follows:
 
-```{.c}
+```c
 rt_err_t rt_mp_init(rt_mp_t mp,
                     const char* name,
                     void *start, 
@@ -493,7 +491,7 @@ For example, the size of the memory pool data area is set to 4096 bytes, and the
 
 Detaching the memory pool means the memory pool object will be detached from the kernel object manager. Use the following function interface to detach the memory pool:
 
-```{.c}
+```c
 rt_err_t rt_mp_detach(rt_mp_t mp);
 ```
 
@@ -511,7 +509,7 @@ Input parameters and return values for rt_mp_detach()
 
 To allocate a memory block from the specified memory pool, use the following interface: 
 
-```{.c}
+```c
 void *rt_mp_alloc (rt_mp_t mp, rt_int32_t time);
 ```
 
@@ -529,7 +527,7 @@ Input parameters and return values of rt_mp_alloc()
 
 Any memory block must be released after it has been used. Otherwise, memory leaks will occur. The memory block is released using the following interface:
 
-```{.c}
+```c
 void rt_mp_free (void *block);
 ```
 
@@ -547,7 +545,7 @@ This is a static internal memory pool application routine that creates a static 
 
    Memory pool usage example
 
-```{.c}
+```c
 #include <rtthread.h>
 
 static rt_uint8_t *ptr[50];

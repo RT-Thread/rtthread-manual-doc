@@ -50,7 +50,7 @@ It is recommended that you create your own development branch based on the maste
 git checkout -b YourBranchName
 ```
 
-For example, create a branch named "dev": `git checkout-b dev`.
+For example, create a branch named "dev": `git checkout -b dev`.
 
 ### Developing 
 

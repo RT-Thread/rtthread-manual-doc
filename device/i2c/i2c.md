@@ -83,8 +83,7 @@ rt_size_t rt_i2c_transfer(struct rt_i2c_bus_device *bus,
 
 Like the custom transport interface of the SPI bus, the data transmitted by the custom transport interface of the I2C bus is also in units of one message. The parameter msgs[] points to the array of messages to be transmitted. The user can customize the content of each message to implement two different data transmission modes supported by the I2C bus. If the master needs to send a repeat start condition, it will need to send 2 messages.
 
-!!! note "precaution"
-    This function will call rt_mutex_take(), which cannot be called inside the interrupt service routine, which will cause assertion to report an error.
+>This function will call rt_mutex_take(), which cannot be called inside the interrupt service routine, which will cause assertion to report an error.
 
 The prototypes of the I2C message data structure are as follows:
 
@@ -100,8 +99,7 @@ struct rt_i2c_msg
 
 Slave address (addr): Supports 7-bit and 10-bit binary addresses. You need to view the data sheets of different devices.
 
-!!! note "precaution"
-    The slave address used by the RT-Thread I2C device interface does not contain read/write bits. The read/write bit control needs to modify the flag `flags`.
+>The slave address used by the RT-Thread I2C device interface does not contain read/write bits. The read/write bit control needs to modify the flag `flags`.
 
 The flags `flags` can be defined as macros that can be combined with other macros using the bitwise operation "|" as needed.
 

@@ -100,13 +100,13 @@ Using the RT-Thread network framework, you first need to initialize the SAL, the
 
 First use the `sal_init()` interface to initialize resources such as mutex locks used in the component. The interface looks like this: 
 
-```{.c}
+```c
 int sal_init(void);
 ```
 
 After the SAL is initialized, then use the  the `sal_proto_family_register()` interface to register network protocol cluster, for example, the LwIP network protocol cluster is registered to the SAL. The sample code is as follows:
 
-```{.c}
+```c
 static const struct proto_family LwIP_inet_family_ops = {
     "LwIP",
     AF_INET,
@@ -234,7 +234,7 @@ For server-side programs, after using `bind()` to bind the socket, you also need
 
 The listening socket is used by the TCP server to listen for the specified socket connection. The interface is as follows:
 
-```{.c}
+```c
 int listen(int s, int backlog);
 ```
 
@@ -250,7 +250,7 @@ int listen(int s, int backlog);
 
 When the application listens for connections from other clients, the connection must be initialized with the `accept()` function, which creates a new socket for each connection and removes the connection from the listen queue. The interface is as follows:
 
-```{.c}
+```c
 int accept(int s, struct sockaddr *addr, socklen_t *addrlen);
 ```
 
@@ -308,7 +308,7 @@ TCP and UDP have different data transmission methods. TCP needs to establish a c
 
 After the TCP connection is established, the data is sent using the `send()` function. The interface is as follows:
 
-```{.c}
+```c
 int send(int s, const void *dataptr, size_t size, int flags);
 ```
 
@@ -345,7 +345,7 @@ int recv(int s, void *mem, size_t len, int flags);
 
 In the case where a connection is not established, you can use the `sendto()` function to send UDP data to the specified destination address, as shown below:
 
-```{.c}
+```c
 int sendto(int s, const void *dataptr, size_t size, int flags,
 		   const struct sockaddr *to, socklen_t tolen);
 ```
@@ -366,7 +366,7 @@ int sendto(int s, const void *dataptr, size_t size, int flags,
 
 To receive UDP data, use the `recvfrom()` function, and the interface is:
 
-```{.c}
+```c
 int recvfrom(int s, void *mem, size_t len, int flags,
 		     struct sockaddr *from, socklen_t *fromlen);
 ```
@@ -390,7 +390,7 @@ After the network communication is over, you need to close the network connectio
 
 The `closesocket()` interface is used to close an existing socket connection, release the socket resource, clear the socket descriptor from memory, and then the socket could not be used again. The connection and cache associated with the socket are also lost the meaning, the TCP protocol will automatically close the connection. The interface is as follows:
 
-```{.c}
+```c
 int closesocket(int s);
 ```
 
@@ -403,7 +403,7 @@ int closesocket(int s);
 
 Network connections can also be turned off using the `shutdown()` function. The TCP connection is full-duplex. You can use the `shutdown()` function to implement a half-close. It can close the read or write operation of the connection, or both ends, but it does not release the socket resource. The interface is as follows:
 
-```{.c}
+```c
 int shutdown(int s, int how);
 ```
 
@@ -468,7 +468,7 @@ LwIP Configuration options:
 
 In the console, you can use the ifconfig command to check the network status. The IP address is 192.168.12.26, and the FLAGS status is LINK_UP, indicating that the network is configured:
 
-```{.c}
+```c
 msh >ifconfig
 network interface: e0 (Default)
 MTU: 1500
@@ -485,7 +485,7 @@ dns server #1: 223.5.5.5
 
 Use the ping command for network testing:
 
-```{.c}
+```c
 msh />ping rt-thread.org
 60 bytes from 116.62.244.242 icmp_seq=0 ttl=49 time=11 ticks
 60 bytes from 116.62.244.242 icmp_seq=1 ttl=49 time=10 ticks
@@ -669,7 +669,7 @@ When the console outputs the log message "Connect successful", it indicates that
 
 After receiving the data on the FinSH console, the corresponding log information will be output, you can see: 
 
-```{.c}
+```c
 msh >tcpclient 192.168.12.130 5000
 Connect successful
 Received data = hello world

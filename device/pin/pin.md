@@ -74,7 +74,7 @@ Take `__STM32_PIN(2, A, 15)` as an example, 2 is the pin number used by RT-Threa
 
 Before the pin is used, you need to set the input or output mode first, and the following functions are used:
 
-```{.c}
+```c
 void rt_pin_mode(rt_base_t pin, rt_base_t mode);
 ```
 
@@ -85,7 +85,7 @@ void rt_pin_mode(rt_base_t pin, rt_base_t mode);
 
 At present, the pin working mode supported by RT-Thread can take one of the five macro definition values as shown. The mode supported by the chip corresponding to each mode needs to refer to the specific implementation of the PIN device driver:
 
-```{.c}
+```c
 #define PIN_MODE_OUTPUT 0x00 			/* Output */
 #define PIN_MODE_INPUT 0x01			 	/* Input */
 #define PIN_MODE_INPUT_PULLUP 0x02 		/* input Pull up  */
@@ -106,7 +106,7 @@ rt_pin_mode(BEEP_PIN_NUM, PIN_MODE_OUTPUT);
 
 The function to set the pin output level is as follows:
 
-```{.c}
+```c
 void rt_pin_write(rt_base_t pin, rt_base_t value);
 ```
 
@@ -130,7 +130,7 @@ rt_pin_write(BEEP_PIN_NUM, PIN_LOW);
 
 The functions to read the pin level are as follows:
 
-```{.c}
+```c
 int rt_pin_read(rt_base_t pin);
 ```
 
@@ -159,7 +159,7 @@ status = rt_pin_read(BEEP_PIN_NUM);
 
 To use the interrupt function of the pin, you can use the following function to configure a pin to some interrupt trigger mode and bind an interrupt callback function to the corresponding pin. When the pin interrupt occurs, the callback function will be executed. :
 
-```{.c}
+```c
 rt_err_t rt_pin_attach_irq(rt_int32_t pin, rt_uint32_t mode,
      					   void (*hdr)(void *args), void *args);
 ```
@@ -176,7 +176,7 @@ rt_err_t rt_pin_attach_irq(rt_int32_t pin, rt_uint32_t mode,
 
 Interrupt trigger mode mode can take one of the following five macro definition values:
 
-```{.c}
+```c
 #define PIN_IRQ_MODE_RISING 0x00 		 /* Rising edge trigger */
 #define PIN_IRQ_MODE_FALLING 0x01 		 /* Falling edge trigger */
 #define PIN_IRQ_MODE_RISING_FALLING 0x02 /* Edge trigger (triggered on both rising and falling edges)*/
@@ -208,7 +208,7 @@ static void pin_beep_sample(void)
 
 After binding the pin interrupt callback function, use the following function to enable pin interrupt:
 
-```{.c}
+```c
 rt_err_t rt_pin_irq_enable(rt_base_t pin, rt_uint32_t enabled);
 ```
 
@@ -246,7 +246,7 @@ static void pin_beep_sample(void)
 
 You can use the following function to detach the pin interrupt callback function:
 
-```{.c}
+```c
 rt_err_t rt_pin_detach_irq(rt_int32_t pin);
 ```
 

@@ -64,7 +64,7 @@ The interrupt vector table is the entry point for all interrupt handlers. The fo
 
 On the Cortex-M core, all interrupts are processed using the interrupt vector table which means when an interrupt is triggered, the processor will directly determine which interrupt source it is, and then jump directly to the corresponding fixed location for processing. The interrupt service routines must be placed together at a uniform address (this address must be set to the NVIC interrupt vector offset register). The interrupt vector table is generally defined by an array or given in the start code. Given by the start code is applied by default:
 
-```{.c}
+```c
   __Vectors     DCD     __initial_sp             ; Top of Stack
                 DCD     Reset_Handler            ; Reset processing function
                 DCD     NMI_Handler              ; NMI processing function
@@ -289,8 +289,7 @@ Input parameters and return values of rt_hw_interrupt_install()
 |**Return**| ——                                               |
 | return   | the handle of the interrupt service routine mounted before the interrupt service routine was mounted |
 
-!!! note "NOTE"
-    This API does not appear in every migration branch. For example, there is usually no such API in the migration branch of Cortex-M0/M3/M4.
+>This API does not appear in every migration branch. For example, there is usually no such API in the migration branch of Cortex-M0/M3/M4.
 
 The interrupt service routine is a kind of runtime environment that requires special attention. It runs in a non-threaded execution environment (generally a special operating mode of the chip (privileged mode)). In this runtime environment, the current thread cannot be  suspended because the current thread does not exist. During the execution of related operations, information similar to print prompt information will appear, "Function [abc_func] shall not used in ISR", meaning a function that should not be called in the interrupt service routine.
 
@@ -312,8 +311,7 @@ Input parameters of rt_hw_interrupt_mask()
 |----------|----------------|
 | vector   | interrupt number to be masked |
 
-!!! note "NOTE"
-    This API does not appear in every migration branch. For example, there is usually no such API in the migration branch of Cortex-M0/M3/M4.
+>This API does not appear in every migration branch. For example, there is usually no such API in the migration branch of Cortex-M0/M3/M4.
 
 In order to avoid losing the hardware interrupt signal as much as possible, the following function interface can be called to enable the blocked interrupt source:
 
@@ -329,8 +327,7 @@ Input parameters of rt_hw_interrupt_umask()
 |----------|--------------------|
 | vector   | enable the blocked interrupt number |
 
-!!! note "NOTE"
-    This API does not appear in every migration branch. For example, there is usually no such API in the migration branch of Cortex-M0/M3/M4. 
+>This API does not appear in every migration branch. For example, there is usually no such API in the migration branch of Cortex-M0/M3/M4. 
 
 ### Global Interrupt Switch
 
@@ -567,6 +564,5 @@ protect thread[20]'s counter is 140
 …
 ```
 
-!!! note "NOTE"
-    Since shutting down the global interrupt will cause the entire system to fail to respond to the interrupt, when using the global interrupt as a means of exclusive access to the critical section, it is necessary to ensure that the global interrupt is very short, such as the time to run several machine instructions.
+>Since shutting down the global interrupt will cause the entire system to fail to respond to the interrupt, when using the global interrupt as a means of exclusive access to the critical section, it is necessary to ensure that the global interrupt is very short, such as the time to run several machine instructions.
 

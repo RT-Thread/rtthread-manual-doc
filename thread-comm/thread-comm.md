@@ -12,7 +12,9 @@ Thread 1 here can also be extended to multiple threads. For example, there are t
 
 ### Mailbox Working Mechanism 
 
-The mailbox of the RT-Thread operating system is used for inter-thread communication, which is characterized by low overhead and high efficiency. Each message in the mailbox can only hold a fixed 4 bytes(for a 32-bit processing system, the pointer is 4 bytes in size, so an email can hold only one pointer). A typical mailbox is also called message exchange. As shown in the following figure, a thread or an interrupt service routine sends a 4-byte message to a mailbox, and one or more threads can receive and process the message from the mailbox. ![Mailbox Working Mechanism Diagram](figures/07mb_work.png)
+The mailbox of the RT-Thread operating system is used for inter-thread communication, which is characterized by low overhead and high efficiency. Each message in the mailbox can only hold a fixed 4 bytes(for a 32-bit processing system, the pointer is 4 bytes in size, so an email can hold only one pointer). A typical mailbox is also called message exchange. As shown in the following figure, a thread or an interrupt service routine sends a 4-byte message to a mailbox, and one or more threads can receive and process the message from the mailbox. 
+
+![Mailbox Working Mechanism Diagram](figures/07mb_work.png)
 
 The sending process of the non-blocking mode mails can be safely used in ISR. It is an effective way for the thread, the interrupt service, and the timer to send a message to the thread. In general, the receiving of the mails  can be a blocked process, depending on whether there is a message in the mailbox and the timeout set when the message was received. When there is no mail in the mailbox and the set timeout is not 0, the receive of the mails will become blocked. In such cases, the mails can only be received by threads.
 
@@ -25,7 +27,7 @@ When a thread receives a message from a mailbox, if the mailbox is empty, the th
 In RT-Thread, the mailbox control block is a data structure used by the operating system to manage mailboxes, represented by the structure `struct rt_mailbox`. Another C expression, `rt_mailbox_t`, represents the handle of the mailbox, and the implementation in C language is a pointer to the mailbox control block. See the following code for a detailed definition of the mailbox control block structure:
 
 
-```{.c}
+```c
 struct rt_mailbox
 {
     struct rt_ipc_object parent;
@@ -52,7 +54,7 @@ The mailbox control block is a structure that contains important parameters rela
 
 To dynamically create a mailbox object, call the following function interface:
 
-```{.c}
+```c
 rt_mailbox_t rt_mb_create (const char* name, rt_size_t size, rt_uint8_t flag);
 ```
 
@@ -71,7 +73,7 @@ Input parameters and return values of rt_mb_create()
 
 When a mailbox created with rt_mb_create() is no longer used, it should be deleted to release the corresponding system resources. Once the operation is completed, the mailbox will be permanently deleted. The function interface for deleting a mailbox is as follows:
 
-```{.c}
+```c
 rt_err_t rt_mb_delete (rt_mailbox_t mb);
 ```
 
@@ -89,7 +91,7 @@ Input parameters and return values of rt_mb_delete()
 
 Initializing a mailbox is similar to creating a mailbox, except that the mailbox initialized is for static mailbox objects. Different from creating a mailbox, the memory of a static mailbox object is allocated by the compiler during system compilation which is usually placed in a read-write data segment or an uninitialized data segment. The rest of the initialization is the same as the creation of a mailbox. The function interface is as follows:
 
-```{.c}
+```c
   rt_err_t rt_mb_init(rt_mailbox_t mb,
                     const char* name,
                     void* msgpool,
@@ -115,7 +117,7 @@ The size parameter here specifies the capacity of the mailbox, if the number of 
 
 Detaching the mailbox means to detach the statically initialized mailbox objects from the kernel object manager. Use the following interface to detach the mailbox:
 
-```{.c}
+```c
 rt_err_t rt_mb_detach(rt_mailbox_t mb);
 ```
 
@@ -133,7 +135,7 @@ Input parameters and return values for rt_mb_detach()
 
 The thread or ISR can send mail to other threads through the mailbox. The function interface of sending mails is as follows:
 
-```{.c}
+```c
 rt_err_t rt_mb_send (rt_mailbox_t mb, rt_uint32_t value);
 ```
 
@@ -153,7 +155,7 @@ Input parameters and return values of rt_mb_send()
 
 Users can also send mails to specified mailbox through the following function interface:
 
-```{.c}
+```c
 rt_err_t rt_mb_send_wait (rt_mailbox_t mb,
                       rt_uint32_t value,
                       rt_int32_t timeout);
@@ -177,7 +179,7 @@ Input parameters and return values of rt_mb_send_wait()
 
 Only when there is a mail in the mailbox, the recipient can receive the mail immediately and return  RT_EOK. Otherwise, the thread receiving the message will suspend on the waiting thread queue of the mailbox or return directly according to the set timeout. The receiving mail function interface is as follows:
 
-```{.c}
+```c
 rt_err_t rt_mb_recv (rt_mailbox_t mb, rt_uint32_t* value, rt_int32_t timeout);
 ```
 
@@ -201,7 +203,7 @@ This is a mailbox application routine that initializes 2 static threads, 1 stati
 
  Mailbox usage routine
 
-```{.c}
+```c
 #include <rtthread.h>
 
 #define THREAD_PRIORITY      10
@@ -341,7 +343,7 @@ The routine demonstrates how to use the mailbox. Thread 2 sends the mails, for  
 
 Mailbox is a simple inter-thread messaging method, which is characterized by low overhead and high efficiency. In the implementation of the RT-Thread operating system, a 4-byte message can be delivered at a time, and the mailbox has certain storage capabilities, which can cache a certain number of messages (the number of messages is determined by the capacity specified when creating and initializing the mailbox). The maximum length of a message in a mailbox is 4 bytes, so the mailbox can be used for messages less than 4 bytes. Since on the 32 system, 4 bytes can be placed right on a pointer, when a larger message needs to be transferred between threads, a pointer pointing to a buffer can be sent as an mail to the mailbox, which means the mailbox can also delivery a pointer. For example, 
 
-```{.c}
+```c
 struct msg
 {
     rt_uint8_t *data_ptr;
@@ -351,7 +353,7 @@ struct msg
 
 For such a message structure, it contains a pointer pointing to data `data_ptr` and a variable `data_size` of the length of the data block. When a thread needs to send this message to another thread, the following operations can be used:
 
-```{.c}
+```c
 struct msg* msg_ptr;
 
 msg_ptr = (struct msg*)rt_malloc(sizeof(struct msg));
@@ -363,7 +365,7 @@ rt_mb_send(mb, (rt_uint32_t)msg_ptr);
 
 When receiving the thread, because the pointer is what's being received, and msg_ptr is a newly allocated memory block, so after the thread receiving the message finishes processing, the corresponding memory block needs to be released:
 
-```{.c}
+```c
 struct msg* msg_ptr;
 if (rt_mb_recv(mb, (rt_uint32_t*)&msg_ptr) == RT_EOK)
 {
@@ -391,7 +393,7 @@ The message queue object of the RT-Thread operating system consists of multiple 
 
 In RT-Thread, a message queue control block is a data structure used by the operating system to manage message queues, represented by the structure `struct rt_messagequeue`. Another C expression, `rt_mq_t`, represents the handle of the message queue. The implementation in C language is a pointer to the message queue control block. See the following code for a detailed definition of the message queue control block structure:
 
-```{.c}
+```c
 struct rt_messagequeue
 {
     struct rt_ipc_object parent;
@@ -422,7 +424,7 @@ The message queue control block is a structure that contains important parameter
 
 The message queue should be created before it is used, or the existing static message queue objects should be initialized. The function interface for creating the message queue is as follows:
 
-```{.c}
+```c
 rt_mq_t rt_mq_create(const char* name, rt_size_t msg_size,
                      rt_size_t max_msgs, rt_uint8_t flag);
 ```
@@ -444,7 +446,7 @@ When creating a message queue, first allocate a message queue object from the ob
 
 When the message queue is no longer in use, it should be deleted to free up system resources, and once the operation is complete, the message queue will be permanently deleted. The function interface for deleting the message queue is as follows:
 
-```{.c}
+```c
 rt_err_t rt_mq_delete(rt_mq_t mq);
 ```
 
@@ -462,7 +464,7 @@ Input parameters and return values of rt_mq_delete()
 
 Initializing a static message queue object is similar to creating a message queue object, except that the memory of a static message queue object is allocated by the compiler during system compilation and is typically placed in a read data segment or an uninitialized data segment. Initialization is required before using such static message queue objects. The function interface for initializing a message queue object is as follows:
 
-```{.c}
+```c
 rt_err_t rt_mq_init(rt_mq_t mq, const char* name,
                     void *msgpool, rt_size_t msg_size,
                     rt_size_t pool_size, rt_uint8_t flag);
@@ -485,7 +487,7 @@ Input parameters and return values of rt_mq_init()
 
 Detaching the message queue will cause the message queue object to be detached from the kernel object manager. The following interface is used to detach from the message queue:
 
-```{.c}
+```c
 rt_err_t rt_mq_detach(rt_mq_t mq);
 ```
 
@@ -503,7 +505,7 @@ Input parameters and return values for rt_mq_detach()
 
 A thread or ISR can send a message to the message queue. When sending a message, the message queue object first takes an idle message block from the idle message list, then copies the content of the message sent by the thread or the interrupt service program to the message block, and then suspends the message block to the end of the message queue. The sender can successfully send a message if and only if there is an idle message block available on the idle message list; when there is no message block available on the idle message list, it means that the message queue is full, at this time, the thread or interrupt program that sent the message will receive an error code (-RT_EFULL). The function interface for sending messages is as follows:
 
-```{.c}
+```c
 rt_err_t rt_mq_send (rt_mq_t mq, void* buffer, rt_size_t size);
 ```
 
@@ -525,7 +527,7 @@ Input parameters and return values of rt_mq_send()
 
 The process of sending an emergency message is almost the same as sending a message. The only difference is that when an emergency message is sent, the message block taken from the idle message list is not put in the end of the message queue, but the head of the queue. The recipient can receive the emergency message preferentially, so that the message can be processed in time. The function interface for sending an emergency message is as follows:
 
-```{.c}
+```c
 rt_err_t rt_mq_urgent(rt_mq_t mq, void* buffer, rt_size_t size);
 ```
 
@@ -547,7 +549,7 @@ Input parameters and return values of rt_mq_urgent()
 
 Only when there is a message in the message queue, can the receiver receive message, otherwise the receiver will set according to the timeout, or suspend on the waiting queue of the message queue, or return directly. The function interface to receive message is as follows:
 
-```{.c}
+```c
 rt_err_t rt_mq_recv (rt_mq_t mq, void* buffer,
                      rt_size_t size, rt_int32_t timeout);
 ```
@@ -573,7 +575,7 @@ This is a message queue application routine. Two static threads are initialized 
 
 Message queue usage routine
 
-```{.c}
+```c
 #include <rtthread.h>
 
 /* Message queue control block */
@@ -751,7 +753,7 @@ Message Queue can be used where occasional long messages are sent, including exc
 
 The obvious difference between message queue and mailbox is that the length of the message is not limited to 4 bytes. In addition, message queue also includes a function interface for sending emergency messages. But when you create a message queue with a maximum length of 4 bytes for all messages, the message queue object will be reduced to a mailbox. This unrestricted message is also reflected in the case of code writing which is also a mailbox-like code:
 
-```{.c}
+```c
 struct msg
 {
     rt_uint8_t *data_ptr;    /* Data block starting address */
@@ -761,7 +763,7 @@ struct msg
 
 Similar to the mailbox example is the message structure definition. Now, let's assume that such a message needs to be sent to thread receiving messages. In the mailbox example, this structure can only send pointers pointing to this structure (after the function pointer is sent, the thread receiving messages can  access the content pointing to this address, usually this piece of data needs to be left to the thread receiving the messages to release). How message queues is used is quite different:
 
-```{.c}
+```c
 void send_op(void *data, rt_size_t length)
 {
     struct msg msg_ptr;
@@ -776,7 +778,7 @@ void send_op(void *data, rt_size_t length)
 
 Note that in the above code, the data content of a local variable is sent to the message queue. In the thread that receives message, the same structure that receives messages using local variables is used: 
 
-```{.c}
+```c
 void message_handler()
 {
     struct msg msg_ptr; /* Local variable used to place the message */
@@ -799,7 +801,7 @@ In general system designs, the problem of sending synchronous messages is often 
 
 Depending on the message confirmation, the message structure can be defined as:
 
-```{.c}
+```c
 struct msg
 {
     /* Other members of the message structure */
@@ -850,7 +852,7 @@ Operations on signals include: install signal, block signal, unblock signal, sen
 
 If the thread is to process a signal, then the signal needs to be installed in the thread. Signal installation is primarily used to determine the mapping relation between the signal value and the actions of the thread on that signal value, that is what signal is to be processed, what actions will be taken when the signal is passed to the thread. See the following code for a detailed definition:
 
-```{.c}
+```c
 rt_sighandler_t rt_signal_install(int signo, rt_sighandler_t[] handler);
 ```
 
@@ -878,7 +880,7 @@ Setting the handler parameter during signal installation determines the differen
 
 Blocking signal can also be understood as shielding signals. If the signal is blocked, the signal will not be delivered to the thread that installed the signal and will not cause soft interrupt processing. Call rt_signal_mask() to block the signal:
 
-```{.c}
+```c
 void rt_signal_mask(int signo);
 ```
 
@@ -894,7 +896,7 @@ rt_signal_mask() function parameters
 
 Several signals can be installed in the thread. Using this function can give some "attention" to some of the signals, then sending these signals will cause a soft interrupt for the thread. Calling rt_signal_unmask() to unblock the signal:
 
-```{.c}
+```c
 void rt_signal_unmask(int signo);
 ```
 
@@ -910,7 +912,7 @@ rt_signal_unmask() function parameters
 
 When we need to process abnormality, a signal can be sent to the thread that has been set to process abnormality. Call rt_thread_kill() to send a signal to any thread:
 
-```{.c}
+```c
 int rt_thread_kill(rt_thread_t tid, int sig);
 ```
 
@@ -930,7 +932,7 @@ Input parameters and return values for rt_thread_kill()
 
 Wait for the arrival of the set signal. If this signal did not arrive, suspend the thread until the signal arrival or the wait until time exceeds the specified timeout. If the signal arrived, the pointer pointing to the signal body is stored in si, as follows is the function to wait for signal. 
 
-```{.c}
+```c
 int rt_signal_wait(const rt_sigset_t *set,
                         rt_siginfo_t[] *si, rt_int32_t timeout);
 ```
@@ -955,7 +957,7 @@ This is a signal application routine, as shown in the following code. This routi
 
 Signal usage routine
 
-```{.c}
+```c
 #include <rtthread.h>
 
 #define THREAD_PRIORITY         25

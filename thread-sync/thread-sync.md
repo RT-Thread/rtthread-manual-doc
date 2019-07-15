@@ -1,5 +1,4 @@
-Inter-thread Synchronization
-==========
+# Inter-thread Synchronization
 
 In a multi-threaded real-time system, the completion of a task can often be accomplished through coordination of multiple threads, so how do these multiple threads collaborate well with each other to perform without errors? Here is an example.
 
@@ -48,7 +47,7 @@ Schematic diagram of semaphore is shown in the figure below. Each semaphore obje
 
 In RT-Thread, semaphore control block is a data structure used by the operating system to manage semaphores, represented by struct rt rt_semaphore. Another C expression is rt_sem_t, which represents the handle of the semaphore, and the implementation in C language is a pointer to the semaphore control block. The detailed definition of semaphore control block structure is as follows:
 
-```{.c}
+```c
 struct rt_semaphore
 {
    struct rt_ipc_object parent;  /* Inherited from the ipc_object class */
@@ -70,7 +69,7 @@ Semaphore control block contains important parameters related to the semaphore a
 
 When creating a semaphore, the kernel first creates a semaphore control block, then performs basic initialization on the control block. The following function interface is used to create a semaphore:
 
-```{.c}
+```c
  rt_sem_t rt_sem_create(const char *name,
                         rt_uint32_t value,
                         rt_uint8_t flag);
@@ -91,7 +90,7 @@ Input parameters and return values of rt_sem_create()
 
 For dynamically created semaphores, when the system no longer uses semaphore, they can be removed to release system resources. To delete a semaphore, use the following function interface:
 
-```{.c}
+```c
 rt_err_t rt_sem_delete(rt_sem_t sem);
 ```
 
@@ -109,7 +108,7 @@ Input parameters and return values of rt_sem_delete()
 
 For a static semaphore object, its memory space is allocated by the compiler during compiling and placed on the read-write data segment or on the uninitialized data segment. In this case,rt_sem_create interface is no longer needed to create the semaphore to use it, just initialize it before using it. To initialize the semaphore object, use the following function interface:
 
-```{.c}
+```c
 rt_err_t rt_sem_init(rt_sem_t       sem,
                     const char     *name,
                     rt_uint32_t    value,
@@ -131,7 +130,7 @@ Input parameters and return values of rt_sem_init()
 
 For statically initialized semaphore, detaching the semaphore is letting the semaphore object detach from the kernel object manager. To detach the semaphore, use the following function interface:
 
-```{.c}
+```c
 rt_err_t rt_sem_detach(rt_sem_t sem);
 ```
 
@@ -149,7 +148,7 @@ After using this function, the kernel wakes up all threads suspended in the sema
 
 Thread obtains semaphore resource instances by obtaining semaphores. When the semaphore value is greater than zero, the thread will get the semaphore, and the corresponding semaphore value will be reduced by 1. The semaphore is obtained using the following function interface:
 
-```{.c}
+```c
 rt_err_t rt_sem_take (rt_sem_t sem, rt_int32_t time);
 ```
 
@@ -170,7 +169,7 @@ When calling this function, if the value of the semaphore is zero, it means the 
 
 When user does not want to suspend thread on the applied semaphore and wait,  the semaphore can be obtained using the wait-free mode , and the following function interface is used for obtaining the semaphore without waiting:
 
-```{.c}
+```c
 rt_err_t rt_sem_trytake(rt_sem_t sem);
 ```
 
@@ -189,7 +188,7 @@ This function has the same effect as rt_sem_take(sem, 0),  which means when the 
 
 Semaphore is released to wake up the thread that suspends on the semaphore. To release the semaphore, use the following function interface:
 
-```{.c}
+```c
 rt_err_t rt_sem_release(rt_sem_t sem);
 ```
 
@@ -210,7 +209,7 @@ This is a sample of semaphore usage routine. This routine creates a dynamic sema
 Use of semaphore
 
 
-```{.c}
+```c
 #include <rtthread.h>
 
 #define THREAD_PRIORITY         25
@@ -364,7 +363,7 @@ The 2 threads in the example are:
 
 Producer consumer routine
 
-```{.c}
+```c
 #include <rtthread.h>
 
 #define THREAD_PRIORITY       6
@@ -569,20 +568,17 @@ Locks, a single lock is often applied to multiple threads accessing the same sha
 
 Semaphore can also be easily applied to interrupting synchronization between threads, such as an interrupt trigger. When interrupting service routine, thread needs to be notifies to perform corresponding data processing. At this time, the initial value of the semaphore can be set to 0. When the thread tries to hold this semaphore, since the initial value of the semaphore is 0, the thread will then suspends on this semaphore until the semaphore is released. When the interrupt is triggered, hardware-related actions are firstly performed, such as reading corresponding data from the hardware I/O port, and confirming the interrupt to clear interrupt source, and then releasing a semaphore to wake up the corresponding thread for subsequent data processing. For example, the processing of FinSH threads is as shown in the following figure.
 
-![FinSH Interrupt, Inter-thread Synchronization Diagram](figures/06inter_ths_commu2.png)
+![sync between ISR and FinSH thread](figures/06inter_ths_commu2.png)
 
 The value of the semaphore is initially 0. When the FinSH thread attempts to obtain the semaphore, it will be suspended because the semaphore value is 0. When the console device has data input, an interrupt is generated to enter the interrupt service routine. In the interrupt service routine, it reads the data of the console device, puts the read data into the UART buffer for buffering, and then releases the semaphore. The semaphore release will wake up the shell thread. After the interrupt service routine has finished, if there are no ready threads with higher priority than the shell thread in the system, the shell thread will hold the semaphore and run, obtaining the input data from the UART buffer.
 
-!!! note "NOTE"
-​    The mutual exclusion between interrupts and threads cannot be done by means of semaphores (locks), but by means of switch interrupts.
+>The mutual exclusion between interrupts and threads cannot be done by means of semaphores (locks), but by means of switch interrupts.
 
 #### Resource Count
 
 Semaphore can also be considered as an incrementing or decrementing counter. It should be noted that the semaphore value is non-negative. For example, if the value of a semaphore is initialized to 5, then the semaphore can be reduced by a maximum of 5 consecutive times until the counter is reduced to zero. Resource count is suitable for occasions where the processing speeds between threads do not match. At this time, the semaphore can be counted as the number of completed tasks of the previous thread, and when dispatched to the next thread, it can also be used in a continuous manner handling multiple events each time. For example, in the producer and consumer problem, the producer can release the semaphore multiple times, and then the consumer can process multiple semaphore resources each time when dispatched.
 
-!!! note "NOTE"
-
-​    Generally, resource count is mostly inter-thread synchronization in a hybrid mode, because there are still multiple accesses from threads for a single resource processing, which requires accessing and processing for a single resource, and operate lock mutex operation.
+>Generally, resource count is mostly inter-thread synchronization in a hybrid mode, because there are still multiple accesses from threads for a single resource processing, which requires accessing and processing for a single resource, and operate lock mutex operation.
 
 Mutex
 ------
@@ -605,14 +601,13 @@ In the RT-Thread operating system, mutex can solve the priority inversion proble
 
 ![Priority Inheritance (M is a mutex)](figures/06priority_inherit.png)
 
-!!! note "NOTE"
-   After the mutex is obtained, release the mutex as soon as possible. During the time when holding the mutex, you must not change the priority of the thread holding the mutex.
+>After the mutex is obtained, release the mutex as soon as possible. During the time when holding the mutex, you must not change the priority of the thread holding the mutex.
 
 ### Mutex Control Block
 
 In RT-Thread, mutex control block is a data structure used by the operating system to manage mutexes, represented by the struct rt rt_mutex. Another C expression, rt_mutex_t, represents the handle of the mutex, and the implementation in C language refers to the pointer of the mutex control block. See the following code for a detailed definition of the mutex control block structure:
 
-```{.c}
+```c
 struct rt_mutex
     {
         struct rt_ipc_object parent;                /* inherited from the ipc_object class */
@@ -638,7 +633,7 @@ The mutex control block contains important parameters related to mutex and it pl
 
 When creating a mutex, the kernel first creates a mutex control block and then completes the initialization of the control block. Create a mutex using the following function interface:
 
-```{.c}
+```c
 rt_mutex_t rt_mutex_create (const char* name, rt_uint8_t flag);
 ```
 
@@ -656,7 +651,7 @@ Input parameters and return values of rt_mutex_create()
 
 For dynamically created mutex, when the mutex is no longer used, the system resource is released by removing the mutex. To remove a mutex, use the following function interface:
 
-```{.c}
+```c
 rt_err_t rt_mutex_delete (rt_mutex_t mutex);
 ```
 
@@ -674,7 +669,7 @@ Input parameters and return values of rt_mutex_delete()
 
 The memory of a static mutex object is allocated by the compiler during system compilation, and is usually placed in a read-write data segment or an uninitialized data segment. Before using such static mutex objects, you need to initialize them first. To initialize the mutex, use the following function interface:
 
-```{.c}
+```c
 rt_err_t rt_mutex_init (rt_mutex_t mutex, const char* name, rt_uint8_t flag);
 ```
 
@@ -692,7 +687,7 @@ Input parameters and return values of rt_mutex_init()
 
 For statically initialized muex, detaching mutex means to remove the mutex object from the kernel object manager. To detach the mutex, use the following function interface:
 
-```{.c}
+```c
 rt_err_t rt_mutex_detach (rt_mutex_t mutex);
 ```
 
@@ -710,7 +705,7 @@ Input parameters and return values for rt_mutex_detach()
 
 Once the thread obtains the mutex, the thread has ownership of the mutex, that is, a mutex can only be held by one thread at a time. To obtain the mutex, use the following function interface:
 
-```{.c}
+```c
 rt_err_t rt_mutex_take (rt_mutex_t mutex, rt_int32_t time);
 ```
 
@@ -731,7 +726,7 @@ Input parameters and return values of rt_mutex_take()
 
 When a thread completes the access to a mutually exclusive resource, it should release the mutex it occupies as soon as possible, so that other threads can obtain the mutex in time. To release the mutex, use the following function interface:
 
-```{.c}
+```c
 rt_err_t rt_mutex_release(rt_mutex_t mutex);
 ```
 
@@ -751,7 +746,7 @@ This is a mutex application routine, and a mutex lock is a way to protect shared
 
 Mutex routine
 
-```{.c}
+```c
 #include <rtthread.h>
 
 #define THREAD_PRIORITY         8
@@ -862,7 +857,7 @@ Another example of a mutex is shown in the following code. This example creates 
 
 Prevent priority inversion routine
 
-```{.c}
+```c
 #include <rtthread.h>
 
 /* Pointer to the thread control block */
@@ -1006,8 +1001,7 @@ test OK.
 
 The routine demonstrates how to use the mutex. Thread 3 holds the mutex first, and then thread 2 tries to hold the mutex, at which point thread 3's priority is raised to the same level as thread 2.
 
-!!! note "NOTE"
-​    It is important to remember that mutexes cannot be used in interrupt service routines.
+>It is important to remember that mutexes cannot be used in interrupt service routines.
 
 ### Occasions to Use Mutex
 
@@ -1052,7 +1046,7 @@ As shown in the figure above, the first and 30th bits of the event flag of threa
 
 In RT-Thread, event set control block is a data structure used by the operating system to manage events, represented by the structure struct rt_event. Another C expression, rt_event_t, represents the handle of the event set, and the implementation in C language is a pointer to the event set control block. See the following code for a detailed definition of the event set control block structure:
 
-```{.c}
+```c
 struct rt_event
 {
     struct rt_ipc_object parent;    /* Inherited from the ipc_object class */
@@ -1076,7 +1070,7 @@ Event set control block contains important parameters related to the event set a
 
 When creating an event set, the kernel first creates an event set control block, and then performs basic initialization on the event set control block. The event set is created using the following function interface:
 
-```{.c}
+```c
 rt_event_t rt_event_create(const char* name, rt_uint8_t flag);
 ```
 
@@ -1094,7 +1088,7 @@ When the function interface is called, the system allocates the event set object
 
 When the system no longer uses the event set object created by rt_event_create(), the system resource is released by deleting the event set object control block. To delete an event set you can use the following function interface:
 
-```{.c}
+```c
 rt_err_t rt_event_delete(rt_event_t event);
 ```
 
@@ -1112,7 +1106,7 @@ Input parameters and return values of rt_event_delete()
 
 The memory of a static event set object is allocated by the compiler during system compilation, and is usually placed in a read-write data segment or an uninitialized data segment. Before using a static event set object, you need to initialize it first. The initialization event set uses the following function interface:
 
-```{.c}
+```c
 rt_err_t rt_event_init(rt_event_t event, const char* name, rt_uint8_t flag);
 ```
 
@@ -1130,7 +1124,7 @@ Input parameters and return values of rt_event_init()
 
 When the system no longer uses the event set object initialized by rt_event_init(), the system resources are released by detaching the event set object control block. Detaching event set means to detach the event set object from the kernel object manager. To detach an event set, use the following function interface:
 
-```{.c}
+```c
 rt_err_t rt_event_detach(rt_event_t event);
 ```
 
@@ -1148,7 +1142,7 @@ Input parameters and return values for rt_event_detach()
 
 The send event function can send one or more events in the event set as follows:
 
-```{.c}
+```c
 rt_err_t rt_event_send(rt_event_t event, rt_uint32_t set);
 ```
 
@@ -1167,7 +1161,7 @@ Input parameters and return values of rt_event_send()
 
 The kernel uses a 32-bit unsigned integer to identify the event set, each bit represents an event, so an event set object can wait to receive 32 events at the same time, and the kernel can decide how to activate the thread by specifying the parameter "logical AND" or "logical OR". Using the "logical AND" parameter indicates that the thread is only activated when all waiting events occur, and using the "logical OR" parameter means that the thread is activated as soon as one waiting event occurs. To receive events, use the following function interface:
 
-```{.c}
+```c
 rt_err_t rt_event_recv(rt_event_t event,
                            rt_uint32_t set,
                            rt_uint8_t option,
@@ -1193,7 +1187,7 @@ Input parameters and return values of rt_event_recv()
 
 The value of option can be:
 
-```{.c}
+```c
 /* Select AND or OR to receive events */
 RT_EVENT_FLAG_OR
 RT_EVENT_FLAG_AND
@@ -1208,7 +1202,7 @@ This is the application routine for the event set, which initializes an event se
 
 Event set usage routine
 
-```{.c}
+```c
 #include <rtthread.h>
 
 #define THREAD_PRIORITY      9
@@ -1310,7 +1304,7 @@ MSH_CMD_EXPORT(event_sample, event sample);
 
 The simulation results are as follows:
 
-```{.c}
+```c
  \ | /
 - RT -     Thread Operating System
  / | \     3.1.0 build Aug 24 2018

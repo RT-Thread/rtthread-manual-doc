@@ -195,8 +195,7 @@ In general, the MCU's SPI device communicates as a master and slave. In the RT-T
 | rt_spi_send_then_send()  | Send data twice |
 | rt_spi_send_then_recv()  | Send then Receive |
 
-!!! note 
-    The SPI data transfer related interface will call rt_mutex_take(). This function cannot be called in the interrupt service routine, which will cause the assertion to report an error.
+>The SPI data transfer related interface will call rt_mutex_take(). This function cannot be called in the interrupt service routine, which will cause the assertion to report an error.
 
 ### Find SPI Device
 
@@ -264,9 +263,8 @@ cs_take :A cs_take value of 1 means that the corresponding CS is set to a valid 
 
 cs_release :A cs_release value of 1 indicates that the corresponding CS is released after the data transfer ends.
 
-!!! note
-    When send_buf or recv_buf is not empty, the available size for both cannot be less than length.
-    If you use this function to transfer messages, the first message sent by cs_take needs to be set to 1. Set the chip to be valid, and the cs_release of the last message needs to be set to 1. Release the chip select.
+>When send_buf or recv_buf is not empty, the available size for both cannot be less than length.
+If you use this function to transfer messages, the first message sent by cs_take needs to be set to 1. Set the chip to be valid, and the cs_release of the last message needs to be set to 1. Release the chip select.
 
 An example of use is as follows:
 
@@ -508,8 +506,7 @@ The data transfer interface of QSPI is as follows:
 | rt_qspi_send_then_recv()     | Send then receive |
 | rt_qspi_send()               | Send data once |
 
-!!! note
-    The QSPI data transfer related interface will call rt_mutex_take(). This function cannot be called in the interrupt service routine, which will cause the assertion to report an error.
+>The QSPI data transfer related interface will call rt_mutex_take(). This function cannot be called in the interrupt service routine, which will cause the assertion to report an error.
 
 ### Transfer Data
 

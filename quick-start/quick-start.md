@@ -64,19 +64,16 @@ After compiling RT-Thread/STM32, we can simulate running RT-Thread through the M
 
 ![simulate RT-Thread1](./figures/10.png)
 
-!!! tip "TIP"
-    We can output all the commands supported by the current system by inputting the Tab key or `help + enter ` , as shown in the following figure.
+>We can output all the commands supported by the current system by inputting the Tab key or `help + enter ` , as shown in the following figure.
 
 ![simulate RT-Thread2](./figures/6.png)
-
-
 
 
 ## User Entry Code
 
 The above startup code is basically related to the RT-Thread system, so how do users add initialization code for their own applications? RT-Thread uses main function as the user code entry, all you need to do is just add your own code to the main function.
 
-```{.c}
+```c
 int main(void)
 {
   /* user app entry */
@@ -84,8 +81,7 @@ int main(void)
 }
 ```
 
-!!! tip "TIP"
-Note: In order to complete the initialization for the system functions before entering the main program, you can use the `$sub$$` and `$super$$` function identifiers to call another sample before entering the main program, this was, users can ignore the initialization operations before the main() function. See [ARM® Compiler v5.06 for µVision® armlink User Guide](http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0377g/pge1362065967698.html) for details. 
+>Note: In order to complete the initialization for the system functions before entering the main program, you can use the `$sub$$` and `$super$$` function identifiers to call another sample before entering the main program, this was, users can ignore the initialization operations before the main() function. See [ARM® Compiler v5.06 for µVision® armlink User Guide](http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0377g/pge1362065967698.html) for details. 
 
 ## Example of a Marquee
 
@@ -97,7 +93,7 @@ Under UART#1, input msh command: led and then click Enter to run it, as shown:
 
 **Example of a Marquee**
 
-```{.c}
+```c
 /*
  * Manifest of programs: Marquee sample
  *

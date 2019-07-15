@@ -12,9 +12,7 @@ Kernel is the most basic and important part of the operating system. The figure 
 
 The kernel library is a small set of C library-like function implementation subsets to ensure that the kernel can run independently. The built-in C library will be somewhat different depending on the compiler. When using the GNU GCC compiler, it will carry more implementations of standard C Library. 
 
-!!! tip "Tips"
-
-C library: Also called C Runtime Library, it provides functions like "strcpy", "memcpy", and some also include the implementation of "printf" and "scanf" functions. The RT-Thread Kernel Service Library provides only a small portion of the C library function implementation used by the kernel. To avoid duplicate names with the standard C library, the rt_ prefix is added before these functions.
+>C library: Also called C Runtime Library, it provides functions like "strcpy", "memcpy", and some also include the implementation of "printf" and "scanf" functions. The RT-Thread Kernel Service Library provides only a small portion of the C library function implementation used by the kernel. To avoid duplicate names with the standard C library, the rt_ prefix is added before these functions.
 
 Real-time kernel implementation includes: object management, thread management and scheduler, inter-thread communication management, clock management and memory management, etc. The minimum resource occupation of the kernel is 3KB ROM, 1.2KB RAM.
 
@@ -72,7 +70,7 @@ For more information on the use of the `$Sub$$` and `$Super$$`extensions, see th
 
 Let's take a look at this code defined in components.c:
 
-```{.c}
+```c
 /* $Sub$$main Function */
 int $Sub$$main(void)
 {
@@ -88,7 +86,7 @@ Here, the`$Sub$$main`function simply calls the rtthread_startup() function. RT-T
 
 Code for the rtthread_startup() function is as follows:
 
-```{.c}
+```c
 int rtthread_startup(void)
 {
     rt_hw_interrupt_disable();
@@ -141,7 +139,7 @@ Set the system clock in rt_hw_board_init() to provide heartbeat and serial port 
 
 The main() function is the user code entry for RT-Thread, and users can add their own applications to the main() function.
 
-```{.c}
+```c
 int main(void)
 {
   /* user app entry */
@@ -197,7 +195,7 @@ The dynamic memory heap is unused RAM space, and the memory blocks requested and
 
 As the following example:
 
-```{.c}
+```c
 rt_uint8_t* msg_ptr;
 msg_ptr = (rt_uint8_t*) rt_malloc (128);
 rt_memset(msg_ptr, 0, 128);
@@ -207,7 +205,7 @@ The 128-byte memory space pointed to by the msg_ptr pointer in the code is in th
 
 Some global variables are stored in the RW segment and the ZI segment. The RW segment stores the global variable with the initial value (the global variable in the constant form is placed in the RO segment, which is a read-only property), and uninitialized global variable is stored in the ZI segment, as in the following example:
 
-```{.c}
+```c
 #include <rtthread.h>
 
 const static rt_uint32_t sensor_enable = 0x000000FE;
@@ -229,7 +227,7 @@ The automatic initialization mechanism means that the initialization function do
 
 For example, calling a macro definition in the serial port driver to inform the function that needs to be called to initialize the system. The code is as follows:
 
-```{.c}
+```c
 int rt_hw_usart_init(void)  /* Serial port initialization function */
 {
      ... ...
@@ -282,7 +280,7 @@ The RT-Thread kernel is designed with object-oriented method. The system-level i
 The following code is an example of static threads and dynamic threads:
 
 
-```{.c}
+```c
 /* Thread 1 object and stack used while running */
 static struct rt_thread thread1;
 static rt_uint8_t thread1_stack[512];
@@ -384,7 +382,7 @@ Derivations from object control block rt_object in the above figure includes: th
 
 Data structure of kernel object control block:
 
-```{.c}
+```c
 struct rt_object
 {
      /* Kernel object name     */
@@ -400,7 +398,7 @@ struct rt_object
 
 Types currently supported by kernel objects are as follows:
 
-```{.c}
+```c
 enum rt_object_class_type
 {
      RT_Object_Class_Thread = 0,             /* Object is thread type      */
@@ -440,7 +438,7 @@ From the above type specification, we can see that if it is a static object, the
 
 Data structure of kernel object container:
 
-```{.c}
+```c
 struct rt_object_information
 {
      /* Object type */
@@ -458,7 +456,7 @@ A class of objects is managed by an rt_object_information structure, and each pr
 
 An uninitialized static object must be initialized before it can be used. The initialization object uses the following interfaces:
 
-```{.c}
+```c
 void rt_object_init(struct  rt_object*  object ,
                     enum rt_object_class_type  type ,
                     const char* name)
@@ -477,7 +475,7 @@ When this function is called to initialize the object, the system will place the
 
 Detach an object from the kernel object manager. The following interfaces are used to detach objects:
 
-```{.c}
+```c
 void rt_object_detach(rt_object_t object);
 ```
 
@@ -487,7 +485,7 @@ Calling this interface makes a static kernel object to be detached from the kern
 
 The above descriptions are interfaces of objects initialization and detachment, both of which are under circumstances that object-oriented memory blocks already exist. But dynamic objects can be requested when needed. The memory space is freed for other applications when not needed. To request assigning new objects, you can use the following interfaces:
 
-```{.c}
+```c
 rt_object_t rt_object_allocate(enum  rt_object_class_typetype ,
                                const  char*  name)
 ```
@@ -507,7 +505,7 @@ When calling the above interface, the system first needs to obtain object inform
 
 For a dynamic object, when it is no longer used, you can call the following interface to delete the object and release the corresponding system resources:
 
-```{.c}
+```c
 void rt_object_delete(rt_object_t object);
 ```
 
@@ -522,7 +520,7 @@ When the above interface is called, the object is first detached from the object
 
 Identify whether the specified object is a system object (static kernel object). The following interface is used to identify the object:
 
-```{.c}
+```c
 rt_err_t rt_object_is_systemobject(rt_object_t object);
 ```
 
@@ -543,7 +541,7 @@ Configuration is mainly done by modifying the file under project directory - rtc
 
 （1）RT-Thread Kernel part 
 
-```{.c}
+```c
 /* Indicates the maximum length of the name of the kernel object. If the maximum length of the name of the object in the code is greater than the length of the macro definition,
  * the extra part will be cut off. */
 #define RT_NAME_MAX 8
@@ -576,7 +574,7 @@ Configuration is mainly done by modifying the file under project directory - rtc
 
 （2）Inter-thread synchronization and communication part, the objects that will be used in this part are semaphores, mutexes, events, mailboxes, message queues, signals, and so on.
 
-```{.c}
+```c
 /* Define this macro to enable the use of semaphores, if not defined, close. */
 #define RT_USING_SEMAPHORE
 
@@ -598,7 +596,7 @@ Configuration is mainly done by modifying the file under project directory - rtc
 
 （3）Memory Management Part
 
-```{.c}
+```c
 /* Start the use of static memory pool */
 #define RT_USING_MEMPOOL
 
@@ -617,7 +615,7 @@ Configuration is mainly done by modifying the file under project directory - rtc
 
 （4）Kernel Device Object
 
-```{.c}
+```c
 /* Indicates the start of useing system devices */
 #define RT_USING_DEVICE
 
@@ -631,7 +629,7 @@ Configuration is mainly done by modifying the file under project directory - rtc
 
 （5）Automatic Initialization Method
 
-```{.c}
+```c
 /* Define this macro to enable automatic initialization mechanism, if not defined, close. */
 #define RT_USING_COMPONENTS_INIT
 
@@ -643,7 +641,7 @@ Configuration is mainly done by modifying the file under project directory - rtc
 
 （6）FinSH
 
-```{.c}
+```c
 /* Define this macro to start the use of the system FinSH debugging tool, if not defined, close. */
 #define RT_USING_FINSH
 
@@ -675,7 +673,7 @@ Configuration is mainly done by modifying the file under project directory - rtc
 
 （7）About MCU
 
-```{.c}
+```c
 /* Define the MCU used in this project is STM32F103ZE; the system defines the chip pins by defining the chip type. */
 #define STM32F103ZE
 
@@ -686,9 +684,7 @@ Configuration is mainly done by modifying the file under project directory - rtc
 #define RT_USING_UART1
 ```
 
-!!! note "Attention"
-
-​    In practice, the system configuration file rtconfig.h is automatically generated by configuration tools and does not need to be changed manually.
+>In practice, the system configuration file rtconfig.h is automatically generated by configuration tools and does not need to be changed manually.
 
 Common Macro Definition Description
 --------------
@@ -697,37 +693,37 @@ Macro definitions are often used in RT-Thread. For example, some common macro de
 
 1）rt_inline, definition is as follows, static keyword is to make the function only available for use in the current file; inline means inline, after modification using static, the compiler is recommended to perform inline expansion when calling the function.
 
-```{.c}
+```c
 #define rt_inline                   static __inline
 ```
 
 2）RT_USED，definition is as follows, the purpose of this macro is to explain to the compiler that this code is useful, compilation needs to be saved even if it is not called in the function. For example, RT-Thread auto-initialization uses custom segments, using RT_USED will retain custom code snippets.
 
-```{.c}
+```c
 #define RT_USED                     __attribute__((used))
 ```
 
 3）RT_UNUSED，definition is as follows, indicates that a function or variable may not be used. This attribute prevents the compiler from generating warnings.
 
-```{.c}
+```c
 #define RT_UNUSED                   __attribute__((unused))
 ```
 
 4）RT_WEAK，definition is as follows, often used to define functions, when linking the function, the compiler will link the function without the keyword prefix first and link the function modified by weak if it can't find those functions. 
 
-```{.c}
+```c
 #define RT_WEAK                     __weak
 ```
 
 5）ALIGN(n)，definition is as follows, is used to align its stored address with n bytes when allocating an address space to an object. Here, n can be the power of 2. Byte alignment not only facilitates quick CPU access, but also save memory space if byte alignment  is properly used. 
 
-```{.c}
+```c
 #define ALIGN(n)                    __attribute__((aligned(n)))
 ```
 
 6）RT_ALIGN(size,align)，definition is as follows, to increase size to a multiple of an integer defined by align. For example, RT_ALIGN(13,4) will return to 16.
 
-```{.c}
+```c
 #define RT_ALIGN(size, align)      (((size) + (align) - 1) & ~((align) - 1))
 ```
 

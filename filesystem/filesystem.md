@@ -72,7 +72,7 @@ The initialization of the DFS component is done by the dfs_init() function. The 
 
 After the DFS component is initialized, you also need to initialize the specific type of file system used, that is, register a specific type of file system into DFS. The interface to register the file system is as follows:
 
-```{.c}
+```c
 int dfs_register(const struct dfs_filesystem_ops *ops);
 ```
 
@@ -99,7 +99,7 @@ Only block devices can be mounted to the file system,  so you need to create the
 
 After registering a block device, you also need to create a file system of the specified type on the block device, that is, format the file system. You can use the `dfs_mkfs()` function to format the specified storage device and create a file system. The interface to format the file system is as follows：
 
-```{.c}
+```c
 int dfs_mkfs(const char * fs_name, const char * device_name);
 ```
 
@@ -139,7 +139,7 @@ msh />mkfs -t elm sd0             # Use the -t parameter to specify the file sys
 
 In RT-Thread, mounting refers to attaching a storage device to an existing path. To access a file on a storage device, we must mount the partition where the file is located to an existing path and then access the storage device through this path. The interface to mount the file system is as follows:
 
-```{.c}
+```c
 int dfs_mount(const char   *device_name,
               const char   *path,
               const char   *filesystemtype,
@@ -164,7 +164,7 @@ If there is only one storage device, it can be mounted directly to the root dire
 
 When a file system does not need to be used anymore, it can be unmounted. The interface to unmount the file system is as follows:
 
-```{.c}
+```c
 int dfs_unmount(const char *specialfile);
 ```
 
@@ -185,7 +185,7 @@ This section introduces the functions that are related to the operation of the f
 
 To open or create a file, you can call the following open() function:
 
-```{.c}
+```c
 int open(const char *file, int flags, ...);
 ```
 
@@ -225,7 +225,7 @@ int close(int fd);
 
 To read the contents of a file, use the `read()` function:
 
-```
+```c
 int read(int fd, void *buf, size_t len);
 ```
 
@@ -243,7 +243,7 @@ This function reads the `len` bytes of the file pointed to by the parameter `fd`
 
 To write data into a file, use the `write()` function:
 
-```
+```c
 int write(int fd, const void *buf, size_t len);
 ```
 
@@ -280,7 +280,7 @@ This function changes the file name specified by the parameter `old` to the file
 
 To get the file status, use the following `stat()` function:
 
-```
+```c
 int stat(const char *file, struct stat *buf);
 ```
 
@@ -311,7 +311,7 @@ int unlink(const char *pathname);
 
 Synchronize all modified file data in memory to the storage device using the `fsync()` function:
 
-```{.c}
+```c
 int fsync(int fildes);
 ```
 
@@ -326,7 +326,7 @@ int fsync(int fildes);
 
 Use the `statfs()` function to query file system related information.
 
-```{.c}
+```c
 int statfs(const char *path, struct statfs *buf);
 ```
 
@@ -342,7 +342,7 @@ int statfs(const char *path, struct statfs *buf);
 
 To monitor the I/O device for events, use the `select()` function:
 
-```{.c}
+```c
 int select( int nfds,
             fd_set *readfds,
             fd_set *writefds,
@@ -374,7 +374,7 @@ This section describes functions that directory management often uses, and opera
 
 To create a directory, you can use the mkdir() function:
 
-```{.c}
+```c
 int mkdir(const char *path, mode_t mode);
 ```
 
@@ -390,7 +390,7 @@ This function is used to create a directory as a folder, the parameter path is t
 
 Delete a directory using the rmdir() function:
 
-```{.c}
+```c
 int rmdir(const char *pathname);
 ```
 
@@ -405,7 +405,7 @@ int rmdir(const char *pathname);
 
 Open the directory to use the `opendir()` function:
 
-```{.c}
+```c
 DIR* opendir(const char* name);
 ```
 
@@ -418,7 +418,7 @@ DIR* opendir(const char* name);
 
 To close the directory, use the `closedir()` function:
 
-```{.c}
+```c
 int closedir(DIR* d);
 ```
 
@@ -435,7 +435,7 @@ This function is used to close a directory and must be used with the `opendir()`
 
 To read the directory, use the `readdir()` function:
 
-```{.c}
+```c
 struct dirent* readdir(DIR *d);
 ```
 
@@ -639,14 +639,14 @@ After the file system is successfully mounted, the files and directories can be 
 
 Use the `ls` command to view the current directory information, and the results are as follows:
 
-```{.c}
+```c
 msh />ls                          # use the `ls` command to view the current directory information
 Directory /:                      # you can see that the root directory already exists /
 ```
 
 Use the `mkdir` command to create a folder, and the results are as follows:
 
-```{.c}
+```c
 msh />mkdir rt-thread             # create an rt-thread folder
 msh />ls                          # view directory information as follows
 Directory /:
@@ -668,14 +668,14 @@ msh />
 
 Use the `cat` command to view the contents of the file. The result is as follows:
 
-```{.c}
+```c
 msh />cat hello.txt                     # view the contents of the hello.txt file and output
 hello rt-thread!!!
 ```
 
 Use the `rm` command to delete a folder or file. The result is as follows:
 
-```{.c}
+```c
 msh />ls                                # view the information of current directory 
 Directory /:
 rt-thread           <DIR>
@@ -793,7 +793,7 @@ MSH_CMD_EXPORT(stat_sample, show text.txt stat sample);
 
 Run the example in the FinSH console and the results are as follows:
 
-```{.c}
+```c
 msh />echo "hello" text.txt
 msh />stat_sample
 text.txt file size = 5

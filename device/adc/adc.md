@@ -22,8 +22,7 @@ The resolution is expressed in binary (or decimal) digits. Generally, there are 
 
 Precision represents the maximum error value between the analog and real values of the ADC devices at all numerical points, that is, the distance at which the output value deviates from the linear maximum.
 
-!!! note "Precautions"
-     Precision and resolution are two different concepts, so please pay attention to the distinction.
+>Precision and resolution are two different concepts, so please pay attention to the distinction.
 
 ### Conversion Rate
 
