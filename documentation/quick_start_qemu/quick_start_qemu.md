@@ -1,21 +1,19 @@
-# Getting Started of QEMU
+# Getting Started of QEMU (Windows)
 
 The development of embedded software is inseparable from the development board. Without physical development boards, similar virtual machines like QEMU can be used to simulate the development board. QEMU is a virtual machine that supports cross-platform virtualization. It can virtualize many development boards. To facilitate the experience of RT-Thread without a development board, RT-Thread provides a board-level support package (BSP) for QEMU-simulated **ARM vexpress A9** development board.
 
 ## Preparations
 
-- Download RT-Thread Source Code
+- [Download RT-Thread Source Code](https://github.com/RT-Thread/rt-thread)
 - Download Env Tool
-- Install Git on your PC ([Download address](https://www.git-scm.com/download/))
+- [Install Git on your PC](https://www.git-scm.com/download/)
 
 
 ## Instructions for the Env tool
 
-### Using Env on Windows Platform
-
 When using Env tools, you need to enter the corresponding BSP directory in the Env terminal.
 
-#### Configuration
+### Configuration
 
 ```
 menuconfig
@@ -23,19 +21,21 @@ menuconfig
 
 Type the `menuconfig` command in the Env terminal to enter the configuration interface, and then configure the BSP:
 
+![menuconfig command](figures/win-menuconfig.png)
+
 ![enter the configuration interface](figures/env_menu.png)
 
 You can use the keyboard `↑` key and `↓` key to look up and down menu items, use the `Enter` key to enter the selected directory, use the `Space` key to select or cancel bool variables, and use the `Esc` key to exit the current directory.
 
-#### Acquisition of software packages
+### Acquisition of software packages
 
 ```
 pkgs --update
 ```
 
-If a package is selected in menuconfig, download the package using the `pkgs -- update` command (Git needs to be installed)
+If a package is selected in menuconfig, download the package using the `pkgs --update` command (Git needs to be installed)
 
-#### Compile
+### Compile
 
 ```
 scons
@@ -43,7 +43,7 @@ scons
 
 Compile using the `scons` command.
 
-#### Generate IDE's Project Files
+### Generate IDE's Project Files
 
 ```
 scons --target=xxx
@@ -57,39 +57,6 @@ scons --target=mdk4
 scons --target=mdk5
 ```
 
-### Using Env on Linux Platform
-
-Enter the BSP directory under the Linux terminal.
-
-#### Configuration
-
-```
-scons --menuconfig
-```
-
-Type `scons --menuconfig` command to enter the configuration interface and configure the BSP:
-
-![enter the configuration interface](figures/env_menu_ubuntu.png)
-
-You can use the keyboard `↑` key and `↓` key to look up and down menu items, use the `Enter` key to enter the selected directory, use the `Space` key to select or cancel bool variables, and use the `Esc` key to exit the current directory.
-
-#### Acquisition of packages
-
-```
-source ~/.env/env.sh
-pkgs --update
-```
-
-If a package is selected in menuconfig, download the package using the `pkgs -- update` command (Git needs to be installed)
-
-#### Compile
-
-```
-scons
-```
-
-Compile using the `scons` command.
-
 ## Introduction of QEMU BSP Catalogue
 
 The board-level support package (BSP) provided by RT-Thread simulates ARM vexpress A9 development board is located in the `qemu-vexpress-a9` folder under the BSP directory of RT-Thread source code. This BSP implements LCD, keyboard, mouse, SD card, Ethernet card, serial port and other related drivers. The contents of the folder are shown in the following figure.
@@ -102,7 +69,6 @@ The main files and directories of `qemu-vexpress-a9` BSP are described as follow
 | ---------------- | ------------------------------------------- |
 | .vscode          | configuration file of vscode                |
 | applications     | User application code directory             |
-| cpu              | Chip-related files                          |
 | drivers          | The underlying driver provided by RT-Thread |
 | qemu.bat         | Script files running on Windows platform    |
 | qemu.sh          | Script files running on Linux platform      |
@@ -131,7 +97,7 @@ After compiling, type `qemu.bat` to start the virtual machine and BSP project. `
 
 ![QEMU virtual machine](figures/qemu.png)
 
-## Run the Finsh Console
+### Run the Finsh Console
 
 RT-Thread supports Finsh, and users can use command operations in command line mode.
 
@@ -143,7 +109,7 @@ For example, by entering the `list_thread` command, you can see the currently ru
 
 ![threads and timers](figures/finsh-thread.png)
 
-## Run the File System
+### Run the File System
 
 Type `list_device` to view all devices registered in the system. You can see the virtual SD card "sd0" device as shown in the following picture. Next, we can format the SD card using the `mkfs sd0` command, which will format the SD card into a FatFS file system. FatFs is a Microsoft fat-compatible file system developed for small embedded devices. It is written in ANSI C, uses abstract hardware I/O layer and provides continuous maintenance, so it has good portability.
 
@@ -174,10 +140,7 @@ You can configure more functions in the configuration interface. After the confi
 
 ![menuconfig interface](figures/menuconfig_menu.png)
 
-Run QEMU:
-
-1. If you choose a package, you need to use the command `pkgs-update` to download the package.
-
+1. If you choose a package, you need to use the command `pkgs --update` to download the package.
 2. Compile with `scons`.
-
-3. Then enter `qemu. bat` to run.
+3. Then enter `qemu.bat` to run.
+4. Use `help` to view all commands of the BSP. And then use the commands.
