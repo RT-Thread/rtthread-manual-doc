@@ -1,6 +1,6 @@
 # RT-Thread
 
-RT-Thread is an open source, free Embedded Real-time Operating System, which means Real-Time Thread. It has a strong scalability:from a tiny kernel running on a tiny core, for example ARM Cortex-M0, or Cortex-M3/4/7, to a rich feature system running on MIPS32, ARM Cortex-A, even the emerging open source RISC-V architecture is supported.RT-Thread can run either on single-core systems or on symmetric multicore processors(SMP) systems, and it have supported SMP since version 4.0.0.
+RT-Thread (Real-Time Thread) is an open source embedded real-time operating system and released under Apache License v2.0. It has a strong scalability: from a nano kernel running on a tiny MCU, for example ARM Cortex-M0, or Cortex-M3/4/7, to a rich feature system running on MIPS32, ARM Cortex-A, even the emerging open source RISC-V architecture is supported. RT-Thread can run either on single-core systems or on symmetric multi-core processors(SMP) systems.
 
 ## Introduction
 
