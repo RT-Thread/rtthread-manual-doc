@@ -717,7 +717,7 @@ void udpclient(int argc, char**argv)
     if (argc < 3)
     {
         rt_kprintf("Usage: udpclient URL PORT [COUNT = 10]\n");
-        rt_kprintf("Like: tcpclient 192.168.12.44 5000\n");
+        rt_kprintf("Like: udpclient 192.168.12.44 5000\n");
         return ;
     }
 
