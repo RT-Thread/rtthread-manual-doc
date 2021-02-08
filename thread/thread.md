@@ -83,7 +83,7 @@ RT-Thread thread has dependent stack. When the thread is switched, the context o
 
 Thread stack is also used to store local variables in functions: local variables in functions are applied from the thread stack space; local variables in functions are initially allocated from registers (ARM architecture), when this function calls another function, these local variables will be placed on the stack.
 
-For the first run of thread, context can be constructed manually to set initial environment like: entry function (PC register), entry parameter (R0 register), return position (LR register), current machine operating status (CPSR register) ).
+For the first run of thread, context can be constructed manually to set initial environment like: entry function (PC register), entry parameter (R0 register), return position (LR register), current machine operating status (CPSR register).
 
 The growth direction of thread stack is closely related to the chip architecture. Versions before RT-Thread 3.1.0 only allows the stack to grow from high address to low address. For ARM Cortex-M architecture, the thread stack can be constructed as shown below. 
 
