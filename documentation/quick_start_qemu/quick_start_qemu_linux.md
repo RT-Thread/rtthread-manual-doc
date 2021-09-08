@@ -47,13 +47,13 @@ You can use the keyboard `↑` key and `↓` key to look up and down menu items,
 
 ```
 source ~/.env/env.sh
-sons --menuconfig
+scons --menuconfig
 pkgs --update
 ```
 
 The `env.sh` file is a file that needs to be executed. It configures the environment variables so that we can update the package with the pkgs command and execute it with the `source ~/.env/env.sh` command.
 
-Then use `sons --menuconfig` command to enter menuconfig, and you could select the online packages by this time.
+Then use `scons --menuconfig` command to enter menuconfig, and you could select the online packages by this time.
 
 ![commands of acquisition of pkgs](figures/ubuntu-pkg-menuconfig.png)
 
