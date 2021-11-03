@@ -96,9 +96,9 @@ In addition, based on the network framework, RT-Thread provides a large number o
 
 Using the RT-Thread network framework, you first need to initialize the SAL, then register various network protocol clusters to ensure that the application can communicate using the socket network socket interface. This section mainly uses LwIP as an example.
 
-### Register the Network Protocol Cluster 
+### Register the Network Protocol Cluster
 
-First use the `sal_init()` interface to initialize resources such as mutex locks used in the component. The interface looks like this: 
+First use the `sal_init()` interface to initialize resources such as mutex locks used in the component. The interface looks like this:
 
 ```c
 int sal_init(void);
@@ -190,7 +190,7 @@ int socket(int domain, int type, int protocol);
 | >=0     | Successful, returns an integer representing the socket descriptor |
 | -1      | Fail                                         |
 
-**Communication types** include SOCK_STREAM and SOCK_DGRAM. 
+**Communication types** include SOCK_STREAM and SOCK_DGRAM.
 
 **SOCK_STREAM** indicates connection-oriented TCP data transfer. Data can arrive at another computer without any errors. If it is damaged or lost, it can be resent, but it is relatively slow.
 
@@ -228,7 +228,7 @@ int bind(int s, const struct sockaddr *name, socklen_t namelen);
 
 ### Establishing a TCP Connection
 
-For server-side programs, after using `bind()` to bind the socket, you also need to use the `listen()` function to make the socket enter the passive listening state, and then call the `accept()` function to respond to the client at any time. 
+For server-side programs, after using `bind()` to bind the socket, you also need to use the `listen()` function to make the socket enter the passive listening state, and then call the `accept()` function to respond to the client at any time.
 
 #### Listening Socket
 
@@ -347,7 +347,7 @@ In the case where a connection is not established, you can use the `sendto()` fu
 
 ```c
 int sendto(int s, const void *dataptr, size_t size, int flags,
-		   const struct sockaddr *to, socklen_t tolen);
+           const struct sockaddr *to, socklen_t tolen);
 ```
 
 |**Parameters**|**Description**                 |
@@ -368,7 +368,7 @@ To receive UDP data, use the `recvfrom()` function, and the interface is:
 
 ```c
 int recvfrom(int s, void *mem, size_t len, int flags,
-		     struct sockaddr *from, socklen_t *fromlen);
+             struct sockaddr *from, socklen_t *fromlen);
 ```
 
 |**Parameters**|**Description**                 |
@@ -659,7 +659,7 @@ Server, fill in the local IP address and port 5000, as shown below.
 Then start the TCP client to connect to the TCP server by entering the following command in the FinSH console:
 
 ```C
-msh />tcpclient 192.168.12.45 5000	// Input according to actual situation
+msh />tcpclient 192.168.12.45 5000  // Input according to actual situation
 Connect successful
 ```
 
@@ -667,7 +667,7 @@ When the console outputs the log message "Connect successful", it indicates that
 
 ![网络调试工具界面](figures/net-hello.png)
 
-After receiving the data on the FinSH console, the corresponding log information will be output, you can see: 
+After receiving the data on the FinSH console, the corresponding log information will be output, you can see:
 
 ```c
 msh >tcpclient 192.168.12.130 5000
@@ -713,7 +713,7 @@ void udpclient(int argc, char**argv)
     struct sockaddr_in server_addr;
     const char *url;
 
-	/* Received less than 3 parameters */
+    /* Received less than 3 parameters */
     if (argc < 3)
     {
         rt_kprintf("Usage: udpclient URL PORT [COUNT = 10]\n");
@@ -771,7 +771,7 @@ When running the example, first open a network debugging assistant on your compu
 Then you can enter the following command in the FinSH console to send data to the UDP server.
 
 ```c
-msh />udpclient 192.168.12.45 1001          // Need to enter according to the real situation 
+msh />udpclient 192.168.12.45 1001          // Need to enter according to the real situation
 ```
 
 The server will receive 10 messages from This is UDP Client from RT-Thread., as shown below:

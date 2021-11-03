@@ -49,27 +49,27 @@ The path to configure ulog using menuconfig in the ENV tool is as follows:
  The ulog configuration options are described below. In general, the default configuration is used:
 
 ```c
-[*] Enable ulog					  /* Enable ulog */
+[*] Enable ulog                   /* Enable ulog */
       The static output log level./* Select a static log output level. After the selection is completed, the log level lower than the set level (here specifically the log using the LOG_X API) will not be compiled into the ROM. */
-[ ]   Enable ISR log.			  /* Enable interrupted ISR log, ie log output API can also be used in ISR */
-[*]   Enable assert check.		  /* Enable assertion checks. If fter disabled, the asserted log will not be compiled into ROM */
-(128) The log's max width.		  /* The maximum length of the log. Since ulog's logging API is in units of rows, this length also represents the maximum length of a row of logs. */
+[ ]   Enable ISR log.             /* Enable interrupted ISR log, ie log output API can also be used in ISR */
+[*]   Enable assert check.        /* Enable assertion checks. If fter disabled, the asserted log will not be compiled into ROM */
+(128) The log's max width.        /* The maximum length of the log. Since ulog's logging API is in units of rows, this length also represents the maximum length of a row of logs. */
 [ ]   Enable async output mode.   /* Enable asynchronous log output mode. When this mode is turned on, the log will not be output to the backend immediately, but will be cached first, and then handed to the log output thread (for example: idle thread) to output. */
-      log format  --->			  /* Configure the format of the log, such as time information, color information, thread information, whether to support floating point, etc. */
-[*]   Enable console backend.	  /* Enable the console as a backend. After enabling, the log can be output to the console serial port. It is recommended to keep it on. */
+      log format  --->            /* Configure the format of the log, such as time information, color information, thread information, whether to support floating point, etc. */
+[*]   Enable console backend.     /* Enable the console as a backend. After enabling, the log can be output to the console serial port. It is recommended to keep it on. */
 [ ]   Enable runtime log filter.  /* Enable the runtime log filter, which is dynamic filtering. After enabling, the log will support dynamic filtering when the system is running, by means of tags, keywords, and so on. */
 ```
 
 **The configuration log format option description is as follows:**
 
 ```c
-[ ] Enable float number support. It will using more thread stack.	/* Supporting floating-point variables (traditional rtdbg/rt_kprintf does not support floating-point logs) */
-    [*] Enable color log.					/* Colored log */
-    [*] Enable time information.			/* Time information */
+[ ] Enable float number support. It will using more thread stack.   /* Supporting floating-point variables (traditional rtdbg/rt_kprintf does not support floating-point logs) */
+    [*] Enable color log.                   /* Colored log */
+    [*] Enable time information.            /* Time information */
     [ ]   Enable timestamp format for time. /* Including timestamp */
-    [*] Enable level information.			/* Level information */
-    [*] Enable tag information.				/* Label Information */
-    [ ] Enable thread information.			/* Thread information */
+    [*] Enable level information.           /* Level information */
+    [*] Enable tag information.             /* Label Information */
+    [ ] Enable thread information.          /* Thread information */
 ```
 
 ### Log Level
@@ -356,7 +356,7 @@ static struct ulog_backend console;
 /* Console backend output function */
 void ulog_console_backend_output(struct ulog_backend *backend, rt_uint32_t level, const char *tag, rt_bool_t is_raw, const char *log, size_t len)
 {
-	...
+    ...
     /* Output log to the console */
     ...
 }
@@ -431,10 +431,10 @@ Use menuconfig in the Env tool to enter the ulog configuration options:
 The asynchronous mode related configuration options are described as follows:
 
 ```c
-[*]   Enable async output mode.					/* Enable asynchronous mode */
-(2048)  The async output buffer size.			/* Asynchronous buffer size, default is 2048*/
-[*]     Enable async output by thread.			/* Whether to enable the asynchronous log output thread in ulog, the thread will wait for log notification when it runs, and then output the log to all backends. This option is turned on by default, and can be turned off if you want to modify it to another thread, such as an idle thread. */
-(1024)    The async output thread stack size.	/* Asynchronous output thread stack size, default is 1024 */
+[*]   Enable async output mode.                 /* Enable asynchronous mode */
+(2048)  The async output buffer size.           /* Asynchronous buffer size, default is 2048*/
+[*]     Enable async output by thread.          /* Whether to enable the asynchronous log output thread in ulog, the thread will wait for log notification when it runs, and then output the log to all backends. This option is turned on by default, and can be turned off if you want to modify it to another thread, such as an idle thread. */
+(1024)    The async output thread stack size.   /* Asynchronous output thread stack size, default is 1024 */
 (30)      The async output thread stack priority./* The priority of the asynchronous output thread, the default is 30*/
 ```
 

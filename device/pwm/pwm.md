@@ -41,8 +41,8 @@ rt_device_t rt_device_find(const char* name);
 In general, the name of the PWM device registered to the system is pwm0, pwm1, etc. The usage examples are as follows:
 
 ```c
-#define PWM_DEV_NAME        "pwm3"	/* name of PWM device */
-struct rt_device_pwm *pwm_dev;		/* PWM device handle */	
+#define PWM_DEV_NAME        "pwm3"  /* name of PWM device */
+struct rt_device_pwm *pwm_dev;      /* PWM device handle */
 /* Search the device */
 pwm_dev = (struct rt_device_pwm *)rt_device_find(PWM_DEV_NAME);
 ```
@@ -53,8 +53,8 @@ Set the PWM period and duty cycle by using the following function:
 
 ```c
 rt_err_t rt_pwm_set(struct rt_device_pwm *device,
-					int channel,
-					rt_uint32_t period,
+                    int channel,
+                    rt_uint32_t period,
                     rt_uint32_t pulse);
 ```
 
@@ -76,8 +76,8 @@ An example of use is as follows:
 
 ```c
 #define PWM_DEV_NAME        "pwm3"  /* name of PWM device */
-#define PWM_DEV_CHANNEL      4		/* PWM channel */
-struct rt_device_pwm *pwm_dev;		/* PWM device handle */	
+#define PWM_DEV_CHANNEL      4      /* PWM channel */
+struct rt_device_pwm *pwm_dev;      /* PWM device handle */
 rt_uint32_t period, pulse;
 
 period = 500000;    /* The period is 0.5ms, the unit is nanoseconds */
@@ -88,7 +88,7 @@ pwm_dev = (struct rt_device_pwm *)rt_device_find(PWM_DEV_NAME);
 rt_pwm_set(pwm_dev, PWM_DEV_CHANNEL, period, pulse);
 ```
 
-### Enable the PWM Device 
+### Enable the PWM Device
 
 After setting the PWM period and pulse width, you can enable the PWM device by the following function:
 
@@ -109,8 +109,8 @@ An example of use is as follows:
 
 ```c
 #define PWM_DEV_NAME        "pwm3"  /* name of PWM device */
-#define PWM_DEV_CHANNEL      4		/* PWM channel */
-struct rt_device_pwm *pwm_dev;		/* PWM device handle */	
+#define PWM_DEV_CHANNEL      4      /* PWM channel */
+struct rt_device_pwm *pwm_dev;      /* PWM device handle */
 rt_uint32_t period, pulse;
 
 period = 500000;    /* The period is 0.5ms, the unit is nanoseconds */
@@ -144,8 +144,8 @@ An example of use is as follows:
 
 ```c
 #define PWM_DEV_NAME        "pwm3"  /* name of PWM device */
-#define PWM_DEV_CHANNEL      4		/* PWM channel */
-struct rt_device_pwm *pwm_dev;		/* PWM device handle */	
+#define PWM_DEV_CHANNEL      4      /* PWM channel */
+struct rt_device_pwm *pwm_dev;      /* PWM device handle */
 rt_uint32_t period, pulse;
 
 period = 500000;    /* The period is 0.5ms, the unit is nanoseconds */
@@ -198,7 +198,7 @@ The following sample code is a  PWM device usage sample . The main steps of the 
  * Program list: This is PWM device usage example
  * The routine exports the pwm_led_sample command to the control terminal
  * Format for Command: pwm_led_sample
- * Program function: By controlling the brightness of the LED light through the PWM device, 
+ * Program function: By controlling the brightness of the LED light through the PWM device,
  * you can see that the LED changes from dark to bright gradually, then from bright to dark.
  */
 
@@ -222,7 +222,7 @@ static int pwm_led_sample(int argc, char *argv[])
     rt_pin_mode(LED_PIN_NUM, PIN_MODE_OUTPUT);
     /* Set high LED pin mode */
     rt_pin_write(LED_PIN_NUM, PIN_HIGH);
-    
+
     /* Search the Device */
     pwm_dev = (struct rt_device_pwm *)rt_device_find(PWM_DEV_NAME);
     if (pwm_dev == RT_NULL)
@@ -235,7 +235,7 @@ static int pwm_led_sample(int argc, char *argv[])
     rt_pwm_set(pwm_dev, PWM_DEV_CHANNEL, period, pulse);
     /* Enable device */
     rt_pwm_enable(pwm_dev, PWM_DEV_CHANNEL);
-    
+
     while (1)
     {
         rt_thread_mdelay(50);

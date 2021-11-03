@@ -152,7 +152,7 @@ As the package system grows, more and more packages will be added, so the list o
 
 - Use `menuconfig -s` command to enter the Env configuration interface
 
-  ![Env Configuration Interface](figures/menuconfig_s.png) 
+  ![Env Configuration Interface](figures/menuconfig_s.png)
 
   Press Enter to enter the configuration menu with 3 configuration options:
 
@@ -230,7 +230,7 @@ The directory where the `chcp` command is located may be added to the environmen
 
 ### Q: Prompt "no module named site" when running python.
 
-**A:** Computer right button –>> Properties—>> Advanced System Settings—>> Environment Variable, in the user variable of the administrator, create a new variable named PYTHONHOME, and the variable value is: `F:\git_repositories\env\tools\Python27` （the installation route of Python in Env）, do not add ";" afterwards, otherwise it will be invalid. If add PYTHONHOME can not solve theproblem, try to add PYTHONPATH in the same way. 
+**A:** Computer right button –>> Properties—>> Advanced System Settings—>> Environment Variable, in the user variable of the administrator, create a new variable named PYTHONHOME, and the variable value is: `F:\git_repositories\env\tools\Python27` （the installation route of Python in Env）, do not add ";" afterwards, otherwise it will be invalid. If add PYTHONHOME can not solve theproblem, try to add PYTHONPATH in the same way.
 
 ### Q: What types of projects can I generate under Env?
 

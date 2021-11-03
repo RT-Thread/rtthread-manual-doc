@@ -1,4 +1,4 @@
-Thread Management 
+Thread Management
 ========================
 
 When we are facing a big task in our daily life, we usually break it down into a number of simple, easy-to-manage smaller tasks. Then, we would deal with these smaller tasks one by one, gradually, the big task is  worked out. In a multi-threaded operating system, developers also need to break down a complex application into multiple small, schedulable, and serialized program units. When tasks are reasonably divided and properly executed, this design allows the system to meet the capacity and time requirements of the real-time system. For example, to have the embedded system to perform such tasks, the system would collect data through sensors and display the data on the screen. In a multi-threaded real-time system, the task can be decomposed into two subtasks. The subtask, as shown in the following figure, reads the sensor data continuously and writes the data into the shared memory. The other subtask periodically reads the data from the shared memory and outputs the sensor data onto the screen.
@@ -9,7 +9,7 @@ In RT-Thread, the application entity corresponding to the above subtask is the t
 
 When a thread runs, it thinks it is hogging the CPU as it runs. The runtime environment when the thread executes is called the context, specifically each variables and data, including all register variables, stacks, memory information, and so on.
 
-This chapter will be divided into five sections to introduce thread management of RT-Thread. After reading this chapter, readers will have a deeper understanding of the thread management mechanism of RT-Thread. They will have clear answers to questions like what states does a thread have, how to create a thread, why do idle threads exist, etc.  
+This chapter will be divided into five sections to introduce thread management of RT-Thread. After reading this chapter, readers will have a deeper understanding of the thread management mechanism of RT-Thread. They will have clear answers to questions like what states does a thread have, how to create a thread, why do idle threads exist, etc.
 
 Thread Management Features
 ------------------
@@ -29,7 +29,7 @@ When the scheduler schedules threads and switch them, the current thread context
 Working Mechanism of Thread
 --------------
 
-### Thread Control Block 
+### Thread Control Block
 
 In RT-Thread, the thread control block is represented by structure struct rt_thread, which is a data structure used by the operating system to manage threads. It stores information about the thread, such as priority, thread name, thread status, etc. It also includes linked list structure for connecting threads, event collection of thread waiting , etc., which are defined as follows:
 
@@ -85,7 +85,7 @@ Thread stack is also used to store local variables in functions: local variables
 
 For the first run of thread, context can be constructed manually to set initial environment like: entry function (PC register), entry parameter (R0 register), return position (LR register), current machine operating status (CPSR register).
 
-The growth direction of thread stack is closely related to the chip architecture. Versions before RT-Thread 3.1.0 only allows the stack to grow from high address to low address. For ARM Cortex-M architecture, the thread stack can be constructed as shown below. 
+The growth direction of thread stack is closely related to the chip architecture. Versions before RT-Thread 3.1.0 only allows the stack to grow from high address to low address. For ARM Cortex-M architecture, the thread stack can be constructed as shown below.
 
 ![Thread Stack](figures/04thread_stack.png)
 
@@ -107,11 +107,11 @@ The five states of a thread in RT-Thread are shown in the following table:
 
 #### Thread Priority
 
-The priority of the RT-Thread thread indicates the thread's priority of being scheduled. Each thread has its priority. The more important the thread, the higher priority should be given, the bigger chance of being scheduled. 
+The priority of the RT-Thread thread indicates the thread's priority of being scheduled. Each thread has its priority. The more important the thread, the higher priority should be given, the bigger chance of being scheduled.
 
 RT-Thread supports a maximum of 256 thread priorities (0~255). The lower the number, the higher the priority and 0 is the highest priority. In some systems with tight resources, you can choose system configurations that only support 8 or 32 priorities according to the actual situation; for the ARM Cortex-M series, 32 priorities are commonly used. The lowest priority is assigned to idle threads by default and is not used by users. In the system, when a thread with a higher priority is ready, the current thread with the lower priority will be swapped out immediately, and the high-priority thread will preempt the processor.
 
-#### Time Slice 
+#### Time Slice
 
 Each thread has a time slice parameter, but time slice is only valid for ready-state threads of the same priority. The system schedules the ready-state threads with the same priority using time slice rotation scheduling method. In this case, time slice plays the role of constraining thread's single running time and the unit is a system tick (OS Tick). Suppose there are 2 ready-state threads, A and B with the same priority. Time slice of A thread is set to 10, and time slice of B thread is set to 5. When there is no ready-state thread with higher priority than A in the system, the system will switch back and forth between thread A and B. Each time the system performs 10 OS Ticks on thread A, and 5 OS Ticks on thread B, as shown below.
 
@@ -139,7 +139,7 @@ void thread_entry(void* paramenter)
 
 It seems that threads have no restrictions on program execution and that all operations can be performed. But as a real-time system, a real-time system with clear priorities, if a program in a thread is stuck in an infinite loop, then threads with a lower priorities will not be executed. Therefore, one thing that must be noted in the real-time operating system is that the thread cannot be stuck in an infinite loop operation, and there must be an action to relinquish the use of the CPU, such as calling a delay function in the loop or actively suspending. The purpose of user designing a infinite loop thread is to let this thread be continuously scheduled and run by the system and never be deleted.
 
-**Sequential Execution or Finite-Cycle Mode**: 
+**Sequential Execution or Finite-Cycle Mode**:
 
 Such as simple sequential statements, do `whlie()` or `for()` loop, etc., these threads will not cycle or permanently loop. They can be described as a "one-off" threads and will surely be executed. After the execution is complete, the thread will be automatically deleted by the system.
 
@@ -178,7 +178,7 @@ RT-Thread provides a set of operating system call interfaces that make the state
 
 ![Thread State Switching Diagram](figures/04thread_sta.png)
 
-Thread enters the initial state (RT_THREAD_INIT) by calling the function rt_thread_create/init(); thread in the initial state enters the ready state (RT_THREAD_READY) by calling the function rt_thread_startup(); thread in the ready state is scheduled by the scheduler and enters the running state (RT_THREAD_RUNNING). When a running thread calls a function such as rt_thread_delay(), rt_sem_take(), rt_mutex_take(), rt_mb_recv() or fails to get resources, it will enter the suspended state (RT_THREAD_SUSPEND); if threads in suspended state waited till timeout and still didn't acquire the resources, or other threads released the resources, it will return to the ready state. 
+Thread enters the initial state (RT_THREAD_INIT) by calling the function rt_thread_create/init(); thread in the initial state enters the ready state (RT_THREAD_READY) by calling the function rt_thread_startup(); thread in the ready state is scheduled by the scheduler and enters the running state (RT_THREAD_RUNNING). When a running thread calls a function such as rt_thread_delay(), rt_sem_take(), rt_mutex_take(), rt_mb_recv() or fails to get resources, it will enter the suspended state (RT_THREAD_SUSPEND); if threads in suspended state waited till timeout and still didn't acquire the resources, or other threads released the resources, it will return to the ready state.
 
 If thread in suspended state called function rt_thread_delete/detach(), it will switch to the closed state (RT_THREAD_CLOSE); as for thread in running state, if operation is completed, function rt_thread_exit()  will be executed at the last part of the thread to change the state into closed state.
 
@@ -188,7 +188,7 @@ If thread in suspended state called function rt_thread_delete/detach(), it will 
 
 As mentioned previously, system thread refers to thread created by the system and user thread is thread created by user program calling the thread management interface. System thread In RT-Thread kernel includes idle thread and main thread.
 
-#### Idle Thread 
+#### Idle Thread
 
 An idle thread is the lowest priority thread created by the system, and its thread state is always ready. When no other ready thread exists in the system, the scheduler will schedule the idle thread, which is usually an infinite loop and can never be suspended. In addition, idle threads have special functions in RT-Thread:
 
@@ -196,7 +196,7 @@ If a thread finishes running, the system will automatically delete the thread: a
 
 Idle thread also provides an interface to run the hook function set by the user. The hook function is called when idle thread is running, which is suitable for operations like hooking into power management, watchdog feeding, etc.
 
-#### Main Thread 
+#### Main Thread
 
 When the system starts, the system will create the main thread. Its entry function is main_thread_entry(). User's application entry function main() starts from here. After the system scheduler starts, the main thread starts running. The process is as follows. Users can add their own application initialization code to the main() function.
 
@@ -381,9 +381,9 @@ The parameters and return values of the thread suspend interface rt_thread_suspe
 | RT_EOK     | Thread suspends successfully  |
 | \-RT_ERROR | Thread suspension failed because the thread is not in ready state. |
 
->Generally, you should not use this function to suspend the thread itself, if you really need to use rt_thread_suspend() to suspend the current task, immediately after calling function rt_thread_suspend(),  rt_schedule() needs to be called. 
+>Generally, you should not use this function to suspend the thread itself, if you really need to use rt_thread_suspend() to suspend the current task, immediately after calling function rt_thread_suspend(),  rt_schedule() needs to be called.
 
-   Function's context switch is achieved manually. User only needs to understand the role of the interface which is not recommended.   
+   Function's context switch is achieved manually. User only needs to understand the role of the interface which is not recommended.
 
 Resuming a thread is to let the suspended thread re-enter the ready state and put the thread into the system's ready queue; if the recovered thread is first in place of the priority list, then the system will start context switching. Thread resumption uses the following function interface:
 
@@ -400,7 +400,7 @@ The parameters and return values of the thread recovery interface rt_thread_resu
 | RT_EOK     | Thread resumed successfully.                  |
 | \-RT_ERROR | Thread recovery failed because the state of the thread is not RT_THREAD_SUSPEND state |
 
-### Control Thread 
+### Control Thread
 
 When you need other control over a thread, such as dynamically changing the priority of a thread, you can call the following function interface:
 
@@ -423,7 +423,7 @@ Demands supported by control command demand cmd include:
 
 •RT_THREAD_CTRL_CHANGE_PRIORITY：dynamically change the priority of a thread;
 
-•RT_THREAD_CTRL_STARTUP：Start running a thread, equivalent to the rt_thread_startup() function call; 
+•RT_THREAD_CTRL_STARTUP：Start running a thread, equivalent to the rt_thread_startup() function call;
 
 •RT_THREAD_CTRL_CLOSE：Close a thread, equivalent to the rt_thread_delete() function call.
 
@@ -592,7 +592,7 @@ thread1 count: 3
 
 When thread 2 counts to a certain value, it will stop running. Then thread 2 is automatically deleted by the system, and therefore the counting stops. Thread 1 prints the count all the time.
 
->About deleting threads: Most threads are executed cyclically without needing to be deleted. For thread that can finish running, RT-Thread automatically deletes the thread after the thread finishes running, and deletes it in rt_thread_exit(). User only needs to understand the role of the interface. It is not recommended to use this interface (this interface can be called by other threads or call this interface in the timer timeout function to delete a thread which is not used very often).  
+>About deleting threads: Most threads are executed cyclically without needing to be deleted. For thread that can finish running, RT-Thread automatically deletes the thread after the thread finishes running, and deletes it in rt_thread_exit(). User only needs to understand the role of the interface. It is not recommended to use this interface (this interface can be called by other threads or call this interface in the timer timeout function to delete a thread which is not used very often).
 
 ### Thread Time Slice Round-Robin Scheduling Sample
 
@@ -686,9 +686,9 @@ thread 2 is running ,thread 2 count = 205
 
 As can be seen from the running count results, thread 2 runs half the time of thread 1.
 
-### Thread Scheduler Hook Sample 
+### Thread Scheduler Hook Sample
 
-When thread is scheduling switch, it executes the schedule. We can set a scheduler hook so that we can do other things when the thread is being switched. This sample is printing switch information between the threads in the scheduler hook function, as shown in the following code. 
+When thread is scheduling switch, it executes the schedule. We can set a scheduler hook so that we can do other things when the thread is being switched. This sample is printing switch information between the threads in the scheduler hook function, as shown in the following code.
 
 ```c
 #include <rtthread.h>

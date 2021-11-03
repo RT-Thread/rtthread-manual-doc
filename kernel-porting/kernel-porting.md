@@ -1,4 +1,4 @@
-Kernel Porting 
+Kernel Porting
 ===============
 
 After learning the previous chapters, everyone has a better understanding of RT-Thread, but many people are not familiar with how to port the RT-Thread kernel to different hardware platforms. Kernel porting refers to the RT-Thread kernel running on different chip architectures and different boards. It can have functions such as thread management and scheduling, memory management, inter-thread synchronization and communication, and timer management. Porting can be divided into two parts: CPU architecture porting and BSP (Board support package) porting .
@@ -8,7 +8,7 @@ This chapter will introduce CPU architecture porting and BSP porting. The CPU ar
 CPU Architecture Porting
 -----------
 
-There are many different CPU architectures in the embedded world, for example, Cortex-M, ARM920T, MIPS32, RISC-V, etc. In order to enable RT-Thread to run on different CPU architecture chips, RT-Thread provides a libcpu abstraction layer to adapt to different CPU architectures. The libcpu layer provides unified interfaces to the kernel, including global interrupt switches, thread stack initialization, context switching, and more. 
+There are many different CPU architectures in the embedded world, for example, Cortex-M, ARM920T, MIPS32, RISC-V, etc. In order to enable RT-Thread to run on different CPU architecture chips, RT-Thread provides a libcpu abstraction layer to adapt to different CPU architectures. The libcpu layer provides unified interfaces to the kernel, including global interrupt switches, thread stack initialization, context switching, and more.
 
 RT-Thread's libcpu abstraction layer provides a unified set of CPU architecture porting interfaces downwards. This part of the interface includes global interrupt switch functions, thread context switch functions, clock beat configuration and interrupt functions, Cache, and so on. The following table shows the interfaces and variables that the CPU architecture migration needs to implement.
 
@@ -63,7 +63,7 @@ Disable global interrupt
 rt_hw_interrupt_disable    PROC      ;PROC pseudoinstruction definition function
     EXPORT  rt_hw_interrupt_disable  ;EXPORT output defined function, similar to C language extern
     MRS     r0, PRIMASK              ;read the value of the PRIMASK register to the r0 register
-    CPSID   I                        ;disable global interrupt 
+    CPSID   I                        ;disable global interrupt
     BX      LR                       ;function renturn
     ENDP                             ;ENDP end of function
 ```
@@ -72,7 +72,7 @@ The above code first uses the MRS instruction to save the value of the PRIMASK r
 
 There are different conventions for different CPU architectures regarding how registers are managed during function calls and in interrupt handlers. A more detailed introduction to the use of registers for Cortex-M can be found in the official ARM manual, "*Procedure Call Standard for the ARM ® Architecture*."
 
-#### Enable Global Interrupt 
+#### Enable Global Interrupt
 
 In `rt_hw_interrupt_enable(rt_base_t level)`, the variable *level* is used as the state to be restored, overriding the global interrupt status of the chip.
 
@@ -173,9 +173,9 @@ The context switch from interrupt to thread can be represented by the following 
 
 ![Interrupt to Thread Switching](figures/10ths_env2.png)
 
-The hardware automatically saves the PSR, PC, LR, R12, R3-R0 registers of the *from* thread before entering the interrupt, and then triggers a PendSV exception. R11~R4 registers of the *from* thread are saved and R4~R11 registers of the *to* thread are restored in the PendSV exception handler. Finally, the hardware automatically restores the R0~R3, R12, PSR, PC, LR registers of the *to* thread after exiting the PendSV interrupt. 
+The hardware automatically saves the PSR, PC, LR, R12, R3-R0 registers of the *from* thread before entering the interrupt, and then triggers a PendSV exception. R11~R4 registers of the *from* thread are saved and R4~R11 registers of the *to* thread are restored in the PendSV exception handler. Finally, the hardware automatically restores the R0~R3, R12, PSR, PC, LR registers of the *to* thread after exiting the PendSV interrupt.
 
-Obviously, in the Cortex-M kernel, the rt_hw_context_switch() and rt_hw_context_switch_interrupt() have same functions, which is finishing saving and replying the remaining contexts in PendSV. So we just need to implement a piece of code to simplify the porting. 
+Obviously, in the Cortex-M kernel, the rt_hw_context_switch() and rt_hw_context_switch_interrupt() have same functions, which is finishing saving and replying the remaining contexts in PendSV. So we just need to implement a piece of code to simplify the porting.
 
 #### Implement rt_hw_context_switch_to()
 
@@ -246,7 +246,7 @@ The function rt_hw_context_switch() and the function rt_hw_context_switch_interr
 
 The rt_hw_context_switch() and rt_hw_context_switch_interrupt() implementations on the Cortex-M3 kernel (based on MDK) are shown in the following code:
 
-Implement rt_hw_context_switch()/rt_hw_context_switch_interrupt() 
+Implement rt_hw_context_switch()/rt_hw_context_switch_interrupt()
 
 ```c
 ;/*
@@ -329,7 +329,7 @@ PendSV_Handler   PROC
 switch_to_thread
     LDR     r1, =rt_interrupt_to_thread
     LDR     r1, [r1]
-    LDR     r1, [r1]                ; obtain the stack pointer of the thread to 
+    LDR     r1, [r1]                ; obtain the stack pointer of the thread to
 
     LDMFD   r1!, {r4 - r11}       ; restore the register value of the thread to in the stack of the thread
     MSR     psp, r1                 ; update the value of r1 to psp

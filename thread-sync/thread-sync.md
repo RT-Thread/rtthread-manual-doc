@@ -18,14 +18,14 @@ There are many ways to synchronize threads. The core idea is that **only one (or
 
 1) Call rt_hw_interrupt_disable() to enter the critical section and call rt_hw_interrupt_enable() to exit the critical section; see the *Global Interrupt Switch* in *Interrupt Management* for details.
 
-2)Call rt_enter_critical() to enter the critical section and call rt_exit_critical() to exit the critical section. 
+2)Call rt_enter_critical() to enter the critical section and call rt_exit_critical() to exit the critical section.
 
 This chapter introduces several synchronization methods: **semaphores,** **mutex**, and **event**. After learning this chapter, you will learn how to use semaphores, mutex, and event to synchronize threads.
 
 Semaphores
 ------
 
-Take parking lot as an example to understand the concept of semaphore: 
+Take parking lot as an example to understand the concept of semaphore:
 
 ①When the parking lot is empty, the administrator of the parking lot finds that there are a lot of empty parking spaces. And then, cars outside will enter the parking lot and get parking spaces.
 
@@ -65,7 +65,7 @@ Semaphore control block contains important parameters related to the semaphore a
 
 ![Interfaces Related to Semaphore](figures/06sem_ops.png)
 
-#### Create and Delete Semaphore 
+#### Create and Delete Semaphore
 
 When creating a semaphore, the kernel first creates a semaphore control block, then performs basic initialization on the control block. The following function interface is used to create a semaphore:
 
@@ -77,7 +77,7 @@ When creating a semaphore, the kernel first creates a semaphore control block, t
 
 When this function is called, the system will first allocate a semaphore object from the object manager and initialize the object, and then initialize the parent class IPC object and semaphore-related parts. Among parameters specified in the creation of semaphore, semaphore flag parameter determines the queuing way of how multiple threads wait when the semaphore is not available. When the RT_IPC_FLAG_FIFO (first in, first out) mode is selected, the waiting thread queue will be queued in a first in first out manner. The first thread that goes in will firstly obtain the waiting semaphore. When the RT_IPC_FLAG_PRIO (priority waiting) mode is selected, the waiting threads will be queued in order of priority.  Threads waiting with the highest priority will get the wait semaphore first. The following table describes the input parameters and return values for this function:
 
-Input parameters and return values of rt_sem_create() 
+Input parameters and return values of rt_sem_create()
 
 |Parameters          |Description                                                         |
 |--------------------|-------------------------------------------------------------------|
@@ -96,7 +96,7 @@ rt_err_t rt_sem_delete(rt_sem_t sem);
 
 When this function is called, the system will delete this semaphore. If there is a thread waiting for this semaphore when it is being deleted, the delete operation will first wake up the thread waiting on the semaphore (return value of the waiting thread is - RT_ERROR), then release the semaphore's memory resources. The following table describes the input parameters and return values for this function:
 
-Input parameters and return values of rt_sem_delete() 
+Input parameters and return values of rt_sem_delete()
 
 |Parameters|Description                        |
 |----------|----------------------------------|
@@ -117,7 +117,7 @@ rt_err_t rt_sem_init(rt_sem_t       sem,
 
 When this function is called, the system will initialize the semaphore object, then initialize the IPC object and parts related to the semaphore. The flag mentioned above in semaphore function creation can be used as the semaphore flag here.  The following table describes the input parameters and return values for this function:
 
-Input parameters and return values of rt_sem_init() 
+Input parameters and return values of rt_sem_init()
 
 |**Parameters**|**Description**                                                         |
 |----------|-------------------------------------------------------------------|
@@ -136,7 +136,7 @@ rt_err_t rt_sem_detach(rt_sem_t sem);
 
 After using this function, the kernel wakes up all threads suspended in the semaphore wait queue and then detaches the semaphore from the kernel object manager. The waiting thread that was originally suspended on the semaphore will get the return value of -RT_ERROR. The following table describes the input parameters and return values for this function:
 
- Input parameters and return values of rt_sem_detach() 
+ Input parameters and return values of rt_sem_detach()
 
 |Parameters|**Description**        |
 |----------|------------------|
@@ -165,7 +165,7 @@ When calling this function, if the value of the semaphore is zero, it means the 
 | \-RT_ETIMEOUT | Did not received semaphore after timeout |
 | \-RT_ERROR    | Other errors                                  |
 
-#### Obtain Semaphore without Waiting 
+#### Obtain Semaphore without Waiting
 
 When user does not want to suspend thread on the applied semaphore and wait,  the semaphore can be obtained using the wait-free mode , and the following function interface is used for obtaining the semaphore without waiting:
 
@@ -175,7 +175,7 @@ rt_err_t rt_sem_trytake(rt_sem_t sem);
 
 This function has the same effect as rt_sem_take(sem, 0),  which means when the semaphore resource instance requested by the thread is not available, it will not wait on the semaphore, instead it returns to -RT_ETIMEOUT directly. The following table describes the input parameters and return values for this function:
 
-  Input parameters and return values for rt_sem_trytake() 
+  Input parameters and return values for rt_sem_trytake()
 
 |**Parameter**     |Description        |
 |---------------|------------------|
@@ -192,9 +192,9 @@ Semaphore is released to wake up the thread that suspends on the semaphore. To r
 rt_err_t rt_sem_release(rt_sem_t sem);
 ```
 
-For example, when semaphore value is zero and a thread is waiting for this semaphore, releasing the semaphore will wake up the first thread waiting in the thread queue of the semaphore, and this thread will obtain the semaphore; otherwise value of the semaphore will plus 1. The following table describes the input parameters and return values of the function: 
+For example, when semaphore value is zero and a thread is waiting for this semaphore, releasing the semaphore will wake up the first thread waiting in the thread queue of the semaphore, and this thread will obtain the semaphore; otherwise value of the semaphore will plus 1. The following table describes the input parameters and return values of the function:
 
- Input parameters and return values of rt_sem_release() 
+ Input parameters and return values of rt_sem_release()
 
 |**Parameters**|Description        |
 |----------|------------------|
@@ -346,9 +346,9 @@ Another application routine for semaphores is as follows:
 
 To be more accurate, the producer consumer model is  actually a "producer-consumer-warehouse" model. We call the available spots in the warehouse "empty seats", and once an available spot ("empty seat") is taken, we then call it a "full seat". For this model, the following points should be clarified:
 1、The producer only produces when the warehouse is not full; the producer will stop production when the warehouse is full.
-2、The consumer can consume only when there are products in the warehouse; consumers will wait if the warehouse is empty. 
-3、When the consumer consumes, the warehouse is not full anymore, and then the producer will be notified to produce again. 
-4、The producer should notify the consumer to consumer after it produces consumable products. 
+2、The consumer can consume only when there are products in the warehouse; consumers will wait if the warehouse is empty.
+3、When the consumer consumes, the warehouse is not full anymore, and then the producer will be notified to produce again.
+4、The producer should notify the consumer to consumer after it produces consumable products.
 
 
 This routine will use two threads and three semaphores to implement examples of producers and consumers.   Among them
@@ -544,11 +544,11 @@ This routine can be understood as the process of producers producing products an
 
 2）Lock protection; read the number produced by the producer from array and add it to the last number; then unlock it;
 
-3）Release 1 "empty seat" (take one product from the warehouse, then there is one more "empty seat" in the warehouse), add 1 to the number of "empty seats". 
+3）Release 1 "empty seat" (take one product from the warehouse, then there is one more "empty seat" in the warehouse), add 1 to the number of "empty seats".
 
 The producer generates 10 numbers in turn, and the consumers take them away in turn and sum the values of the 10 numbers. Semaphore lock protects array critical region resources, ensuring the exclusivity of number taking for the consumers each time and achieving inter-thread synchronization.
 
-### Semaphore Usage Occasion 
+### Semaphore Usage Occasion
 
 Semaphores is a very flexible way to synchronize and can be used in a variety of situations, like forming locks, synchronization, resource counts, etc. It can also be conveniently used for synchronization between threads and threads, interrupts and threads.
 
@@ -665,7 +665,7 @@ Input parameters and return values of rt_mutex_delete()
 |**Return**| ——               |
 | RT_EOK   | Deleted successfully |
 
-#### Initialize and Detach Mutex 
+#### Initialize and Detach Mutex
 
 The memory of a static mutex object is allocated by the compiler during system compilation, and is usually placed in a read-write data segment or an uninitialized data segment. Before using such static mutex objects, you need to initialize them first. To initialize the mutex, use the following function interface:
 
@@ -701,7 +701,7 @@ Input parameters and return values for rt_mutex_detach()
 |**Return**| ——               |
 | RT_EOK   | Successful |
 
-#### Obtain Mutex 
+#### Obtain Mutex
 
 Once the thread obtains the mutex, the thread has ownership of the mutex, that is, a mutex can only be held by one thread at a time. To obtain the mutex, use the following function interface:
 
@@ -722,7 +722,7 @@ Input parameters and return values of rt_mutex_take()
 | \-RT_ETIMEOUT | Timeout |
 | \-RT_ERROR    | Failed to obtain |
 
-#### Release Mutex 
+#### Release Mutex
 
 When a thread completes the access to a mutually exclusive resource, it should release the mutex it occupies as soon as possible, so that other threads can obtain the mutex in time. To release the mutex, use the following function interface:
 
@@ -907,7 +907,7 @@ static void thread2_entry(void *parameter)
     rt_thread_mdelay(50);
 
     /*
-     * Trying to hold a mutex lock. At this point, thread 3 has the mutex lock, so the priority level of thread 3 should be raised 
+     * Trying to hold a mutex lock. At this point, thread 3 has the mutex lock, so the priority level of thread 3 should be raised
      * to the same level of priority as thread 2
      */
     result = rt_mutex_take(mutex, RT_WAITING_FOREVER);
@@ -1018,7 +1018,7 @@ Event set is also one of the mechanisms for synchronization between threads. An 
 
 ①P1 is taking a bus to a certain place, only one type of bus can reach the destination. P1 can leave for the destination once that bus arrives.
 
-②P1 is taking a bus to a certain place, 3 types of buses can reach the destination. P1 can leave for the destination once any 1 of the 3 types of bus arrives. 
+②P1 is taking a bus to a certain place, 3 types of buses can reach the destination. P1 can leave for the destination once any 1 of the 3 types of bus arrives.
 
 ③P1 is traveling with P2 to a certain place together, P1 can't leave for the destination unless two conditions are met. These two conditions are “P2 arrives at the bus stop” and “bus arrives at the bus stop”.
 
@@ -1032,7 +1032,7 @@ The event set defined by RT-Thread has the following characteristics:
 
 1) Events are related to threads only, and events are independent of each other: each thread can have 32 event flags, recorded with a 32-bit unsigned integer, each bit representing an event;
 
-2) Event is only used for synchronization and does not provide data transfer functionality; 
+2) Event is only used for synchronization and does not provide data transfer functionality;
 
 3) Events are not queuing, that is, sending the same event to the thread multiple times (if the thread has not had time read it), the effect is equivalent to sending only once.
 
@@ -1042,7 +1042,7 @@ In RT-Thread, each thread has an event information tag with three attributes. Th
 
 As shown in the figure above, the first and 30th bits of the event flag of thread #1 are set. If the event information flag is set to logical AND, it means that thread #1 will be triggered to wake up only after both event 1 and event 30 occur. If the event information flag is set to logical OR, the occurrence of either event 1 or event 30 will trigger to wake up thread #1. If the message flag also sets the clear flag bit, this means event 1 and event 30 will be automatically cleared to zero when thread #1 wakes up, otherwise the event flag will still be present (set to 1).
 
-### Event Set Control Block 
+### Event Set Control Block
 
 In RT-Thread, event set control block is a data structure used by the operating system to manage events, represented by the structure struct rt_event. Another C expression, rt_event_t, represents the handle of the event set, and the implementation in C language is a pointer to the event set control block. See the following code for a detailed definition of the event set control block structure:
 
@@ -1066,7 +1066,7 @@ Event set control block contains important parameters related to the event set a
 
 ![Event Related Interface](figures/06event_ops.png)
 
-#### Create and Delete Event Set 
+#### Create and Delete Event Set
 
 When creating an event set, the kernel first creates an event set control block, and then performs basic initialization on the event set control block. The event set is created using the following function interface:
 
@@ -1102,7 +1102,7 @@ Input parameters and return values of rt_event_delete()
 |**Return**| ——               |
 | RT_EOK   | Success        |
 
-#### Initialize and Detach Event Set 
+#### Initialize and Detach Event Set
 
 The memory of a static event set object is allocated by the compiler during system compilation, and is usually placed in a read-write data segment or an uninitialized data segment. Before using a static event set object, you need to initialize it first. The initialization event set uses the following function interface:
 
@@ -1138,7 +1138,7 @@ Input parameters and return values for rt_event_detach()
 |**Return**| ——               |
 | RT_EOK   | Success        |
 
-#### Send Event 
+#### Send Event
 
 The send event function can send one or more events in the event set as follows:
 
@@ -1322,7 +1322,7 @@ thread1 leave.
 
 The routine demonstrates how to use the event set. Thread 1 receives events twice before and after, using the "logical OR" and "logical AND" respectively.
 
-### Occasions to Use Event Set 
+### Occasions to Use Event Set
 
 Event sets can be used in a variety of situations, and it can replace semaphores to some extent for inter-thread synchronization. A thread or interrupt service routine sends an event to the event set object, and the waiting thread is awaken and the corresponding event is processed.  However, unlike semaphore, the event transmission operation is not cumulative until the event is cleared, and the release actions of semaphore are cumulative. Another feature of the event is that the receiving thread can wait for multiple events, meaning multiple events correspond to one thread or multiple threads. At the same time, according to thread waiting parameters, you can choose between a "logical OR" trigger or a "logical AND" trigger. This feature is not available for semaphores, etc. The semaphore can only recognize a single release action, and cannot wait for multiple types of release at the same time. The following figure shows the multi-event receiving diagram:
 

@@ -47,8 +47,8 @@ rt_device_t rt_device_find(const char* name);
 Generally, the name of the uart device registered to the system is uart0, uart1, etc. samples are as follows:
 
 ```c
-#define SAMPLE_UART_NAME       "uart2"	/* uart device name */
-static rt_device_t serial;				/* uart device handle */	
+#define SAMPLE_UART_NAME       "uart2"  /* uart device name */
+static rt_device_t serial;              /* uart device handle */
 /* Find uart device*/
 serial = rt_device_find(SAMPLE_UART_NAME);
 ```
@@ -79,7 +79,7 @@ oflags parameters support the following values (Use OR logic to support multiple
 #define RT_DEVICE_FLAG_DMA_RX       0x200     /* DMA receiving mode */
 /* Receive mode function */
 #define RT_DEVICE_FLAG_INT_TX       0x400     /* Interrupt receive mode*/
-#define RT_DEVICE_FLAG_DMA_TX       0x800     /* DMA receive mode	 */
+#define RT_DEVICE_FLAG_DMA_TX       0x800     /* DMA receive mode    */
 ```
 
 There are three modes of uart data receiving and sending: interrupt mode, polling mode and DMA mode. When used, only one of the three modes can be selected. If the open parameter oflag of the serial port does not specify the use of interrupt mode or DMA mode, the polling mode is used by default.
@@ -93,8 +93,8 @@ The stream mode `RT_DEVICE_FLAG_STREAM` can be used with the receive and send mo
 An example of using  a uart device in **interrupt receive mode and polling mode** as follows:
 
 ```c
-#define SAMPLE_UART_NAME       "uart2"	/* uart device name */
-static rt_device_t serial;				/* uart device handle */	
+#define SAMPLE_UART_NAME       "uart2"  /* uart device name */
+static rt_device_t serial;              /* uart device handle */
 /* find uart device */
 serial = rt_device_find(SAMPLE_UART_NAME);
 
@@ -137,14 +137,14 @@ rt_err_t rt_device_control(rt_device_t dev, rt_uint8_t cmd, void* arg);
 ```c
 struct serial_configure
 {
-    rt_uint32_t baud_rate;			/* Baudrate */
-    rt_uint32_t data_bits    :4;	/* Data bit */
-    rt_uint32_t stop_bits    :2;	/* Stop bit */
-    rt_uint32_t parity       :2;	/* Parity bit */
-    rt_uint32_t bit_order    :1;	/* Prioritized by order */
-    rt_uint32_t invert       :1;	/* Mode */
-    rt_uint32_t bufsz        :16;	/* Receive data buffer size */
-    rt_uint32_t reserved     :4;	/* Reserved bit */
+    rt_uint32_t baud_rate;          /* Baudrate */
+    rt_uint32_t data_bits    :4;    /* Data bit */
+    rt_uint32_t stop_bits    :2;    /* Stop bit */
+    rt_uint32_t parity       :2;    /* Parity bit */
+    rt_uint32_t bit_order    :1;    /* Prioritized by order */
+    rt_uint32_t invert       :1;    /* Mode */
+    rt_uint32_t bufsz        :16;   /* Receive data buffer size */
+    rt_uint32_t reserved     :4;    /* Reserved bit */
 };
 ```
 
@@ -199,8 +199,8 @@ The configuration parameters provided by RT-Thread can be defined as the followi
 #define BIT_ORDER_LSB                   0
 #define BIT_ORDER_MSB                   1
 /* Mode canbe defined as */
-#define NRZ_NORMAL                      0 	/* normal mode */
-#define NRZ_INVERTED                    1 	/* inverted mode */
+#define NRZ_NORMAL                      0   /* normal mode */
+#define NRZ_INVERTED                    1   /* inverted mode */
 /* Default size of the receive data buffer */
 #define RT_SERIAL_RB_BUFSZ              64
 ```
@@ -214,8 +214,8 @@ When the uart device is opened using interrupt receive mode, the uart driver fra
 A sample for configuring uart hardware parameters such as data bits, check bits, stop bits, and so on are shown below：
 
 ```c
-#define SAMPLE_UART_NAME       "uart2"	/* uart device's name */
-static rt_device_t serial;				/* uart device handle */
+#define SAMPLE_UART_NAME       "uart2"  /* uart device's name */
+static rt_device_t serial;              /* uart device handle */
 struct serial_configure config = RT_SERIAL_CONFIG_DEFAULT; /* Configuration parameters */
 /* Find uart devices */
 serial = rt_device_find(SAMPLE_UART_NAME);
@@ -254,8 +254,8 @@ Calling this function will write the data in the `buffer` to the `dev` device, t
 The sample program for writing data to the serial port is as follows:
 
 ```c
-#define SAMPLE_UART_NAME       "uart2"	/* uart device's name */
-static rt_device_t serial;				/* uart device handle */
+#define SAMPLE_UART_NAME       "uart2"  /* uart device's name */
+static rt_device_t serial;              /* uart device handle */
 char str[] = "hello RT-Thread!\r\n";
 struct serial_configure config = RT_SERIAL_CONFIG_DEFAULT; /* Configuration parameter */
 /*find uart device */
@@ -308,8 +308,8 @@ If the uart is opened in DMA receive mode, the callback function is called when 
 Normally the receiving callback function can send a semaphore or event to notify the serial port data processing thread that data has arrived. The example is as follows:
 
 ```c
-#define SAMPLE_UART_NAME       "uart2"	/* uart device name */
-static rt_device_t serial;				/* uart device handle */
+#define SAMPLE_UART_NAME       "uart2"  /* uart device name */
+static rt_device_t serial;              /* uart device handle */
 static struct rt_semaphore rx_sem;      /* The semaphore used to receive the message */
 
 /* Receive data callback function */
@@ -360,7 +360,7 @@ Read data offset: pos is not valid for character devices. This parameter is main
 An example of using the interrupt receive mode with the receive callback function is as follows:
 
 ```c
-static rt_device_t serial;			  /* uart device handle */
+static rt_device_t serial;            /* uart device handle */
 static struct rt_semaphore rx_sem;    /* Semaphore used to receive messages */
 
 /* Thread receiving data */
@@ -401,7 +401,7 @@ rt_err_t rt_device_close(rt_device_t dev);
 
 Use the `rt_device_close()` interface and `rt_device_open()` interface in pair. When you open the device, you need to close the device once, so that the device will be completely shut down, otherwise the device will remain open.
 
-## Examples Of Using UART Device 
+## Examples Of Using UART Device
 
 ### Interrupt Receiving And Polling Send
 
@@ -618,7 +618,7 @@ static int uart_dma_sample(int argc, char *argv[])
                sizeof(struct rx_msg),    /* The maximum length of a message*/
                sizeof(msg_pool),         /* The size of the message pool */
                RT_IPC_FLAG_FIFO);        /* If there are multiple threads waiting, assign messages according to the order. */
-    
+
     /* Open the uart device in DMA receive and polling send mode */
     rt_device_open(serial, RT_DEVICE_FLAG_DMA_RX);
     /* Set the receive callback function */

@@ -10,15 +10,15 @@ Mailbox service is a typical inter-thread communication method in real-time oper
 
 Thread 1 here can also be extended to multiple threads. For example, there are three threads, thread 1 detects and sends the button state, thread 2 detects and sends the ADC information, and thread 3 performs different operations according to the type of information received.
 
-### Mailbox Working Mechanism 
+### Mailbox Working Mechanism
 
-The mailbox of the RT-Thread operating system is used for inter-thread communication, which is characterized by low overhead and high efficiency. Each message in the mailbox can only hold a fixed 4 bytes(for a 32-bit processing system, the pointer is 4 bytes in size, so an email can hold only one pointer). A typical mailbox is also called message exchange. As shown in the following figure, a thread or an interrupt service routine sends a 4-byte message to a mailbox, and one or more threads can receive and process the message from the mailbox. 
+The mailbox of the RT-Thread operating system is used for inter-thread communication, which is characterized by low overhead and high efficiency. Each message in the mailbox can only hold a fixed 4 bytes(for a 32-bit processing system, the pointer is 4 bytes in size, so an email can hold only one pointer). A typical mailbox is also called message exchange. As shown in the following figure, a thread or an interrupt service routine sends a 4-byte message to a mailbox, and one or more threads can receive and process the message from the mailbox.
 
 ![Mailbox Working Mechanism Diagram](figures/07mb_work.png)
 
 The sending process of the non-blocking mode mails can be safely used in ISR. It is an effective way for the thread, the interrupt service, and the timer to send a message to the thread. In general, the receiving of the mails  can be a blocked process, depending on whether there is a message in the mailbox and the timeout set when the message was received. When there is no mail in the mailbox and the set timeout is not 0, the receive of the mails will become blocked. In such cases, the mails can only be received by threads.
 
-When a thread sends a message to a mailbox, if the mailbox is not full, the message will be copied to the mailbox. If the mailbox is full, the thread sending the message can set a timeout, and choose to wait and suspend or return directly - RT_EFULL. If the thread sending the message chooses to suspend and wait, then when the mails in the mailbox are received and space is left open again, the thread sending the message will be awaken and will continue to send. 
+When a thread sends a message to a mailbox, if the mailbox is not full, the message will be copied to the mailbox. If the mailbox is full, the thread sending the message can set a timeout, and choose to wait and suspend or return directly - RT_EFULL. If the thread sending the message chooses to suspend and wait, then when the mails in the mailbox are received and space is left open again, the thread sending the message will be awaken and will continue to send.
 
 When a thread receives a message from a mailbox, if the mailbox is empty, the thread receiving the message can choose whether to set a timeout or wait and suspend until a new message is received to be awaken. When the set timeout is up and the mailbox still hasn't received the message, the thread that chose to wait till timeout will be awaken and return - RT_ETIMEOUT. If there are messages in the mailbox, then the thread receiving the message will copy the 4-byte message in the mailbox to the receiving cache.
 
@@ -123,7 +123,7 @@ rt_err_t rt_mb_detach(rt_mailbox_t mb);
 
 After using this function interface, the kernel wakes up all the threads suspended on the mailbox (the threads return -RT_ERROR), and then detaches the mailbox objects from the kernel object manager. The following table describes the input parameters and return values for this function:
 
-Input parameters and return values for rt_mb_detach() 
+Input parameters and return values for rt_mb_detach()
 
 |**Parameters**|**Description**      |
 |----------|----------------|
@@ -141,7 +141,7 @@ rt_err_t rt_mb_send (rt_mailbox_t mb, rt_uint32_t value);
 
 The message sent can be any data 32-bit formatted, an integer value or a pointer pointing to the buffer. When the mailbox is fully filled with mails, the thread or ISR that sent the mail will receive a return value of -RT_EFULL. The following table describes the input parameters and return values for this function:
 
-Input parameters and return values of rt_mb_send() 
+Input parameters and return values of rt_mb_send()
 
 |**Parameters**  |**Description**      |
 |------------|----------------|
@@ -151,7 +151,7 @@ Input parameters and return values of rt_mb_send()
 | RT_EOK     | Sent successfully |
 | \-RT_EFULL | The mailbox is filled |
 
-#### Send Mails with Waiting 
+#### Send Mails with Waiting
 
 Users can also send mails to specified mailbox through the following function interface:
 
@@ -341,7 +341,7 @@ The routine demonstrates how to use the mailbox. Thread 2 sends the mails, for  
 
 ### Occasions to Use Mails
 
-Mailbox is a simple inter-thread messaging method, which is characterized by low overhead and high efficiency. In the implementation of the RT-Thread operating system, a 4-byte message can be delivered at a time, and the mailbox has certain storage capabilities, which can cache a certain number of messages (the number of messages is determined by the capacity specified when creating and initializing the mailbox). The maximum length of a message in a mailbox is 4 bytes, so the mailbox can be used for messages less than 4 bytes. Since on the 32 system, 4 bytes can be placed right on a pointer, when a larger message needs to be transferred between threads, a pointer pointing to a buffer can be sent as an mail to the mailbox, which means the mailbox can also delivery a pointer. For example, 
+Mailbox is a simple inter-thread messaging method, which is characterized by low overhead and high efficiency. In the implementation of the RT-Thread operating system, a 4-byte message can be delivered at a time, and the mailbox has certain storage capabilities, which can cache a certain number of messages (the number of messages is determined by the capacity specified when creating and initializing the mailbox). The maximum length of a message in a mailbox is 4 bytes, so the mailbox can be used for messages less than 4 bytes. Since on the 32 system, 4 bytes can be placed right on a pointer, when a larger message needs to be transferred between threads, a pointer pointing to a buffer can be sent as an mail to the mailbox, which means the mailbox can also delivery a pointer. For example,
 
 ```c
 struct msg
@@ -776,7 +776,7 @@ void send_op(void *data, rt_size_t length)
 }
 ```
 
-Note that in the above code, the data content of a local variable is sent to the message queue. In the thread that receives message, the same structure that receives messages using local variables is used: 
+Note that in the above code, the data content of a local variable is sent to the message queue. In the thread that receives message, the same structure that receives messages using local variables is used:
 
 ```c
 void message_handler()
@@ -817,10 +817,10 @@ struct msg
 
 The first type of message uses a mailbox as a confirmation flag, while the second type of message uses a semaphore as a confirmation flag. The mailbox is used as a confirmation flag, which means that the receiving thread can notify some  status values to the thread sending messages; and the semaphore is used as a confirmation flag that can only notify the thread sending messages in a single way, and the message has been confirmed to be received.
 
-Signal 
+Signal
 ----
 
-A signal (also known as a soft interrupt signal), from a software perspective, is a simulation of interrupt mechanism. When it comes to its principle, thread receiving a signal is similar to processor receiving an interrupt request.  
+A signal (also known as a soft interrupt signal), from a software perspective, is a simulation of interrupt mechanism. When it comes to its principle, thread receiving a signal is similar to processor receiving an interrupt request.
 
 ### Signal Working Mechanism
 
@@ -830,7 +830,7 @@ The essence of signal is soft interrupt, which is used to notify the thread that
 
 The thread that receives the signals has different processing methods for various signals, and these methods can be divided into three categories:
 
-The first one is an interrupt-like processing program. For signals that need to be processed, the thread can specify a function to process. 
+The first one is an interrupt-like processing program. For signals that need to be processed, the thread can specify a function to process.
 
 The second one is to ignore a signal and do nothing about it, as if it had not happened.
 
@@ -842,7 +842,7 @@ As shown in the following figure, suppose that thread 1 needs to process the sig
 
 When the signal is passed to thread 1, if it is suspended, it will be switched to ready to process the corresponding signal. If it is running, it will create a new stack frame space on its current thread stack to process the corresponding signal. It should be noted that the thread stack size used will also increase accordingly.
 
-### Management of Signals 
+### Management of Signals
 
 Operations on signals include: install signal, block signal, unblock signal, send signal, and wait for signal. The interfaces of the signal are shown in the following figure:
 
@@ -930,7 +930,7 @@ Input parameters and return values for rt_thread_kill()
 
 #### Wait for Signal
 
-Wait for the arrival of the set signal. If this signal did not arrive, suspend the thread until the signal arrival or the wait until time exceeds the specified timeout. If the signal arrived, the pointer pointing to the signal body is stored in si, as follows is the function to wait for signal. 
+Wait for the arrival of the set signal. If this signal did not arrive, suspend the thread until the signal arrival or the wait until time exceeds the specified timeout. If the signal arrived, the pointer pointing to the signal body is stored in si, as follows is the function to wait for signal.
 
 ```c
 int rt_signal_wait(const rt_sigset_t *set,

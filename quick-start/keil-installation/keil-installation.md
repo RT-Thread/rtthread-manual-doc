@@ -2,7 +2,7 @@
 
 Before running the RT-Thread operating system, we need to install MDK-ARM 5.24 (either official or evaluation version, version 5.14 and above), this version is also a relatively new version. This version can provide relatively complete debugging functions. Here, we are using evaluation version 5.24 of 16k compiled code limit. If you want to remove the 16k compiled code limit, please purchase the official MDK-ARM.
 
-Firstly, download the MDK-ARM evaluation version from the official website of www.keil.com: 
+Firstly, download the MDK-ARM evaluation version from the official website of www.keil.com:
 [http://www.keil.com/download/](http://www.keil.com/download/)
 
 When downloading, you need to fill in some basic information, please fill in the corresponding complete information, and then start downloading. After it is downloaded, double-click the mouse to start the installation, you will see the software installation as shown:
@@ -21,7 +21,7 @@ Click "Browse..." to select the installation directory of MDK-ARM or directly in
 
 ![Fourth Step](./figures/4.png)
 
-Input your name after "First Name", input your last name after "Last Name", input your company name after "Company Name", input your email address after "E-mail", and then click "Next>> " for the installation. Wait for a while for the installation to finish and you will see the following: 
+Input your name after "First Name", input your last name after "Last Name", input your company name after "Company Name", input your email address after "E-mail", and then click "Next>> " for the installation. Wait for a while for the installation to finish and you will see the following:
 
 ![Fifth Step](./figures/12.png)
 

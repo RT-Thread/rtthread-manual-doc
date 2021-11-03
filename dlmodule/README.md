@@ -26,7 +26,7 @@ When you want to use the dynamic module, you need to open the corresponding opti
 ```c
    RT-Thread Components  --->
        POSIX layer and C standard library  --->
-	       [*] Enable dynamic module with dlopen/dlsym/dlclose feature
+           [*] Enable dynamic module with dlopen/dlsym/dlclose feature
 ```
 
 Also open the configuration options of the file system:
@@ -34,7 +34,7 @@ Also open the configuration options of the file system:
 ```c
    RT-Thread Components  --->
         Device virtual file system  --->
-	           [*] Using device virtual file system
+               [*] Using device virtual file system
 ```
 
 The configuration parameters required for dynamic module compilation are set in *rtconfig.py* file corresponding to bsp:
@@ -58,7 +58,7 @@ The relevant explanation is as follows:
 
 Basically, these compilation configuration parameters for the ARM9, Cortex-A, and Cortex-M series are the same.
 
-The kernel firmware also exports some function APIs to the dynamic module via  `RTM(function)`. All exported symbols information in firmware can be listed by command A under MSH: 
+The kernel firmware also exports some function APIs to the dynamic module via  `RTM(function)`. All exported symbols information in firmware can be listed by command A under MSH:
 
 ```
 list_symbols

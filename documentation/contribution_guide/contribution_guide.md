@@ -30,7 +30,7 @@ Fork the RT-Thread/rt-thread repository into your git repository.
 
 ### Clone
 
-In your repository, copy the repository links after your fork: 
+In your repository, copy the repository links after your fork:
 
 ![clone rt-thread from your repo](figures/cloneformgit2.png)
 
@@ -52,7 +52,7 @@ git checkout -b YourBranchName
 
 For example, create a branch named "dev": `git checkout -b dev`.
 
-### Developing 
+### Developing
 
 Modify bugs and submit new functional code. For example, suppose the developer adds a USB driver:
 
@@ -80,7 +80,7 @@ git commit -m "Describe your submission here"
 
 ### Push to Your Remote Repository
 
-Push the modified content to the branch of your remote repository. It is recommended that the branch name of the remote repository be consistent with the local branch name.Use the following command to push: 
+Push the modified content to the branch of your remote repository. It is recommended that the branch name of the remote repository be consistent with the local branch name.Use the following command to push:
 
 ```
 git push origin YourBranchName
@@ -168,4 +168,4 @@ git pull rtt master
 
 * Refer to the [*GitHub - Contributing to a Project*](https://git-scm.com/book/en/v2/GitHub-Contributing-to-a-Project)  section of the official Git document for details.
 
-  
+

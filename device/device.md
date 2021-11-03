@@ -2,7 +2,7 @@
 
 Most embedded systems include some I/O (Input/Output) devices, data displays on instruments, serial communication on industrial devices, Flash or SD cards for saving data on data acquisition devices,as well as Ethernet interfaces for network devices, are examples of I/O devices that are commonly seen in embedded systems.
 
-This chapter describes how RT-Thread manages different I/O devices. 
+This chapter describes how RT-Thread manages different I/O devices.
 
 ## I/O Device Introduction
 
@@ -57,9 +57,9 @@ struct rt_device
     rt_err_t (*rx_indicate)(rt_device_t dev, rt_size_t size);
     rt_err_t (*tx_complete)(rt_device_t dev, void *buffer);
 
-    const struct rt_device_ops *ops;	/* device operate methods */
+    const struct rt_device_ops *ops;    /* device operate methods */
 
-	/* device's private data */
+    /* device's private data */
     void *user_data;
 };
 typedef struct rt_device *rt_device_t;
@@ -95,7 +95,7 @@ A block device transfers one data block at a time, for example 512 bytes data at
 
 When the system serves a write operation with a large amount of data, the device driver must first divide the data into multiple packets, each with the data size specified by the device. In the actual process, the last part of the data size may be smaller than the normal device block size. Each block in the above figure is written to the device using a separate write request, and the first three are directly written. However, the last data block size is smaller than the device block size, and the device driver must process the last data block differently than the first 3 blocks. Normally, the device driver needs to first perform a read operation of the corresponding device block, then overwrite the write data onto the read data, and then write the "composited" data block back to the device as a whole block. . For example, for block 4 in the above figure, the driver needs to read out the device block corresponding to block 4, and then overwrite the data to be written to the data read from the device block, and merge them into a new block. Finally write back to the block device.
 
-## Create and Register I/O Device 
+## Create and Register I/O Device
 
 The driver layer is responsible for creating device instances and registering them in the I/O Device Manager. You can create device instances in a statically declared manner or dynamically create them with the following interfaces:
 
@@ -148,7 +148,7 @@ void rt_device_destroy(rt_device_t device);
 |----------|----------|
 | device   | device handle |
 
-After the device is created, it needs to be registered to the I/O Device Manager for the application to access. The functions for registering the device are as follows: 
+After the device is created, it needs to be registered to the I/O Device Manager for the application to access. The functions for registering the device are as follows:
 
 ```c
 rt_err_t rt_device_register(rt_device_t dev, const char* name, rt_uint8_t flags);
@@ -163,7 +163,7 @@ rt_err_t rt_device_register(rt_device_t dev, const char* name, rt_uint8_t flags)
 | RT_EOK     | registration success |
 | -RT_ERROR | registration failed, dev is empty or name already exists |
 
->It should be avoided to repeatedly register registered devices and to register devices with the same name. 
+>It should be avoided to repeatedly register registered devices and to register devices with the same name.
 
 flags parameters support the following parameters (multiple parameters can be supported in OR logic):
 
@@ -306,8 +306,8 @@ oflags supports the following parameters:
 #define RT_DEVICE_OFLAG_CLOSE 0x000   /* device was already closed(internal use)*/
 #define RT_DEVICE_OFLAG_RDONLY 0x001  /* open the device in read-only mode */
 #define RT_DEVICE_OFLAG_WRONLY 0x002  /* open the device in write-only mode */
-#define RT_DEVICE_OFLAG_RDWR 0x003	  /* open the device in read-and_write mode */
-#define RT_DEVICE_OFLAG_OPEN 0x008 	  /* device was already closed(internal use) */
+#define RT_DEVICE_OFLAG_RDWR 0x003    /* open the device in read-and_write mode */
+#define RT_DEVICE_OFLAG_OPEN 0x008    /* device was already closed(internal use) */
 #define RT_DEVICE_FLAG_STREAM 0x040   /* open the device in stream mode */
 #define RT_DEVICE_FLAG_INT_RX 0x100   /* open the device in interrupt reception mode */
 #define RT_DEVICE_FLAG_DMA_RX 0x200   /* open the device in DMA mode */

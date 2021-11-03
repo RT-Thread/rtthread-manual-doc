@@ -381,7 +381,7 @@ The AT Client initialization function, which belongs to the application layer fu
 
 ### AT Client data receiving and sending ###
 
-The main function of the AT Client is to send AT commands, receive data, and parse data. The following is an introduction to the processes and APIs related to AT Client data reception and transmission. 
+The main function of the AT Client is to send AT commands, receive data, and parse data. The following is an introduction to the processes and APIs related to AT Client data reception and transmission.
 
 Related structure definition:
 
@@ -406,11 +406,11 @@ typedef struct at_response *at_response_t;
 
 In the AT component, this structure is used to define a control block for AT command response data, which is used to store or limit the data format of the AT command response data.
 
--  `buf` is used to store the received response data. Note that the data stored in the buf is not the original response data, but the data of the original response data removal terminator (`"\r\n"`). Each row of data in the buf is split by '\0' to make it easy to get data by row. 
+-  `buf` is used to store the received response data. Note that the data stored in the buf is not the original response data, but the data of the original response data removal terminator (`"\r\n"`). Each row of data in the buf is split by '\0' to make it easy to get data by row.
 - `buf_size`  is a user-defined length of the received data that is most supported by this response. The length of the return value is defined by the user according to his own command.
 - `line_num` is the number of rows that the user-defined response data needs to receive. **If there is no response line limit requirement, it can be set to 0.**
 - `line_counts` is used to record the total number of rows of this response data.
-- `timeout` is the user-defined maximum response time for this response data.  
+- `timeout` is the user-defined maximum response time for this response data.
 
 `buf_size`、`line_num`、`timeout` parameters in the structure are restricted conditions, which are set when the structure is created, and other parameters are used to store data parameters for later data analysis.
 

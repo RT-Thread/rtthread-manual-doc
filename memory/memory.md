@@ -3,7 +3,7 @@ Memory Management
 
 In a computing system, there are usually two types of memory space: internal memory space and external memory space. The internal memory is quick to access and can be accessed randomly according to the variable address. It is what we usually call RAM (Random-Access Memory) and can be understood as the computer's memory. In the external memory, the content stored is relatively fixed, and the data will not be lost even after the power is turned off. It is what we usually call ROM (Read Only Memory) and can be understood as the hard disk of the computer.
 
-In a computer system, variables and intermediate data are generally stored in RAM, and they are only transferred from RAM to CPU for calculation when actually used. The memory size required by some data needs to be determined according to the actual situation during the running of the program, which requires the system to have the ability to dynamically manage the memory space. User applies to the system when he needs a block of memory space, then the system selects a suitable memory space to allocate to the user. After the user finishes using it, the memory space is released back to the system which enables the system to recycle the memory space. 
+In a computer system, variables and intermediate data are generally stored in RAM, and they are only transferred from RAM to CPU for calculation when actually used. The memory size required by some data needs to be determined according to the actual situation during the running of the program, which requires the system to have the ability to dynamically manage the memory space. User applies to the system when he needs a block of memory space, then the system selects a suitable memory space to allocate to the user. After the user finishes using it, the memory space is released back to the system which enables the system to recycle the memory space.
 
 This chapter introduces two kinds of memory management methods in RT-Thread, namely dynamic memory heap management and static memory pool management. After learning this chapter, readers will understand the memory management principle and usage of RT-Thread.
 
@@ -12,13 +12,13 @@ Memory Management Functional Features
 
 Because time requirements are very strict in real-time systems, memory management is often much more demanding than in general-purpose operating systems:
 
-1) Time for allocating memory must be deterministic. The general memory management algorithm is to find a free memory block that is compatible with the data according to the length of the data to be stored, and then store the data therein. The time it takes to find such a free block of memory is uncertain, but for real-time systems, this is unacceptable. Because real-time system requires that the allocation process of the memory block is completed within a predictable certain time, otherwise the response of the real-time task to the external event will become undeterminable. 
+1) Time for allocating memory must be deterministic. The general memory management algorithm is to find a free memory block that is compatible with the data according to the length of the data to be stored, and then store the data therein. The time it takes to find such a free block of memory is uncertain, but for real-time systems, this is unacceptable. Because real-time system requires that the allocation process of the memory block is completed within a predictable certain time, otherwise the response of the real-time task to the external event will become undeterminable.
 
-2) As memory is constantly being allocated and released, the entire memory area will produce more and more fragments (while using memory, some memory is applied, some of which are released, resulting in some small memory blocks in the memory space,  these small memory blocks have inconsecutive addresses and cannot be allocated as a whole large block of memory.) There is enough free memory in the system, but because their addresses are  inconsecutive, they cannot form a continuous block of complete memory, which will make the program unable to apply for large memory. For general-purpose systems, this inappropriate memory allocation algorithm can be solved by rebooting the system (once every month or once a few months). But it is unacceptable for embedded systems that need to work continuously in the field work all the year round. 
+2) As memory is constantly being allocated and released, the entire memory area will produce more and more fragments (while using memory, some memory is applied, some of which are released, resulting in some small memory blocks in the memory space,  these small memory blocks have inconsecutive addresses and cannot be allocated as a whole large block of memory.) There is enough free memory in the system, but because their addresses are  inconsecutive, they cannot form a continuous block of complete memory, which will make the program unable to apply for large memory. For general-purpose systems, this inappropriate memory allocation algorithm can be solved by rebooting the system (once every month or once a few months). But it is unacceptable for embedded systems that need to work continuously in the field work all the year round.
 
-3) The resource environment of embedded system is also different. Some systems have relatively tight resources, only tens of kilobytes of memory are available for allocation, while some systems have several megabytes of memory. This makes choosing efficient memory allocation algorithm for these different systems more complicated. 
+3) The resource environment of embedded system is also different. Some systems have relatively tight resources, only tens of kilobytes of memory are available for allocation, while some systems have several megabytes of memory. This makes choosing efficient memory allocation algorithm for these different systems more complicated.
 
-RT-Thread operating system provides different memory allocation management algorithms for memory management according to different upper layer applications and system resources. Generally, it can be divided into two categories: memory heap management and memory pool management. Memory heap management is divided into three cases according to specific memory devices:  
+RT-Thread operating system provides different memory allocation management algorithms for memory management according to different upper layer applications and system resources. Generally, it can be divided into two categories: memory heap management and memory pool management. Memory heap management is divided into three cases according to specific memory devices:
 
 The first is allocation management for small memory blocks (small memory management algorithm);
 
@@ -26,16 +26,16 @@ The second is allocation management for large memory blocks (slab management alg
 
 The third is allocation management for multiple memory heaps (memheap management algorithm)
 
-Memory Heap Management 
+Memory Heap Management
 ----------
 
 Memory heap management is used to manage a contiguous memory space. We introduced the memory distribution of RT-Thread in chapter "Kernel Basics". As shown in the following figure, RT-Thread uses the space at "the end of the ZI segment" to the end of the memory as the memory heap.
 
 ![RT-Thread Memory Distribution](figures/08Memory_distribution.png)
 
-If current resource allows, memory heap can allocate memory blocks of any size according to the needs of users.  When user does not need to use these memory blocks, they can be released back to the heap for other applications to allocate and use. In order to meet different needs, RT-Thread system provides different memory management algorithms, namely small memory management algorithm, slab management algorithm and memheap management algorithm. 
+If current resource allows, memory heap can allocate memory blocks of any size according to the needs of users.  When user does not need to use these memory blocks, they can be released back to the heap for other applications to allocate and use. In order to meet different needs, RT-Thread system provides different memory management algorithms, namely small memory management algorithm, slab management algorithm and memheap management algorithm.
 
-The small memory management algorithm is mainly for system with less resources and with less than 2MB of memory. The slab memory management algorithm mainly provides a fast algorithm similar to multiple memory pool management algorithms when the system resources are rich. In addition to the above, RT-Thread also has a management algorithm for multi-memory heap, namely the memheap management algorithm. The memheap management algorithm is suitable for where there are multiple memory heaps in the system. It can “paste” multiple memories together to form a large memory heap, which is very easy to use for users. 
+The small memory management algorithm is mainly for system with less resources and with less than 2MB of memory. The slab memory management algorithm mainly provides a fast algorithm similar to multiple memory pool management algorithms when the system resources are rich. In addition to the above, RT-Thread also has a management algorithm for multi-memory heap, namely the memheap management algorithm. The memheap management algorithm is suitable for where there are multiple memory heaps in the system. It can “paste” multiple memories together to form a large memory heap, which is very easy to use for users.
 
 Either one or none of these memory heap management algorithms can be chosen when the system is running. These memory heap management algorithms provide the same API interface to the application.
 
@@ -63,7 +63,7 @@ As shown in the following figure, the free list pointer lfree initially points t
 
 In addition, a 12-byte data head is reserved for `magic, used` information, and linked list nodes before each memory block is allocated. The address returned to the application is actually the address after 12 bytes of this memory block. The 12-byte data head is the part that the user should never use. (Note: The length of the 12-byte data head will be different as it aligns with the system).
 
-As for releasing, it is the reversed process, but the allocator will check if the adjacent memory blocks are free, and if they are free, the allocator will merge them into one large free memory block. 
+As for releasing, it is the reversed process, but the allocator will check if the adjacent memory blocks are free, and if they are free, the allocator will merge them into one large free memory block.
 
 ### Slab Management Algorithm
 
@@ -81,11 +81,11 @@ Here are the two main operations for the memory allocator:
 
 **(1) Memory Allocation**
 
-Assuming a 32-byte memory is allocated, the slab memory allocator first finds the corresponding zone linked list from the linked list head of zone array in accordance with the 32-byte value. If the linked list is empty, assign a new zone to the page allocator and return the first free block of memory from the zone. If the linked list is not empty, a free block must exist in the first zone node in the zone linked list, (otherwise it would not have been placed in the linked list), then take the corresponding free block. If all free memory blocks in the zone are used after the allocation, the allocator needs to remove this zone node from the linked list. 
+Assuming a 32-byte memory is allocated, the slab memory allocator first finds the corresponding zone linked list from the linked list head of zone array in accordance with the 32-byte value. If the linked list is empty, assign a new zone to the page allocator and return the first free block of memory from the zone. If the linked list is not empty, a free block must exist in the first zone node in the zone linked list, (otherwise it would not have been placed in the linked list), then take the corresponding free block. If all free memory blocks in the zone are used after the allocation, the allocator needs to remove this zone node from the linked list.
 
 **(2)Memory Release**
 
-The allocator needs to find the zone node where the memory block is located, and then link the memory block to the zone's free memory block linked list. If the free linked list of the zone indicates that all the memory blocks of the zone have been released, it means that the zone is completely free. The system will release the fully free zone to the page allocator when the number of free zones in the zone linked list reaches a certain number. 
+The allocator needs to find the zone node where the memory block is located, and then link the memory block to the zone's free memory block linked list. If the free linked list of the zone indicates that all the memory blocks of the zone have been released, it means that the zone is completely free. The system will release the fully free zone to the page allocator when the number of free zones in the zone linked list reaches a certain number.
 
 ### memheap Management Algorithm
 
@@ -107,20 +107,20 @@ void rt_system_heap_init(void* begin_addr, void* end_addr);
 
 This function will use the memory space of the parameters begin_addr, end_addr as a memory heap. The following table describes the input parameters for this function:
 
-Input parameter for rt_system_heap_init() 
+Input parameter for rt_system_heap_init()
 
 |**Parameters**  |**Description**          |
 |------------|--------------------|
 | begin_addr | Start address for heap memory area |
 | end_addr   | End address for heap memory area |
 
-When using memheap heap memory, you must initialize the heap memory at system initialization, which can be done through the following function interface: 
+When using memheap heap memory, you must initialize the heap memory at system initialization, which can be done through the following function interface:
 
 ```c
 rt_err_t rt_memheap_init(struct rt_memheap  *memheap,
-                        const char	*name,
-                        void		*start_addr,
-                        rt_uint32_t	size)
+                        const char  *name,
+                        void        *start_addr,
+                        rt_uint32_t size)
 ```
 
 If there are multiple non-contiguous memheaps, the function can be called multiple times to initialize it and join the memheap_item linked list. The following table describes the input parameters and return values for this function:
@@ -142,9 +142,9 @@ Operations of the memory heap are as shown in the following figure, including: i
 
 ![Operations of the Memory Heap ](figures/08heap_ops.png)
 
-#### Allocate and Release Memory Block 
+#### Allocate and Release Memory Block
 
-Allocate a memory block of user-specified size from the memory heap. The function interface is as follows: 
+Allocate a memory block of user-specified size from the memory heap. The function interface is as follows:
 
 ```c
 void *rt_malloc(rt_size_t nbytes);
@@ -360,7 +360,7 @@ Memory Pool
 
 The memory heap manager can allocate blocks of any size, which is very flexible and convenient. But it also has obvious shortcomings. Firstly, the allocation efficiency is not high because free memory block needs to be looked up for each allocation. Secondly, it is easy to generate memory fragmentation. In order to improve the memory allocation efficiency and avoid memory fragmentation, RT-Thread provides another method of memory management: Memory Pool.
 
-Memory pool is a memory allocation method for allocating a large number of small memory blocks of the same size. It can greatly speed up memory allocation and release, and can avoid memory fragmentation as much as possible. In addition, RT-Thread's memory pool allows  thread suspend function. When there is no free memory block in the memory pool, the application thread will be suspended until there is a new available memory block in the memory pool, and then the suspended application thread will be awakened. 
+Memory pool is a memory allocation method for allocating a large number of small memory blocks of the same size. It can greatly speed up memory allocation and release, and can avoid memory fragmentation as much as possible. In addition, RT-Thread's memory pool allows  thread suspend function. When there is no free memory block in the memory pool, the application thread will be suspended until there is a new available memory block in the memory pool, and then the suspended application thread will be awakened.
 
 The thread suspend function of the memory pool is very suitable for scenes that need to be synchronized by memory resources. For example, when playing music, the player thread decodes the music file and then sends it to the sound card driver to drive the hardware to play music.
 
@@ -419,7 +419,7 @@ Memory pool control block is a structure that contains important parameters rela
 
 ![Related Interfaces of Memory Pool](figures/08mempool_ops.png)
 
-#### Create and Delete Memory Pool 
+#### Create and Delete Memory Pool
 
 To create a memory pool, a memory pool object is created first and then a memory heap is allocated from the heap. Creating a memory pool is a prerequisite for allocating and releasing memory blocks from the corresponding memory pool. After the memory pool is created, thread then can perform operations like application, release and so on. To creating a memory pool, use the following function interface. This function returns a memory pool object that has been created.
 
@@ -429,7 +429,7 @@ rt_mp_t rt_mp_create(const char* name,
                      rt_size_t block_size);
 ```
 
-Using this function interface can create a memory pool that matches the size and number of memory blocks required. The creation will be successful if system resources allow it (most importantly memory heap memory resources). When you create a memory pool, you need to give the memory pool a name. The kernel then applies for a memory pool object from the system. Next, a memory buffer calculated from the number and sizes of blocks will be allocated from the memory heap. Then memory pool object is initialized. Afterwards, the successfully applied memory block buffer is organized into idle linked list used for allocation. The following table describes the input parameters and return values for this function:   
+Using this function interface can create a memory pool that matches the size and number of memory blocks required. The creation will be successful if system resources allow it (most importantly memory heap memory resources). When you create a memory pool, you need to give the memory pool a name. The kernel then applies for a memory pool object from the system. Next, a memory buffer calculated from the number and sizes of blocks will be allocated from the memory heap. Then memory pool object is initialized. Afterwards, the successfully applied memory block buffer is organized into idle linked list used for allocation. The following table describes the input parameters and return values for this function:
 
 Input parameters and return values for rt_mp_create()
 
@@ -458,14 +458,14 @@ Input parameters and return values of rt_mp_delete()
 |**Return**| ——                                |
 | RT_EOK   | Deletion successful  |
 
-#### Initialize and Detach Memory Pool 
+#### Initialize and Detach Memory Pool
 
 Memory pool Initialization is similar to memory pool creation, except that the memory pool initialization is for static memory management mode, and the memory pool control block is derived from static objects that the user applies in the system. In addition, unlike memory pool creation, the memory space used by the memory pool object here is a buffer space specified by user. User passes the pointer of the buffer to the memory pool control block, the rest of the initialization is the same as the creation of the memory pool. The function interface is as follows:
 
 ```c
 rt_err_t rt_mp_init(rt_mp_t mp,
                     const char* name,
-                    void *start, 
+                    void *start,
                     rt_size_t size,
                     rt_size_t block size);
 ```
@@ -507,7 +507,7 @@ Input parameters and return values for rt_mp_detach()
 
 #### Allocate and Release Memory Block
 
-To allocate a memory block from the specified memory pool, use the following interface: 
+To allocate a memory block from the specified memory pool, use the following interface:
 
 ```c
 void *rt_mp_alloc (rt_mp_t mp, rt_int32_t time);

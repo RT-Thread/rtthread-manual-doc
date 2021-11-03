@@ -1,16 +1,16 @@
 # utest Framework
 
-## utest Introduction 
+## utest Introduction
 
 utest (unit test) is a unit testing framework developed by RT-Thread. The original intention of designing utest is to make it easier for RT-Thread developers to write test programs using a unified framework interface for unit testing, coverage testing, and integration testing.
 
 ### Test Case Definition
 
-A test case (tc) is a single test performed to achieve a specific test objective. It is a specification that includes test input, execution conditions, test procedures, and expected results. It is a infinite loop with clear end conditions and test results. 
+A test case (tc) is a single test performed to achieve a specific test objective. It is a specification that includes test input, execution conditions, test procedures, and expected results. It is a infinite loop with clear end conditions and test results.
 
 The utest (unit test) framework defines user-written test programs as **test cases**, and a test case contains only one *testcase* function (similar to the main function), which can contain multiple *test unit* functions.
 
-The test code for a function, specifically through the API provided by the utest framework, is a test case. 
+The test code for a function, specifically through the API provided by the utest framework, is a test case.
 
 ### Test Unit Definition
 
@@ -149,7 +149,7 @@ UTEST_TC_EXPORT(testcase, "components.utilities.utest.sample.sample_tc", utest_t
 
 A basic test case must contain the following:
 
-- File comment header (Copyright) 
+- File comment header (Copyright)
 
     The test case file must contain a file comment header containing `Copyright`, time, author, and description information.
 
@@ -228,12 +228,12 @@ utest_run [-thread or -help] [testcase name] [loop num]
 
 ```c
 msh />utest_list
-[14875] I/utest: Commands list : 
+[14875] I/utest: Commands list :
 [14879] I/utest: [testcase name]:components.filesystem.dfs.dfs_api_tc; [run timeout]:30
 [14889] I/utest: [testcase name]:components.filesystem.posix.posix_api_tc; [run timeout]:30
 [14899] I/utest: [testcase name]:packages.iot.netutils.iperf.iperf_tc; [run timeout]:30
 msh />
-msh />utest_run components.filesystem.dfs.dfs_api_tc 
+msh />utest_run components.filesystem.dfs.dfs_api_tc
 [83706] I/utest: [==========] [ utest    ] started
 [83712] I/utest: [----------] [ testcase ] (components.filesystem.dfs.dfs_api_tc) started
 [83721] I/testcase: in testcase func...
@@ -269,6 +269,6 @@ From the above flow chart you can get the following:
 
 - Determine whether the link script has the `UtestTcTab` section added before compiling with GCC.
 - Make sure `RT-Thread Kernel -> Kernel Device Object -> (256) the buffer size for console log printf` is at least 256 bytes before compiling.
-- The resources (threads, semaphores, timers, memory, etc.) created in the test case need to be released before the test ends. 
+- The resources (threads, semaphores, timers, memory, etc.) created in the test case need to be released before the test ends.
 - A test case implementation can only export a test body function (testcase function) using `UTEST_TC_EXPORT`
-- Write a `README.md` document for the your test case to guide the user through configuring the test environment. 
+- Write a `README.md` document for the your test case to guide the user through configuring the test environment.

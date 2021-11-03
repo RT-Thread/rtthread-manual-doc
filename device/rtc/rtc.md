@@ -77,14 +77,14 @@ time_t time(time_t *t)
 
 | **Parameter** | **Description**              |
 | ---------- | ------------------------------- |
-|t          |Time data pointer		|
+|t          |Time data pointer      |
 | **return** | ——                             |
 | Current time value |  |
 
 Examples of use are as follows:
 
 ```c
-time_t now;		/* Save the current time value obtained */
+time_t now;     /* Save the current time value obtained */
 /* Obtain Time */
 now = time(RT_NULL);
 /* Printout time information */
@@ -100,7 +100,7 @@ rt_kprintf("%s\n", ctime(&now));
 You can use the function of enabling RTC software emulation, which is ideal for products that do not require high time precision and have no hardware RTC. The configuration options of menuconfig are as follows:
 
 ```c
-RT-Thread Components → 
+RT-Thread Components →
     Device Drivers:
         -*- Using RTC device drivers                                 /* Use RTC device driver */
         [ ]   Using software simulation RTC device                   /* Use software simulation RTC device */
@@ -122,7 +122,7 @@ RT-Thread online packages →
 After the NTP is turned on, the RTC's automatic synchronization function will be automatically turned on, and the synchronization period and the delay time of the first synchronization can also be set:
 
 ```c
-RT-Thread Components → 
+RT-Thread Components →
     Device Drivers:
         -*- Using RTC device drivers                                 /* Use RTC device driver */
         [ ]   Using software simulation RTC device                   /* Use software simulation RTC device */
@@ -133,7 +133,7 @@ RT-Thread Components →
 
 ## FinSH Command
 
-Enter `date` to view the current time. 
+Enter `date` to view the current time.
 
 ```c
 msh />date
