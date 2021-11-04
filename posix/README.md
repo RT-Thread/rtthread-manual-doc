@@ -72,7 +72,7 @@ int pthread_create (pthread_t *tid,
 | start |                    Thread entry function address                    |
 |  arg  |                The argument passed to the thread entry function                |
 |**return**| ——                                 |
-| 0 		| succeeded |
+| 0         | succeeded |
 | EINVAL  | Invalid parameter |
 | ENOMEM  | Dynamic allocation of memory failed |
 
@@ -150,7 +150,7 @@ int pthread_detach (pthread_t thread);
 |------|----------------------|
 | thread | Thread handle (thread identifier) |
 |**return**| ——                                 |
-| 0 		| succeeded |
+| 0         | succeeded |
 
 Call this function, If the pthread does not finish running, set the detach state of the thread thread property to detached; when the thread thread has finished, the system will reclaim the resources occupied by the pthread thread.
 
@@ -158,7 +158,7 @@ Usage: The child thread calls `pthread_detach(pthread_self())` (*pthread_self()*
 
 > Once the detach state of the thread property is set to detached, the thread cannot be waited by the pthread_join() function or re-set to detached.
 
-#### Example Code for Detaching Thread 
+#### Example Code for Detaching Thread
 
 The following program initializes 2 threads, which have the same priority and are scheduled according to the time slice. Both threads will be set to the detached state. The 2 threads will automatically exit after printing 3 times of information. After exiting, the system will automatically reclaim its resources.
 
@@ -248,7 +248,7 @@ int pthread_join (pthread_t thread, void**value_ptr);
 |   thread   | Thread handle (thread identifier) |
 | value_ptr | User-defined pointer to store the return value of the waiting thread, which can be obtained by the function pthread_join() |
 |**Return**| ——          |
-| 0 		| succeeded |
+| 0         | succeeded |
 | EDEADLK  | Thread join itself |
 | EINVAL  | Join a thread with a detached state |
 | ESRCH  | Could not find the thread |
@@ -257,7 +257,7 @@ The thread calling this function blocks and waits for the thread with the joinab
 
 The pthread_join() and pthread_detach() functions are similar in that they are used to reclaim the resources occupied by threads after the thread running ends. A thread cannot wait for itself to end. The detached state of the thread thread must be `joinable`, and one thread only corresponds to the `pthread_join()` call. A thread with a split state of joinable will only release the resources it occupies when other threads execute `pthread_join()` on it. So in order to avoid memory leaks, all threads that will end up running, either detached or set to detached, or use pthread_join() to reclaim the resources they consume.
 
-#### Example Code for Waiting for the Thread to End 
+#### Example Code for Waiting for the Thread to End
 
 The following program code initializes 2 threads, they have the same priority, and the threads of the same priority are scheduled according to the time slice. The separation status of the 2 thread attributes is the default value joinable, and thread 1 starts running first, and ends after printing 3 times of information. Thread 2 calls pthread_join() to block waiting for thread 1 to end, and reclaims the resources occupied by thread 1, and thread 2 prints the message every 2 seconds.
 
@@ -428,7 +428,7 @@ int rt_application_init()
 
 ## Mutex
 
-Mutexes, also known as mutually exclusive semaphores, are a special binary semaphore. Mutexes are used to ensure the integrity of shared resources. Only one thread can access the shared resource at any time. To access shared resources, the thread must first obtain the mutex. After the access is complete, the mutex must be released. Embedded shared resources include memory, IO, SCI, SPI, etc. If two threads access shared resources at the same time, there may be problems because one thread may use the resource while another thread modifies the shared resource and consider sharing. 
+Mutexes, also known as mutually exclusive semaphores, are a special binary semaphore. Mutexes are used to ensure the integrity of shared resources. Only one thread can access the shared resource at any time. To access shared resources, the thread must first obtain the mutex. After the access is complete, the mutex must be released. Embedded shared resources include memory, IO, SCI, SPI, etc. If two threads access shared resources at the same time, there may be problems because one thread may use the resource while another thread modifies the shared resource and consider sharing.
 
 There are only two kinds of operations of mutex,  locking or unlocking, and only one thread holds a mutex at a time. When a thread holds it, the mutex is latched and its ownership is obtained by this thread. Conversely, when this thread releases it, it unlocks the mutex and loses its ownership. When a thread holds a mutex, other threads will not be able to unlock it or hold it.
 
@@ -474,7 +474,7 @@ int pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *attr);
 | mutex |                 Mutex lock handle, cannot be NULL                 |
 |  attr | Pointer to the mutex attribute, if the pointer is NULL, the default attribute is used. |
 |**return**| ——          |
-| 0 		| succeeded |
+| 0         | succeeded |
 | EINVAL  | Invalid parameter |
 
 This function initializes the mutex `mutex` and sets the mutex property according to the mutex attribute object pointed to by `attr`. After successful initialization, the mutex is unlocked and the thread can obtain it. This function encapsulates the rt_mutex_init() function.
@@ -493,7 +493,7 @@ int pthread_mutex_destroy(pthread_mutex_t *mutex);
 |----------|----------------------|
 | mutex | Mutex lock handle, cannot be NULL |
 |**return**| ——          |
-| 0 		| Succeeded |
+| 0         | Succeeded |
 | EINVAL  | Mutex is empty or mutex has been destroyed |
 | EBUSY  | Mutex is being used |
 
@@ -511,7 +511,7 @@ int pthread_mutex_lock(pthread_mutex_t *mutex);
 |----------|----------------------|
 | mutex | Mutex lock handle, cannot be NULL |
 |**return**| ——          |
-| 0 		| Succeeded |
+| 0         | Succeeded |
 | EINVAL  | Invalid parameter |
 | EDEADLK  | Mutexes mutex do not call this function repeatedly for a thread with a nested lock |
 
@@ -527,7 +527,7 @@ int pthread_mutex_trylock(pthread_mutex_t *mutex);
 |----------|----------------------|
 | mutex | Mutex lock handle, cannot be NULL |
 |**return**| ——          |
-| 0 		| succeeded |
+| 0         | succeeded |
 | EINVAL  | Invalid parameter |
 | EDEADLK  | Mutexes are not nested locks, but threads call this function repeatedly |
 | EBUSY  | Mutexes mutex has been locked by other threads |
@@ -544,7 +544,7 @@ int pthread_mutex_unlock(pthread_mutex_t *mutex);
 |----------|----------------------|
 | mutex | Mutex lock handle, cannot be NULL |
 |**return**| ——          |
-| 0 		| Succeeded |
+| 0         | Succeeded |
 | EINVAL  | Invalid parameter |
 | EPERM  | This function is called repeatedly by a thread when the mutex is not a nested lock |
 | EBUSY  | Unlock the mutex held by other threads with the type of error detection lock |
@@ -676,7 +676,7 @@ int pthread_cond_init(pthread_cond_t *cond, const pthread_condattr_t *attr);
 | cond |             Conditional variable handle, cannot be NULL             |
 | attr | Pointer to the condition variable property, if NULL then use the default property value |
 |**return**| ——          |
-| 0 		| succeeded |
+| 0         | succeeded |
 | EINVAL  | Invalid parameter |
 
 This function initializes the `cond` condition variable and sets its properties according to the condition variable property pointed to by `attr` , which is a wrapper of the `rt_sem_init()` function, based on semaphore implementation. The condition variable is not available after successful initialization.
@@ -695,7 +695,7 @@ int pthread_cond_destroy(pthread_cond_t *cond);
 |----|------------------------|
 | cond | Conditional variable handle, cannot be NULL |
 |**return**| ——          |
-| 0 		| Succeeded |
+| 0         | Succeeded |
 | EINVAL  | Invalid parameter |
 | EPERM  | Mutexes are not nested locks, but threads call this function repeatedly |
 | EBUSY  | Condition variables are being used |
@@ -715,7 +715,7 @@ int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex);
 |  cond | Conditional variable handle, cannot be NULL        |
 | mutex | Pointer to the mutex control block, cannot be NULL |
 |**return**| ——          |
-| 0 		| Succeeded |
+| 0         | Succeeded |
 | EINVAL  | Invalid parameter |
 
 This function gets the `cond` condition variable in blocking mode. The thread needs to lock the mutex before waiting for the condition variable. This function first determines whether the condition variable is available. If it is not available, initializes a condition variable, then unlocks the mutex and then tries to acquire a semaphore when the semaphore's value is greater than zero, it indicates that the semaphore is available, the thread will get the semaphore, and the condition variable will be obtained, and the corresponding semaphore value will be decremented by 1. If the value of the semaphore is equal to zero, indicating that the semaphore is not available, the thread will block until the semaphore is available, after which the mutex will be locked again.
@@ -734,7 +734,7 @@ int pthread_cond_timedwait(pthread_cond_t *cond,
 |  mutex  | Pointer to the mutex control block, cannot be NULL        |
 | abstime | The specified wait time in operating system clock tick (OS Tick) |
 |**return**| ——          |
-| 0 		| Succeeded |
+| 0         | Succeeded |
 | EINVAL  | Invalid parameter |
 | EPERM  | Mutexes are not nested locks, but threads call this function repeatedly |
 | ETIMEDOUT  | time out |
@@ -751,7 +751,7 @@ int pthread_cond_signal(pthread_cond_t *cond);
 |----|------------------------|
 | cond | Conditional variable handle, cannot be NULL |
 |**return**| ——          |
-| 0 		| Succeeded |
+| 0         | Succeeded |
 
 This function sends a signal and wakes up only one thread waiting for the `cond` condition variable, which encapsulates the rt_sem_release() function, which is to send a semaphore. When the value of the semaphore is equal to zero, and a thread waits for this semaphore, it will wake up the first thread waiting in the queue of the semaphore to get the semaphore. Otherwise the value of the semaphore will be increased by 1.
 
@@ -765,12 +765,12 @@ int pthread_cond_broadcast(pthread_cond_t *cond);
 |----|------------------------|
 | cond | Conditional variable handle, cannot be NULL |
 |**return**| ——          |
-| 0 		| Succeeded |
+| 0         | Succeeded |
 | EINVAL  | Invalid parameter |
 
 Calling this function will wake up all threads waiting for the `cond` condition variable.
 
-### Example Code for Condition Variable 
+### Example Code for Condition Variable
 
 This example is a producer consumer model with a producer thread and a consumer thread that have the same priority. The producer will produce a number every 2 seconds, put it in the list pointed to by the `head`, and then call pthread_cond_signal() to send signal to the consumer thread to inform the consumer that there is data in the thread list. The consumer thread calls pthread_cond_wait() to wait for the producer thread to send a signal.
 
@@ -912,7 +912,7 @@ struct pthread_rwlock
 typedef struct pthread_rwlock pthread_rwlock_t;     /* Type redefinition */
 ```
 
-### Initialize Read-write Lock 
+### Initialize Read-write Lock
 
 ``` c
 int pthread_rwlock_init (pthread_rwlock_t *rwlock,
@@ -924,7 +924,7 @@ int pthread_rwlock_init (pthread_rwlock_t *rwlock,
 | rwlock | Read-write lock handle, cannot be NULL           |
 |  attr  | Pointer to the read-write lock property, RT-Thread does not use this variable |
 |**return**| ——          |
-| 0 		| Succeeded |
+| 0         | Succeeded |
 | EINVAL  | Invalid parameter |
 
 This function initializes an `rwlock` read-write lock. This function initializes the semaphore and condition variables of the read-write lock control block with default values, and the associated count parameter is initially 0. The read-write lock after initialization is in an unlocked state.
@@ -943,7 +943,7 @@ int pthread_rwlock_destroy (pthread_rwlock_t *rwlock);
 |------|----------------------|
 | rwlock | Read-write lock handle, cannot be NULL                       |
 |**return**| ——          |
-| 0 		| Succeeded |
+| 0         | Succeeded |
 | EINVAL  | Invalid parameter |
 | EBUSY  | The read-write lock is currently being used or has a thread waiting for the read-write lock |
 | EDEADLK  | Deadlock |
@@ -962,7 +962,7 @@ int pthread_rwlock_rdlock (pthread_rwlock_t *rwlock);
 |------|----------------------|
 | rwlock | Read-write lock handle, cannot be NULL |
 |**return**| ——          |
-| 0 		| Succeeded |
+| 0         | Succeeded |
 | EINVAL  | Invalid parameter |
 | EDEADLK  | Deadlock |
 
@@ -978,7 +978,7 @@ int pthread_rwlock_tryrdlock (pthread_rwlock_t *rwlock);
 |------|----------------------|
 | rwlock | Read-write lock handle, cannot be NULL |
 |**return**| ——          |
-| 0 		| Succeeded |
+| 0         | Succeeded |
 | EINVAL  | Invalid parameter |
 | EBUSY  | The read-write lock is currently being used or has a thread waiting for the read-write lock |
 | EDEADLK  | Deadlock |
@@ -997,7 +997,7 @@ int pthread_rwlock_timedrdlock (pthread_rwlock_t *rwlock,
 |  rwlock | Read-write lock handle, cannot be NULL              |
 | abstime | The specified wait time in operating system clock tick (OS Tick) |
 |**return**| ——          |
-| 0 		| Succeeded |
+| 0         | Succeeded |
 | EINVAL  | Invalid parameter                                            |
 | ETIMEDOUT  | Time out |
 | EDEADLK  | Deadlock |
@@ -1016,7 +1016,7 @@ int pthread_rwlock_wrlock (pthread_rwlock_t *rwlock);
 |------|----------------------|
 | rwlock | Read-write lock handle, cannot be NULL |
 |**return**| ——          |
-| 0 		| Succeeded |
+| 0         | Succeeded |
 | EINVAL  | Invalid parameter |
 | EDEADLK  | Deadlock |
 
@@ -1032,14 +1032,14 @@ int pthread_rwlock_trywrlock (pthread_rwlock_t *rwlock);
 |------|----------------------|
 | rwlock | Read-write lock handle, cannot be NULL |
 |**return**| ——          |
-| 0 		| Succeeded |
+| 0         | Succeeded |
 | EINVAL  | Invalid parameter                                            |
 | EBUSY  | The read-write lock is currently Write-Locked  or there are reader threads blocked on the read-write lock |
 | EDEADLK  | Deadlock |
 
 The only difference between this function and the pthread_rwlock_wrlock() function is that if a thread has locked the read-write lock, ie the read-write lock value is not 0, the writer thread that called the function will directly return an error code, and the thread will not be Blocked.
 
-#### Specify Blocking Time for the Read-write Lock to be Write-Lock 
+#### Specify Blocking Time for the Read-write Lock to be Write-Lock
 
 ``` c
 int pthread_rwlock_timedwrlock (pthread_rwlock_t *rwlock,
@@ -1050,14 +1050,14 @@ int pthread_rwlock_timedwrlock (pthread_rwlock_t *rwlock,
 |--------------|---------------------|
 | rwlock abstime | Read-write lock handle, cannot specify the wait time for NULL, the unit is the operating system clock beat (OS Tick) |
 |**return**| ——          |
-| 0 		| Succeeded |
+| 0         | Succeeded |
 | EINVAL  | Invalid parameter |
 | ETIMEDOUT  | Time out |
 | EDEADLK  | Deadlock |
 
 The only difference between this function and the pthread_rwlock_wrlock() function is that if a thread locks the read-write lock, that is, the read-write lock value is not 0, the calling thread blocks the specified `abstime` duration. After the timeout, the function returns the error code ETIMEDOUT, and the thread will be woken up to the ready state.
 
-### Unlock the Read-write Lock 
+### Unlock the Read-write Lock
 
 ``` c
 int pthread_rwlock_unlock (pthread_rwlock_t *rwlock);
@@ -1067,7 +1067,7 @@ int pthread_rwlock_unlock (pthread_rwlock_t *rwlock);
 |------|----------------------|
 | rwlock | Read-write lock handle, cannot be NULL |
 |**return**| ——          |
-| 0 		| Succeeded |
+| 0         | Succeeded |
 | EINVAL  | Invalid parameter |
 | EDEADLK  | Deadlock |
 
@@ -1199,7 +1199,7 @@ int pthread_barrier_init(pthread_barrier_t *barrier,
 | barrier |         Barrier handle      |
 |  count  | The number of waiting threads specified |
 |**return**| ——          |
-| 0 		| Succeeded |
+| 0         | Succeeded |
 | EINVAL  | Invalid parameter |
 
 This function creates a `barrier` barrier and initializes the conditional variables and mutex locks of the barrier control block according to the default parameters. The number of waiting threads specified after initialization is `count`, and pthread_barrier_wait() must be called for `count` threads.
@@ -1216,7 +1216,7 @@ int pthread_barrier_destroy(pthread_barrier_t *barrier);
 |-------|--------|
 | barrier | Barrier handle |
 |**return**| ——          |
-| 0 		| Succeeded |
+| 0         | Succeeded |
 | EINVAL  | Invalid parameter |
 
 This function destroys a barrier. The barrier's properties and control block parameters will not be valid after destruction, but can be reinitialized by calling pthread_barrier_init().
@@ -1231,7 +1231,7 @@ int pthread_barrier_wait(pthread_barrier_t *barrier);
 |-------|--------|
 | barrier | Barrier handle |
 |**return**| ——          |
-| 0 		| Succeeded |
+| 0         | Succeeded |
 | EINVAL  | Invalid parameter |
 
 This function synchronizes the threads waiting in front of the barrier and called by each thread. If the number of queue waiting threads is not 0, count will be decremented by 1. If the count is 0, indicating that all threads have reached the railing. All arriving threads will be woken up and re-entered into the ready state to participate in system scheduling. If count is not 0 after the decrease, it indicates that there is still threads that do not reach the barrier, and the calling thread will block until all threads reach the barrier.
@@ -1341,7 +1341,7 @@ Semaphores can be used for communication between processes and processes, or bet
 
 Depending on the value of the semaphore (representing the number of available resources), POSIX semaphores can be divided into:
 
--   **Binary semaphore**: The value of the semaphore is only 0 and 1, and the initial value is specified as 1. This is the same as a mutex. If the resource is locked, the semaphore value is 0. If the resource is available, the semaphore value is 1. Equivalent to only one key, after the thread gets the key, after completing the access to the shared resource, you need to unlock it, put the key back, and use it for other threads that need this key. The method is the same as the mutex lock. The wait semaphore function must be used in pairs with the send semaphore function. It cannot be used alone. 
+-   **Binary semaphore**: The value of the semaphore is only 0 and 1, and the initial value is specified as 1. This is the same as a mutex. If the resource is locked, the semaphore value is 0. If the resource is available, the semaphore value is 1. Equivalent to only one key, after the thread gets the key, after completing the access to the shared resource, you need to unlock it, put the key back, and use it for other threads that need this key. The method is the same as the mutex lock. The wait semaphore function must be used in pairs with the send semaphore function. It cannot be used alone.
 
 -   **Count semaphore**: The value of the semaphore ranges from 0 to a limit greater than 1 (POSIX indicates that the system's maximum limit is at least 32767). This count indicates the number of available semaphores. At this point, the send semaphore function can be called separately to send the semaphore, which is equivalent to having more than one key, the thread takes a key and consumes one, and the used key does not have to be put back.
 
@@ -1396,7 +1396,7 @@ int sem_init(sem_t *sem, int pshared, unsigned int value);
 |  value  | The initial value of the semaphore, indicating the available amount of semaphore resources |
 | pshared | RT-Thread unimplemented parameters          |
 |**return**| ——          |
-| 0 		| Succeeded |
+| 0         | Succeeded |
 | -1  | Failed |
 
 This function initializes an unnamed semaphore sem, initializes the semaphore related data structure according to the given or default parameters, and puts the semaphore into the semaphore list. The semaphore value after initialization is the given initial value. This function is a wrapper of the rt_sem_create() function.
@@ -1411,8 +1411,8 @@ int sem_destroy(sem_t *sem);
 |----|----------|
 |  sem | Semaphore handle |
 |**return**| ——          |
-| 0 		| Succeeded |
-| -1  		| Failed |
+| 0         | Succeeded |
+| -1        | Failed |
 
 This function destroys an unnamed semaphore sem and releases the resources occupied by the semaphore.
 
@@ -1432,7 +1432,7 @@ sem_t *sem_open(const char *name, int oflag, ...);
 | oflag | The way the semaphore is opened |
 |**return**| ——          |
 | Semaphore handle | Succeeded |
-| NULL  		| Failed |
+| NULL          | Failed |
 
 This function creates a new semaphore based on the semaphore name or opens an existing semaphore. The optional values for Oflag are `0`, `O_CREAT` or `O_CREAT|O_EXCL`. If Oflag is set to `O_CREAT` , a new semaphore is created. If Oflag sets to  `O_CREAT|O_EXCL`, it returns NULL if the semaphore already exists, and creates a new semaphore if it does not exist. If Oflag is set to 0, a semaphore does not exist and NULL is returned.
 
@@ -1446,8 +1446,8 @@ int sem_unlink(const char *name);
 |----|----------|
 | name | Semaphore name |
 |**return**| ——          |
-| 0 		| Succeeded |
-| -1  		| Failed, semaphore does not exist |
+| 0         | Succeeded |
+| -1        | Failed, semaphore does not exist |
 
 This function looks up the semaphore based on the semaphore name, and marks the semaphore as a detached state if the semaphore is present. Then check the reference count. If the value is 0, the semaphore is deleted immediately. If the value is not 0, it will not be deleted until all threads holding the semaphore close the semaphore.
 
@@ -1461,8 +1461,8 @@ int sem_close(sem_t *sem);
 |----|----------|
 |  sem | Semaphore handle |
 |**return**| ——          |
-| 0 		| Succeeded |
-| -1  		| Failed |
+| 0         | Succeeded |
+| -1        | Failed |
 
 When a thread terminates,it closes the semaphore it occupies. Whether the thread terminates voluntarily or involuntarily, this closing operation is performed. This is equivalent to a reduction of 1 in the number of semaphores held. If the holding count is zero after subtracting 1 and the semaphore is in separated state, the `sem` semaphore will be deleted and the resources it occupies will be released.
 
@@ -1477,8 +1477,8 @@ int sem_getvalue(sem_t *sem, int *sval);
 |  sem | Semaphore handle, cannot be NULL      |
 | sval | Save the obtained semaphore value address, cannot be NULL |
 |**return**| ——          |
-| 0 		| Succeeded |
-| -1  		| Failed |
+| 0         | Succeeded |
+| -1        | Failed |
 
 This function obtains the value of the semaphore and saves it in the memory pointed to by `sval` to know the amount of semaphore resources.
 
@@ -1492,8 +1492,8 @@ int sem_wait(sem_t *sem);
 |----|----------------------|
 |  sem | Semaphore handle, cannot be NULL |
 |**return**| ——          |
-| 0 		| Succeeded |
-| -1  		| Failed |
+| 0         | Succeeded |
+| -1        | Failed |
 
 The thread calls this function to get the semaphore, which is a wrapper of the `rt_sem_take(sem,RT_WAITING_FOREVER)` function. If the semaphore value is greater than zero, the semaphore is available, the thread gets the semaphore, and the semaphore value is decremented by one. If the semaphore value is equal to 0, indicating that the semaphore is not available, the thread is blocked and entering the suspended state and queued in a first-in, first-out manner until the semaphore is available.
 
@@ -1507,8 +1507,8 @@ int sem_trywait(sem_t *sem);
 |----|----------------------|
 |  sem | Semaphore handle, cannot be NULL |
 |**return**| ——          |
-| 0 		| Succeeded |
-| -1  		| Failed |
+| 0         | Succeeded |
+| -1        | Failed |
 
 This function is a non-blocking version of the sem_wait() function and is a wrapper of the `rt_sem_take(sem,0)` function. When the semaphore is not available, the thread does not block, but returns directly.
 
@@ -1523,8 +1523,8 @@ int sem_timedwait(sem_t *sem, const struct timespec *abs_timeout);
 |      sem     | Semaphore handle, cannot be NULL              |
 | abs_timeout | The specified wait time in operating system clock tick (OS Tick) |
 |**return**| ——          |
-| 0 		| Succeeded |
-| -1  		| Failed |
+| 0         | Succeeded |
+| -1        | Failed |
 
 The difference between this function and `the sem_wait()` function is that if the semaphore is not available, the thread will block the duration of `abs_timeout`. After the timeout, the function returns -1, and the thread will be awakened from the blocking state to the ready state.
 
@@ -1538,8 +1538,8 @@ int sem_post(sem_t *sem);
 |----|----------------------|
 |  sem | Semaphore handle, cannot be NULL |
 |**return**| ——          |
-| 0 		| Succeeded |
-| -1  		| Failed |
+| 0         | Succeeded |
+| -1        | Failed |
 
 This function will release a sem semaphore, which is a wrapper of the rt_sem_release() function. If the thread queue waiting for the semaphore is not empty, indicating that there are threads waiting for the semaphore, the first thread waiting for the semaphore will switch from the suspended state to the ready state, waiting for system scheduling. If no thread is waiting for the semaphore, the semaphore value will be incremented by one.
 
@@ -1697,7 +1697,7 @@ mqd_t mq_open(const char *name, int oflag, ...);
 | oflag | Message queue open mode |
 |**return**| ——          |
 | Message queue handle | Succeeded |
-| NULL 		| Failed |
+| NULL      | Failed |
 
 This function creates a new message queue or opens an existing message queue based on the name of the message queue. The optional values for Oflag are `0`, `O_CREAT` or `O_CREAT\|O_EXCL`. If Oflag is set to `O_CREAT` then a new message queue is created. If Oflag sets `O_CREAT\|O_EXCL`, it returns NULL if the message queue already exists, and creates a new message queue if it does not exist. If Oflag is set to `0`, the message queue does not exist and returns NULL.
 
@@ -1711,8 +1711,8 @@ int mq_unlink(const char *name);
 |----|------------|
 | name | Message queue name |
 |**return**| ——          |
-| 0 		| Succeeded |
-| -1  		| Failed |
+| 0         | Succeeded |
+| -1        | Failed |
 
 This function finds the message queue based on the message queue name name. If found, it sets the message queue to a detached state. If the hold count is 0, the message queue is deleted and the resources occupied by the message queue are released.
 
@@ -1726,8 +1726,8 @@ int mq_close(mqd_t mqdes);
 |----------|------------|
 | mqdes | Message queue handle |
 |**return**| ——          |
-| 0 		| Succeeded |
-| -1  		| Failed |
+| 0         | Succeeded |
+| -1        | Failed |
 
 When a thread terminates,it closes the message queue it occupies. Whether the thread terminates voluntarily or involuntarily, this closure is performed.  This is equivalent to the message queue holding count minus 1. If the holding count is 0 after the minus 1 and the message queue is in the separated state, the `mqdes` message queue will be deleted and released the resources it occupies.
 
@@ -1747,8 +1747,8 @@ int mq_send(mqd_t mqdes,
 |  msg_len |          The length of the message sent          |
 | msg_prio | RT-Thread unimplemented this parameter   |
 |**return**| ——          |
-| 0 		| Succeeded |
-| -1  		| Failed |
+| 0         | Succeeded |
+| -1        | Failed |
 
 This function is used to send a message to the `mqdes` message queue, which is a wrapper of the rt_mq_send() function. This function adds the message pointed to by `msg_ptr` to the `mqdes` message queue, and the length of the message sent `msg_len` must be less than or equal to the maximum message length set when the message queue is created.
 
@@ -1772,8 +1772,8 @@ int mq_timedsend(mqd_t mqdes,
 |   msg_prio  |                RT-Thread unimplemented parameters                |
 | abs_timeout | The specified wait time in operating system clock tick (OS Tick) |
 |**Parameter**| ——          |
-| 0 		| Succeeded |
-| -1  		| Failed |
+| 0         | Succeeded |
+| -1        | Failed |
 
 Currently RT-Thread does not support sending messages with the specified blocking time, but the function interface has been implemented, which is equivalent to calling mq_send().
 
@@ -1794,7 +1794,7 @@ ssize_t mq_receive(mqd_t mqdes,
 | msg_prio | RT-Thread unimplemented parameters        |
 |**return**| ——          |
 | Message length | Succeeded |
-| -1  		| Failed |
+| -1        | Failed |
 
 This function removes the oldest message from the `mqdes` message queue and puts the message in the memory pointed to by `msg_ptr`. If the message queue is empty, the thread that called the mq_receive() function will block until the message in the message queue is available.
 
@@ -1817,7 +1817,7 @@ ssize_t mq_timedreceive(mqd_t mqdes,
 | abs_timeout | The specified wait time in operating system clock tick (OS Tick) |
 |**return**| ——          |
 | Message length | Succeeded |
-| -1  		| Failed |
+| -1        | Failed |
 
 The difference between this function and the mq_receive() function is that if the message queue is empty, the thread will block the `abs_timeout` duration. After the timeout, the function will return `-1`, and the thread will be awakened from the blocking state to the ready state.
 
@@ -1989,7 +1989,7 @@ int pthread_attr_destroy(pthread_attr_t *attr);
 |----|------------------|
 | attr | Pointer to the thread property |
 |**return**| ——          |
-| 0 		| Succeeded |
+| 0         | Succeeded |
 
 Using the pthread_attr_init() function initializes the thread attribute structure `attr` with the default value, which is equivalent to setting the parameter to NULL when calling the thread initialization function. You need to define a `pthread_attr_t` attribute object before use. This function must be called before the pthread_create() function.
 
@@ -2009,7 +2009,7 @@ int pthread_attr_getdetachstate(pthread_attr_t const *attr, int *state);
 |  attr | Pointer to the thread property |
 | state | Thread detached state |
 |**return**| ——          |
-| 0 		| Succeeded |
+| 0         | Succeeded |
 
 The thread separation state property value state can be `PTHREAD_CREATE_JOINABL` (non-detached) and `THREAD_CREATE_DETACHED` (detached).
 
@@ -2042,7 +2042,7 @@ int pthread_attr_getschedparam(pthread_attr_t const *attr,
 |  attr | Pointer to the thread property |
 | param | Pointer to the dispatch parameter |
 |**return**| ——          |
-| 0 		| Succeeded |
+| 0         | Succeeded |
 
 The `pthread_attr_setschedparam()` function sets the priority of the thread. Use `param` to set the thread priority.
 
@@ -2071,7 +2071,7 @@ int pthread_attr_getstacksize(pthread_attr_t const *attr, size_t *stack_size);
 |     attr    | Pointer to the thread property |
 | stack_size |    Thread stack size    |
 |**return**| ——          |
-| 0 		| Succeeded |
+| 0         | Succeeded |
 
 The `pthread_attr_setstacksize()` function sets the stack size in bytes. Stack space address alignment is required on most systems (for example, the ARM architecture needs to be aligned to a 4-byte address).
 
@@ -2094,7 +2094,7 @@ int pthread_attr_getstack(pthread_attr_t const *attr,
 | stack_size |    Thread stack size    |
 | stack_base |    Thread stack address    |
 |**return**| ——          |
-| 0 		| Succeeded |
+| 0         | Succeeded |
 
 #### Thread Attribute Related Function
 
@@ -2110,11 +2110,11 @@ int pthread_attr_getscope(pthread_attr_t const *attr);
 |     attr    | Pointer to the thread property |
 | scope |    Thread scope    |
 |**return**| ——          |
-| 0 		| scope is PTHREAD_SCOPE_SYSTEM |
-| EOPNOTSUPP 	| scope is PTHREAD_SCOPE_PROCESS |
-| EINVAL		| scope is PTHREAD_SCOPE_SYSTEM |
+| 0         | scope is PTHREAD_SCOPE_SYSTEM |
+| EOPNOTSUPP    | scope is PTHREAD_SCOPE_PROCESS |
+| EINVAL        | scope is PTHREAD_SCOPE_SYSTEM |
 
-#### Example Code for Thread Property 
+#### Example Code for Thread Property
 
 This program will initialize 2 threads, they have a common entry function, but their entry parameters are not the same. The first thread created will use the provided `attr` thread attribute, and the other thread will use the system default attribute. Thread priority is a very important parameter, so this program will modify the first created thread to have a priority of 8, and the system default priority of 24.
 
@@ -2194,7 +2194,7 @@ int pthread_cancel(pthread_t thread);
 |------|--------|
 | thread | Thread handle |
 |**return**| ——          |
-| 0 		| Succeeded |
+| 0         | Succeeded |
 
 This function sends a cancel request to the `thread` thread. Whether the thread will respond to the cancellation request and when it responds depends on the state and type of thread cancellation.
 
@@ -2211,8 +2211,8 @@ int pthread_setcancelstate(int state, int *oldstate);
 |   state  | There are two values: <br />`PTHREAD_CANCEL_ENABLE`: Cancel enable. <br />`PTHREAD_CANCEL_DISABLE`: Cancel disabled (default value when thread is created). |
 | oldstate | Save the original cancellation status      |
 |**return**| ——          |
-| 0 		| Succeeded |
-| EINVAL 	| state is not PTHREAD_CANCEL_ENABLE or PTHREAD_CANCEL_DISABLE |
+| 0         | Succeeded |
+| EINVAL    | state is not PTHREAD_CANCEL_ENABLE or PTHREAD_CANCEL_DISABLE |
 
 This function sets the cancel state and is called by the thread itself. Canceling the enabled thread will react to the cancel request, and canceling the disabled thread will not react to the cancel request.
 
@@ -2229,7 +2229,7 @@ int pthread_setcanceltype(int type, int *oldtype);
 |   type  | There are 2 values: <br />`PTHREAD_CANCEL_DEFFERED`: After the thread receives the cancellation request, it will continue to run to the next cancellation point and then end. (Default value when thread is created) .<br />`PTHREAD_CANCEL_ASYNCHRONOUS`: The thread ends immediately. |
 | oldtype | Save the original cancellation type |
 |**return**| ——          |
-| 0 		| Succeeded |
+| 0         | Succeeded |
 | EINVAL | state is neither PTHREAD_CANCEL_DEFFERED nor PTHREAD_CANCEL_ASYNCHRONOUS |
 
 #### Set Cancellation Point
@@ -2282,7 +2282,7 @@ All cancellation points included in RT-Thread are as follows:
 
 -   pthread_rwlock_wrlock()
 
-#### Example Code for Thread Cancel 
+#### Example Code for Thread Cancel
 
 This program creates 2 threads. After thread2 starts running, it sleeps for 8 seconds. Thread1 sets its own cancel state and type, and then prints the run count information in an infinite loop. After thread2 wakes up, it sends a cancel request to thread1, and thread1 ends the run immediately after receiving the cancel request.
 
@@ -2369,7 +2369,7 @@ int pthread_once(pthread_once_t * once_control, void (*init_routine) (void));
 | once_control | Control variable |
 | init_routine | Execute function |
 |**return**| ——          |
-| 0 		| Succeeded |
+| 0         | Succeeded |
 
 Sometimes we need to initialize some variables only once. If we do multiple initialization procedures, it will get an error. In traditional sequential programming, one-time initialization is often managed by using Boolean variables. The control variable is statically initialized to 0, and any code that relies on initialization can test the variable. If the variable value is still 0, it can be initialized and then set the variable to 1. Codes that are checked later will skip initialization.
 
@@ -2402,8 +2402,8 @@ int pthread_equal (pthread_t t1, pthread_t t2);
 |----------|--------|
 | pthread_t | Thread handle |
 |**return**| ——          |
-| 0 		| Not equal |
-| 1 		| Equal |
+| 0         | Not equal |
+| 1         | Equal |
 
 #### Obtain Thread Handle
 
@@ -2440,8 +2440,8 @@ int pthread_mutexattr_destroy(pthread_mutexattr_t *attr);
 |----|------------------------|
 | attr | Pointer to the mutex attribute object |
 |**return**| ——          |
-| 0 		| Succeeded |
-| EINVAL 		| Invalid parameter |
+| 0         | Succeeded |
+| EINVAL        | Invalid parameter |
 
 The pthread_mutexattr_init() function initializes the property object pointed to by `attr` with the default value, which is equivalent to setting the property parameter to NULL when calling the pthread_mutex_init() function.
 
@@ -2459,8 +2459,8 @@ int pthread_mutexattr_getpshared(pthread_mutexattr_t *attr, int *pshared);
 |   type  |    Mutex type    |
 | pshared | There are 2 optional values: <br />`PTHREAD_PROCESS_PRIVATE`: The default value, used to synchronize only threads in the process. `PTHREAD_PROCESS_SHARED`: Used to synchronize threads in this process and other processes. |
 |**return**| ——          |
-| 0 		| Succeeded |
-| EINVAL 		| Invalid parameter |
+| 0         | Succeeded |
+| EINVAL        | Invalid parameter |
 
 #### Mutex Type
 
@@ -2474,8 +2474,8 @@ int pthread_mutexattr_gettype(const pthread_mutexattr_t *attr, int *type);
 | type |        Mutex type        |
 | attr | Pointer to the mutex attribute object |
 |**return**| ——          |
-| 0 		| Succeeded |
-| EINVAL 		| Invalid parameter |
+| 0         | Succeeded |
+| EINVAL        | Invalid parameter |
 
 The type of mutex determines how a thread behaves when it acquires a mutex. RT-Thread implements three mutex types:
 
@@ -2497,8 +2497,8 @@ int pthread_condattr_init(pthread_condattr_t *attr);
 |----|--------------------------|
 | attr | Pointer to a condition variable property object |
 |**return**| ——          |
-| 0 		| Succeeded |
-| EINVAL 		| Invalid parameter |
+| 0         | Succeeded |
+| EINVAL        | Invalid parameter |
 
 #### Obtain Condition Variable Scope
 
@@ -2510,8 +2510,8 @@ int pthread_mutexattr_getpshared(pthread_mutexattr_t *attr, int *pshared);
 |----|--------------------------|
 | attr | Pointer to a condition variable property object |
 |**return**| ——          |
-| 0 		| Succeeded |
-| EINVAL 		| Invalid parameter |
+| 0         | Succeeded |
+| EINVAL        | Invalid parameter |
 
 ### Read-write Lock Attribute
 
@@ -2525,8 +2525,8 @@ int pthread_rwlockattr_init (pthread_rwlockattr_t *attr);
 |----|--------------------|
 | attr | Pointer to the read-write lock property |
 |**return**| ——          |
-| 0 		| Succeeded |
-|-1 		| Invalid parameter |
+| 0         | Succeeded |
+|-1         | Invalid parameter |
 
 This function initializes the read-write lock attribute `attr` with the default value PTHREAD_PROCESS_PRIVATE.
 
@@ -2541,8 +2541,8 @@ int pthread_rwlockattr_getpshared (const pthread_rwlockattr_t *attr, int *pshare
 |   attr  | Pointer to the read-write lock property     |
 | pshared | Pointer to the scope of the read-write lock |
 |**return**| ——          |
-| 0 		| Succeeded |
-|-1 		| Invalid parameter |
+| 0         | Succeeded |
+|-1         | Invalid parameter |
 
 The memory pointed to by pshared is saved as PTHREAD_PROCESS_PRIVATE.
 
@@ -2558,8 +2558,8 @@ int pthread_barrierattr_init(pthread_barrierattr_t *attr);
 |----|------------------|
 | attr | Pointer to the barrier property |
 |**return**| ——          |
-| 0 		| Succeeded |
-|-1 		| Invalid parameter |
+| 0         | Succeeded |
+|-1         | Invalid parameter |
 
 The modified function initializes the barrier attribute `attr` with the default value PTHREAD_PROCESS_PRIVATE.
 
@@ -2574,8 +2574,8 @@ int pthread_barrierattr_getpshared(const pthread_barrierattr_t *attr, int *pshar
 |   attr  | Pointer to the barrier property |
 | pshared | Pointer to save barrier scope data |
 |**return**| ——          |
-| 0 		| Succeeded |
-|-1 		| Invalid parameter |
+| 0         | Succeeded |
+|-1         | Invalid parameter |
 
 ### Message Queue Property
 
@@ -2600,5 +2600,5 @@ int mq_getattr(mqd_t mqdes, struct mq_attr *mqstat);
 |  mqdes | Pointer to the message queue control block |
 | mqstat |  Pointer to save the get data  |
 |**return**| ——          |
-| 0 		| Succeeded |
-|-1 		| Invalid parameter |
+| 0         | Succeeded |
+|-1         | Invalid parameter |

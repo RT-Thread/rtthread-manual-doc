@@ -86,7 +86,7 @@ If the sensor uses FIFO receiving mode, the value of oflags is RT_DEVICE_FLAG_FI
 An example of turning on sensor devices in polling mode is as follows:
 
 ```c
-#define SAMPLE_SENSOR_NAME       "acce_st"	/* sensor device name */
+#define SAMPLE_SENSOR_NAME       "acce_st"  /* sensor device name */
 int main(void)
 {
     rt_device_t dev;
@@ -227,8 +227,8 @@ The callback function of the function is provided by the user. If the sensor is 
 Generally, receiving callback function can send a semaphore or event to inform sensor data processing thread that data arrives. The use example is as follows:
 
 ```c
-#define SAMPLE_SENSOR_NAME       "acce_st"	/* sensor device name */
-static rt_device_t dev;				/* sensoe device handle*/
+#define SAMPLE_SENSOR_NAME       "acce_st"  /* sensor device name */
+static rt_device_t dev;             /* sensoe device handle*/
 static struct rt_semaphore rx_sem;    /* The semaphore used to receive messages */
 
 /* Callback function for receiving data */
@@ -257,7 +257,7 @@ static int sensor_sample(int argc, char *argv[])
 
 ### Read Data of Sensor Device
 
-The following functions can be called to read the data received by the sensor: 
+The following functions can be called to read the data received by the sensor:
 
 ```c
 rt_size_t rt_device_read(rt_device_t dev, rt_off_t pos, void* buffer, rt_size_t size);
@@ -276,7 +276,7 @@ rt_size_t rt_device_read(rt_device_t dev, rt_off_t pos, void* buffer, rt_size_t 
 The sensor uses the interrupt receiving mode and cooperates with the receiving callback function as follows:
 
 ```c
-static rt_device_t dev;				/* sensor device handle */
+static rt_device_t dev;             /* sensor device handle */
 static struct rt_semaphore rx_sem;    /* The semaphore used to receive messages */
 
 /* Threads receiving data */
@@ -324,7 +324,7 @@ static void sensor_fifo_rx_entry(void *parameter)
         res = rt_device_read(dev, 0, data, 32);
         for (i = 0; i < res; i++)
         {
-			sensor_show_data(dev, &data[i]);
+            sensor_show_data(dev, &data[i]);
         }
     }
 }
@@ -333,7 +333,7 @@ int main(void)
     static rt_thread_t tid1 = RT_NULL;
     rt_device_t dev;
     struct rt_sensor_data data;
-    
+
     sensor_rx_sem = rt_sem_create("sen_rx_sem", 0, RT_IPC_FLAG_FIFO);
     tid1 = rt_thread_create("sen_rx_thread",
                             sensor_fifo_rx_entry, dev,
@@ -341,7 +341,7 @@ int main(void)
                             15, 5);
     if (tid1 != RT_NULL)
         rt_thread_startup(tid1);
-    
+
     dev = rt_device_find("acce_st");
     rt_device_set_rx_indicate(dev, rx_cb);
     rt_device_open(dev, RT_SEN_FLAG_FIFO);

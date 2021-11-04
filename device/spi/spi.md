@@ -107,7 +107,7 @@ The `struct rt_spi_configuration` prototype is as follows:
 ```c
 struct rt_spi_configuration
 {
-    rt_uint8_t mode;		/* mode */
+    rt_uint8_t mode;        /* mode */
     rt_uint8_t data_width;  /* data width, 8 bits, 16 bits, 32 bits */
     rt_uint16_t reserved;   /* reserved */
     rt_uint32_t max_hz;     /* maximum frequency */
@@ -215,8 +215,8 @@ rt_device_t rt_device_find(const char* name);
 In general, the name of the SPI device registered to the system is spi10, qspi10, etc. The usage examples are as follows:
 
 ```c
-#define W25Q_SPI_DEVICE_NAME     "qspi10"	/* SPI device name */
-struct rt_spi_device *spi_dev_w25q;		/* SPI device handle */
+#define W25Q_SPI_DEVICE_NAME     "qspi10"   /* SPI device name */
+struct rt_spi_device *spi_dev_w25q;     /* SPI device handle */
 
 /* Find the spi device to get the device handle */
 spi_dev_w25q = (struct rt_spi_device *)rt_device_find(W25Q_SPI_DEVICE_NAME);
@@ -243,12 +243,12 @@ This function can transmit a series of messages, the user can customize the valu
 ```c
 struct rt_spi_message
 {
-    const void *send_buf;	        /* Send buffer pointer */
-    void *recv_buf;		  			/* Receive buffer pointer */
-    rt_size_t length;	            /* Send/receive data bytes */
+    const void *send_buf;           /* Send buffer pointer */
+    void *recv_buf;                 /* Receive buffer pointer */
+    rt_size_t length;               /* Send/receive data bytes */
     struct rt_spi_message *next;    /* Pointer to the next message to continue sending */
-    unsigned cs_take    : 1;	    /* Take chip selection*/
-    unsigned cs_release : 1;	    /* Release chip selection */
+    unsigned cs_take    : 1;        /* Take chip selection*/
+    unsigned cs_release : 1;        /* Release chip selection */
 };
 ```
 send_buf :sendbuf is the send buffer pointer. When the value is RT_NULL, it means that the current transmission is only receiving state, and no data needs to be sent.
@@ -259,7 +259,7 @@ length :The unit of length is word, that is, when the data length is 8 bits, eac
 
 next :The parameter next is a pointer to the next message to continue to send. If only one message is sent, the value of this pointer is RT_NULL. Multiple messages to be transmitted are connected together in a singly linked list by the next pointer.
 
-cs_take :A cs_take value of 1 means that the corresponding CS is set to a valid state before data is transferred. 
+cs_take :A cs_take value of 1 means that the corresponding CS is set to a valid state before data is transferred.
 
 cs_release :A cs_release value of 1 indicates that the corresponding CS is released after the data transfer ends.
 
@@ -269,10 +269,10 @@ If you use this function to transfer messages, the first message sent by cs_take
 An example of use is as follows:
 
 ```c
-#define W25Q_SPI_DEVICE_NAME     "qspi10"	/* SPI device name */
-struct rt_spi_device *spi_dev_w25q;		    /* SPI device handle */
+#define W25Q_SPI_DEVICE_NAME     "qspi10"   /* SPI device name */
+struct rt_spi_device *spi_dev_w25q;         /* SPI device handle */
 struct rt_spi_message msg1, msg2;
-rt_uint8_t w25x_read_id = 0x90;			    /* command */
+rt_uint8_t w25x_read_id = 0x90;             /* command */
 rt_uint8_t id[5] = {0};
 
 /* Find the spi device to get the device handle */
@@ -592,7 +592,7 @@ The send_buf parameter contains the sequence of commands and data to be sent.
 
 ## Special Usage Scenarios
 
-In some special usage scenarios, a device wants to monopolize the bus for a period of time, and the CS is always valid during the period, during which the data transmission may be intermittent, then the relevant interface can be used as shown. The transfer data function must use `rt_spi_transfer_message()`, and this function must set the cs_take and cs_release of the message to be transmitted to 0 value, because the CS has already used other interface control, and does not need to control during data transmission. 
+In some special usage scenarios, a device wants to monopolize the bus for a period of time, and the CS is always valid during the period, during which the data transmission may be intermittent, then the relevant interface can be used as shown. The transfer data function must use `rt_spi_transfer_message()`, and this function must set the cs_take and cs_release of the message to be transmitted to 0 value, because the CS has already used other interface control, and does not need to control during data transmission.
 
 ### Acquire the SPI bus
 

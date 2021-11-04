@@ -392,9 +392,9 @@ pm current run mode:   Normal Speed
 msh >
 ```
 
-In the pattern list of `pm_dump`, the priority of sleep mode is arranged from high to low. 
+In the pattern list of `pm_dump`, the priority of sleep mode is arranged from high to low.
 
-The `Counter` column identifies the count of requests. The graph shows that the Light Sleep mode is requested once, so the current work is in a slight sleep state. 
+The `Counter` column identifies the count of requests. The graph shows that the Light Sleep mode is requested once, so the current work is in a slight sleep state.
 
 The `Timer` column identifies whether to turn on sleep time compensation. In the figure, only Deep Sleep mode is used for time compensation.
 
@@ -410,7 +410,7 @@ According to the product's own situation, turn off the peripherals and clocks th
 
 - Unable to enter lower levels of power consumption
 
-Check whether the higher-level power consumption mode is not released. RT-Thread's PM component uses `rt_pm_request` to request dormancy mode. If it is not released after requesting high-power consumption mode, the system will not be able to switch to lower-level power consumption. 
+Check whether the higher-level power consumption mode is not released. RT-Thread's PM component uses `rt_pm_request` to request dormancy mode. If it is not released after requesting high-power consumption mode, the system will not be able to switch to lower-level power consumption.
 
 For example, after requesting Light Sleep mode, then requesting Deep Sleep mode, the system is still in Light Sleep mode. By calling the interface `rt_pm_request` to release the Light Sleep mode, the system will automatically switch to the Deep Sleep mode.
 

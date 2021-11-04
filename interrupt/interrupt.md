@@ -7,7 +7,7 @@ Interrupts often occur in embedded operating systems. When the CPU is processing
 
 Interrupt processing is closely related to the CPU architecture. Therefore, this chapter first introduces the ARM Cortex-M CPU architecture, and then introduces the RT-Thread interrupt management mechanism in conjunction with the Cortex-M CPU architecture. After reading this chapter, you will learn more about the interrupt handling process of RT-Thread, how to add an interrupt service routine (ISR) and other matters related.
 
-Cortex-M CPU Architecture Foundation 
+Cortex-M CPU Architecture Foundation
 --------------------
 
 Unlike older classic ARM processors (like ARM7, ARM9), the ARM Cortex-M processor has a very different architecture. Cortex-M is serious which Cortex M0/M3/M4/M7 models. There will be some differences between each model. For example, the Cortex-M4 has more floating point calculation functions than the Cortex-M3, but their programming models are basically the same, so the parts of the book that describe interrupt management and porting are not going to be too finely differentiated for the Cortex M0/M3/M4/M7. This section focuses on the architectural aspects related to RT-Thread interrupt management.
@@ -258,14 +258,14 @@ void demo_nw_isr(int vector, void *param)
 
 As can be seen from the two code snippets of the above example, the interrupt service routine completes the start and end of the interrupt Bottom Half by waiting and releasing a semaphore object. Since the interrupt processing is divided into two parts, Top and Bottom, the interrupt processing becomes an asynchronous process. This part of the system overhead requires the user to seriously consider whether the interrupt service processing time is greater than the time to send notifications to Bottom Half and process when using RT-Thread.
 
-RT-Thread Interrupt Management Interface 
+RT-Thread Interrupt Management Interface
 ---------------------
 
 In order to isolate the operating system from the underlying exceptions and interrupt hardware, RT-Thread encapsulates interrupts and exceptions into a set of abstract interfaces, as shown in the following figure:
 
 ![Interrupt Related Interfaces](figures/09interrupt_ops.png)
 
-### Mount Interrupt Service Routine 
+### Mount Interrupt Service Routine
 
 The system associates the user's interrupt handler with the specified interrupt number. You can call the following interface to mount a new interrupt service routine:
 
@@ -327,7 +327,7 @@ Input parameters of rt_hw_interrupt_umask()
 |----------|--------------------|
 | vector   | enable the blocked interrupt number |
 
->This API does not appear in every migration branch. For example, there is usually no such API in the migration branch of Cortex-M0/M3/M4. 
+>This API does not appear in every migration branch. For example, there is usually no such API in the migration branch of Cortex-M0/M3/M4.
 
 ### Global Interrupt Switch
 
@@ -478,14 +478,14 @@ Through the above calculation process, we can see some of the key factors: the s
 
 1) Increase the length of each data volume for each transmission, and try to let the peripherals send as much data as possible every time;
 
-2) Change the interrupt mode to polling mode if necessary. At the same time, in order to solve the problem that the processor is always preempted with polling mode and other low-priority threads cannot be operated, the priority of the polling thread can be lowered accordingly. 
+2) Change the interrupt mode to polling mode if necessary. At the same time, in order to solve the problem that the processor is always preempted with polling mode and other low-priority threads cannot be operated, the priority of the polling thread can be lowered accordingly.
 
 Global Interrupt Switch Usage Example
 --------------------
 
 This is an interrupted application routine: when multiple threads access the same variable, use the switch global interrupt to protect the variable, as shown in the following code:
 
-Use switch interrupts to access global variables  
+Use switch interrupts to access global variables
 
 ```c
 #include <rthw.h>

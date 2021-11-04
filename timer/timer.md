@@ -54,7 +54,7 @@ void rt_tick_increase(void)
 }
 ```
 
-You can see that global variable rt_tick is incremented by one on every clock tick.  The value of rt_tick indicates the total number of clock ticks that the system has elapsed since it started, that is, system time. In addition, on every clock tick, whether the current thread's time slice is exhausted and whether there is a timer timeout will be checked. 
+You can see that global variable rt_tick is incremented by one on every clock tick.  The value of rt_tick indicates the total number of clock ticks that the system has elapsed since it started, that is, system time. In addition, on every clock tick, whether the current thread's time slice is exhausted and whether there is a timer timeout will be checked.
 
 >In interrupt, rt_timer_check()  is used to check the system hardware timer linked list. If there is a timer timeout, the corresponding timeout function will be called. All timers are removed from the timer linked list if it timed out, and periodic timer is added to the timer linked list when it is started again.
 
@@ -72,14 +72,14 @@ The following table describes the return values of `rt_tick_get()` function:
 |----------|----------------|
 | rt_tick  | Current clock tick value |
 
-Timer Management 
+Timer Management
 ----------
 
 Timer refers to triggering an event after a certain specified time from a specified moment, for example, setting a timer to wake up yourself the next morning. Timer includes hardware timer and software timer:
 
 1) **Hardware timer** is the timing function provided by the chip itself. The hardware timer can be used by configuring the timer module into a timer mode and setting the time. Hardware timer is accurate to nanosecond precision, and is interrupt trigger mode.
 
-2) **Software timer** is a type of system interface provided by the operating system. It is built on the basis of the hardware timer to enable the system to provide a timer service with no constraint on numbers. 
+2) **Software timer** is a type of system interface provided by the operating system. It is built on the basis of the hardware timer to enable the system to provide a timer service with no constraint on numbers.
 
 RT-Thread operating system provides software-implemented timers in units of clock tick (OS Tick), that is, the timing value must be an integer multiple of OS Tick. For example, an OS Tick is 10ms, then the software timer can only be timed 10ms, 20ms, 100ms, etc., but not 15ms. RT-Thread timer is also based on the clock tick, providing timing capabilities based on integral multiples of the clock tick.
 
@@ -97,7 +97,7 @@ The timer timeout function of HARD_TIMER mode is executed in the interrupt conte
 
 When executed in interrupt context, the requirements for timeout function are the same as those for the interrupt service routine: execution time should be as short as possible, and the execution should not cause the current context to suspend and wait. For example, a timeout function executed in an interrupt context should not attempt to apply for dynamic memory, free dynamic memory, etc.
 
-The default mode of RT-Thread timer is HARD_TIMER mode which means after the timer timeout, the timeout function runs in the context of the system clock interrupt. The execution mode in the interrupt context determines that the timer's timeout function should not call any system function that will cause the current context to suspend; nor can it be executing for a very long time, otherwise the response time of other interrupts will be lengthened or the running time of other threads will be preempted. 
+The default mode of RT-Thread timer is HARD_TIMER mode which means after the timer timeout, the timeout function runs in the context of the system clock interrupt. The execution mode in the interrupt context determines that the timer's timeout function should not call any system function that will cause the current context to suspend; nor can it be executing for a very long time, otherwise the response time of other interrupts will be lengthened or the running time of other threads will be preempted.
 
 #### SOFT_TIMER Mode
 
@@ -121,9 +121,9 @@ If after system's 10 ticks (current rt_tick=30),  a new task has created Timer4 
 
 ![Timer linked List Insertion Diagram](figures/05timer_linked_list2.png)
 
-#### Timer Control Block 
+#### Timer Control Block
 
-In RT-Thread operating system, timer control block is defined by structure `struct rt_timer` and forms a timer kernel object, which is then linked to the kernel object container for management. It is a data structure used by the operating system to manage timers. It stores information about timers, such as the initial number of ticks, the number of timeout ticks, the linked list structure used to connect timers, timeout callback functions, etc. 
+In RT-Thread operating system, timer control block is defined by structure `struct rt_timer` and forms a timer kernel object, which is then linked to the kernel object container for management. It is a data structure used by the operating system to manage timers. It stores information about timers, such as the initial number of ticks, the number of timeout ticks, the linked list structure used to connect timers, timeout callback functions, etc.
 
 ```c
 struct rt_timer
@@ -141,7 +141,7 @@ typedef struct rt_timer *rt_timer_t;
 
 Timer control block is defined by  structure `struct rt_timer` and forms a timer kernel object, which is then linked to the kernel object container for management. The `list` member is used to link an active (already started) timer to the `rt_timer_list` linked list.
 
-#### Timer Skip List Algorithm 
+#### Timer Skip List Algorithm
 
 In the introduction of working mechanics of the timer above, we have talked about that the newly created and activated timers are inserted into the rt_timer_list linked list in the order of the timeout, that is, rt_timer_list linked list is an ordered list. RT-Thread uses a skip list algorithm to speed up the search for linked list elements.
 
@@ -161,7 +161,7 @@ In this structure, {3, 18, 77} is extracted as first-level index, so that the nu
 
 Therefore, the timer skip list can pass the index of the upper layer, reducing the number of comparisons during the search and improving the efficiency of the search. This is an algorithm of "space in exchange of time", macro definition RT_TIMER_SKIP_LIST_LEVEL is used to configure the number of layers in skip list. The default value is 1, which means that ordered linked list algorithm for first-order ordered list graph is used. Each additional one means that another level of index is added to the original list.
 
-### Timer Management 
+### Timer Management
 
 RT-Thread timer is introduced in the previous sections and the working mechanism of the timer is conceptually explained. This section will go deep into the various interfaces of the timer to help the reader understand the RT-Thread timer at the code level.
 
@@ -334,7 +334,7 @@ Input parameters and return values of rt_timer_control()
 |**Return**| ——                                                                                                       |
 | RT_EOK   | Successful                                                                                            |
 
-Commands supported by function parameters cmd: 
+Commands supported by function parameters cmd:
 
 ```c
 #define RT_TIMER_CTRL_SET_TIME      0x0     /* Set Timeout value      */

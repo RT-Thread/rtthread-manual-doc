@@ -2,7 +2,7 @@
 
 ## Introduction of Pin
 
-The pins on the chip are generally divided into four categories: power supply, clock, control, and I/O. The I/O port is further divided into General Purpose Input Output (GPIO) and function multiplex I/O (such as SPI/I2C/UART, etc.) in the usage mode. 
+The pins on the chip are generally divided into four categories: power supply, clock, control, and I/O. The I/O port is further divided into General Purpose Input Output (GPIO) and function multiplex I/O (such as SPI/I2C/UART, etc.) in the usage mode.
 
 Most MCU pins have more than one function. The internal structure of different pins is different and the functions are different. The actual function of the pin can be switched through different configurations. The main features of the General Purpose Input Output (GPIO) port are as follows:
 
@@ -44,7 +44,7 @@ GET_PIN(port, pin)
 The sample code for the pin number corresponding to LED0 with pin number PF9 is as follows:
 
 ```c
-#define LED0_PIN		GET_PIN(F, 9)
+#define LED0_PIN        GET_PIN(F, 9)
 ```
 
 #### View Driver Files
@@ -64,7 +64,7 @@ static const rt_uint16_t pins[] =
     __STM32_PIN_DEFAULT,
     __STM32_PIN(8, A, 14),
     __STM32_PIN(9, B, 6),
-	... ...    
+    ... ...
 }
 ```
 
@@ -86,11 +86,11 @@ void rt_pin_mode(rt_base_t pin, rt_base_t mode);
 At present, the pin working mode supported by RT-Thread can take one of the five macro definition values as shown. The mode supported by the chip corresponding to each mode needs to refer to the specific implementation of the PIN device driver:
 
 ```c
-#define PIN_MODE_OUTPUT 0x00 			/* Output */
-#define PIN_MODE_INPUT 0x01			 	/* Input */
-#define PIN_MODE_INPUT_PULLUP 0x02 		/* input Pull up  */
-#define PIN_MODE_INPUT_PULLDOWN 0x03	/* input Pull down  */
-#define PIN_MODE_OUTPUT_OD 0x04 		/* output Open drain  */
+#define PIN_MODE_OUTPUT 0x00            /* Output */
+#define PIN_MODE_INPUT 0x01             /* Input */
+#define PIN_MODE_INPUT_PULLUP 0x02      /* input Pull up  */
+#define PIN_MODE_INPUT_PULLDOWN 0x03    /* input Pull down  */
+#define PIN_MODE_OUTPUT_OD 0x04         /* output Open drain  */
 ```
 
 An example of use is as follows:
@@ -161,7 +161,7 @@ To use the interrupt function of the pin, you can use the following function to 
 
 ```c
 rt_err_t rt_pin_attach_irq(rt_int32_t pin, rt_uint32_t mode,
-     					   void (*hdr)(void *args), void *args);
+                           void (*hdr)(void *args), void *args);
 ```
 
 | Parameter  | Description                                                  |
@@ -177,11 +177,11 @@ rt_err_t rt_pin_attach_irq(rt_int32_t pin, rt_uint32_t mode,
 Interrupt trigger mode mode can take one of the following five macro definition values:
 
 ```c
-#define PIN_IRQ_MODE_RISING 0x00 		 /* Rising edge trigger */
-#define PIN_IRQ_MODE_FALLING 0x01 		 /* Falling edge trigger */
+#define PIN_IRQ_MODE_RISING 0x00         /* Rising edge trigger */
+#define PIN_IRQ_MODE_FALLING 0x01        /* Falling edge trigger */
 #define PIN_IRQ_MODE_RISING_FALLING 0x02 /* Edge trigger (triggered on both rising and falling edges)*/
-#define PIN_IRQ_MODE_HIGH_LEVEL 0x03 	 /* High level trigger */
-#define PIN_IRQ_MODE_LOW_LEVEL 0x04 	 /* Low level trigger */
+#define PIN_IRQ_MODE_HIGH_LEVEL 0x03     /* High level trigger */
+#define PIN_IRQ_MODE_LOW_LEVEL 0x04      /* Low level trigger */
 ```
 
 Examples of use are as follows:

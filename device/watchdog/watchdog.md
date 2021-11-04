@@ -1,6 +1,6 @@
 # WATCHDOG Device
 
-## An Introduction to WATCHDOG 
+## An Introduction to WATCHDOG
 
 The hardware watchdog timer is a timer whose timing output is connected to the reset terminal of the circuit. In a productized embedded system, in order to automatically reset the system under abnormal conditions, it generally needs a watchdog.
 

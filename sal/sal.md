@@ -34,7 +34,7 @@ The working principle of SAL component is mainly divided into the following thre
 
 #### Multi-Protocol Stack Access and Unified Abstract Function Of Interface Function
 
-For different protocol stacks or network function implementations, the names of network interfaces may be different. Take the `connect` connection function as an example. The interface name in the lwIP protocol stack is `lwip_connect`, and the interface name in the AT Socket network implementation is `at_connect`. The SAL component provides abstraction and unification of the interface of different protocol stacks or networks. When the socket is created, the component **judges the protocol stack or network function used by judging the incoming protocol domain type**, and completes the RT-Thread. 
+For different protocol stacks or network function implementations, the names of network interfaces may be different. Take the `connect` connection function as an example. The interface name in the lwIP protocol stack is `lwip_connect`, and the interface name in the AT Socket network implementation is `at_connect`. The SAL component provides abstraction and unification of the interface of different protocol stacks or networks. When the socket is created, the component **judges the protocol stack or network function used by judging the incoming protocol domain type**, and completes the RT-Thread.
 
 Currently, the protocol stack or network implementation types supported by the SAL component are: **lwIP protocol stack**, **AT Socket protocol stack**, **WIZnet hardware TCP/IP protocol stack**.
 
@@ -46,7 +46,7 @@ The above is the definition of the socket creation function in the standard BSD 
 
 For different software packages, the protocol domain type passed to the socket may be fixed and will not change depending on how the SAL component is accessed. **In order to dynamically adapt access to different protocol stacks or network implementations**, the SAL component provides two protocol domain type matching methods for each protocol stack or network implementation: **Primary protocol domain type and secondary protocol domain type**. When socket is created, it first determines whether the incoming protocol domain type has the supported primary protocol type. If it is, it uses the corresponding protocol stack or network implementation, if not, determine whether the subprotocol cluster type supports. The current system support protocol domain types are as follows:
 
-1. 
+1.
    lwIP Protocol stack： family = AF_INET、sec_family = AF_INET
 
 2. AT Socket Protocol stack： family = AF_AT、sec_family = AF_INET
@@ -136,7 +136,7 @@ After the configuration is complete, as long as the `protocol` type passed in th
 #include <string.h>
 
 #include <rtthread.h>
-#include <sys/socket.h> 
+#include <sys/socket.h>
 #include <netdb.h>
 
 /* RT-Thread offical website，supporting TLS function */
@@ -172,7 +172,7 @@ void sal_tls_test(void)
         rt_kprintf("Socket error\n");
         goto __exit;
     }
-    
+
     /* Initialize the server address */
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(SAL_TLS_PORT);
@@ -192,7 +192,7 @@ void sal_tls_test(void)
         rt_kprintf("send error,close the socket.\n");
         goto __exit;
     }
-    
+
     /* Receive and print the response data, using encrypted data transmission */
     bytes_received = recv(sock, recv_data, SAL_TLS_BUFSZ  - 1, 0);
     if (bytes_received <= 0)
@@ -200,7 +200,7 @@ void sal_tls_test(void)
         rt_kprintf("received error,close the socket.\n");
         goto __exit;
     }
-    
+
     rt_kprintf("recv data:\n");
     for (i = 0; i < bytes_received; i++)
     {
@@ -243,7 +243,7 @@ RT-Thread Components  --->
         Socket abstraction layer  --->
         [*] Enable socket abstraction layer
             protocol stack implement --->
-            [ ] Support lwIP stack 
+            [ ] Support lwIP stack
             [ ] Support AT Commands stack
             [ ] Support MbedTLS protocol
         [*]    Enable BSD socket operated by file system API
@@ -325,7 +325,7 @@ static int bing_test(int argc, char **argv)
 {
     struct sockaddr_in client_addr;
     struct sockaddr_in server_addr;
-    struct netdev *netdev = RT_NULL; 
+    struct netdev *netdev = RT_NULL;
     int sockfd = -1;
 
     if (argc != 2)
@@ -380,7 +380,7 @@ static int bing_test(int argc, char **argv)
     {
         rt_kprintf("socket connect success!\n");
     }
-    
+
     /* Close the connection */
     closesocket(sockfd);
     return RT_EOK;
@@ -721,7 +721,7 @@ The following is the access registration process implemented by AT Socket networ
 #include <netdb.h>
 #include <sal.h>            /* SAL component structure holds the header file */
 #include <at_socket.h>      /* AT Socket related header file */
-#include <af_inet.h>       
+#include <af_inet.h>
 
 #include <netdev.h>         /*network interface card function related header file */
 
@@ -796,7 +796,7 @@ static const struct proto_ops at_inet_stream_ops =
 #endif /* SAL_USING_POSIX */
 };
 
-static const struct sal_netdb_ops at_netdb_ops = 
+static const struct sal_netdb_ops at_netdb_ops =
 {
     at_gethostbyname,
     NULL,

@@ -40,22 +40,22 @@ RT-Thread Components ->  Device Drivers -> Using WiFi ->
 Configuration options are described in detail as follows:
 
 ```c
-[*] Using Wi-Fi framework				 /* Using Wi-Fi framework */
+[*] Using Wi-Fi framework                /* Using Wi-Fi framework */
 (wlan0) The WiFi device name for station /* The default name for station */
-(wlan1) The WiFi device name for ap	 	 /* The default name for ap */
-(lwip) Default transport protocol	 	 /* Default protocol */
-(10000) Set scan timeout time(ms)	 	 /* Scan timeout time */
-(10000) Set connect timeout time(ms)	 /* Connect timeout time */
-(32)  SSID name maximum length	 	 	 /* Maximum length of SSID name */
-(32)  Maximum password length	 		 /* Maximum length of password */
-[*]   Automatic sorting of scan results	 /* Automatic sorting of scan results */
+(wlan1) The WiFi device name for ap      /* The default name for ap */
+(lwip) Default transport protocol        /* Default protocol */
+(10000) Set scan timeout time(ms)        /* Scan timeout time */
+(10000) Set connect timeout time(ms)     /* Connect timeout time */
+(32)  SSID name maximum length           /* Maximum length of SSID name */
+(32)  Maximum password length            /* Maximum length of password */
+[*]   Automatic sorting of scan results  /* Automatic sorting of scan results */
 (3)   Maximum number of WiFi information automatically saved /* Maximum number of WiFi information automatically saved */
-(wlan_job) WiFi work queue thread name	 /* WiFi work queue thread name */
-(2048) wifi work queue thread size	 	 /* wifi work queue thread size */
-(22)  WiFi work queue thread priority	 /* WiFi work queue thread priority */
-(2)   Maximum number of driver events	 /* Maximum number of driver events in dev layer */
-[ ]   Forced use of PBUF transmission	 /* Forced use of PBUF transmission */
-[ ]   Enable WLAN Debugging Options	     /* Enable WLAN Debugging Options */
+(wlan_job) WiFi work queue thread name   /* WiFi work queue thread name */
+(2048) wifi work queue thread size       /* wifi work queue thread size */
+(22)  WiFi work queue thread priority    /* WiFi work queue thread priority */
+(2)   Maximum number of driver events    /* Maximum number of driver events in dev layer */
+[ ]   Forced use of PBUF transmission    /* Forced use of PBUF transmission */
+[ ]   Enable WLAN Debugging Options      /* Enable WLAN Debugging Options */
 ```
 
 ## Access Wi-Fi Devices
@@ -99,8 +99,8 @@ The scan result is a structure as follows:
 ```c
 struct rt_wlan_scan_result
 {
-    rt_int32_t num;				/* info number */
-    struct rt_wlan_info *info;	/* info pointer */
+    rt_int32_t num;             /* info number */
+    struct rt_wlan_info *info;  /* info pointer */
 };
 ```
 

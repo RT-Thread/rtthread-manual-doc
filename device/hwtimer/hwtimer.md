@@ -11,7 +11,7 @@ Hardware timers generally have two modes of operation, timer mode and counter mo
 
 **Counter **: Counter can count up or down. The maximum count value of the 16-bit counter is 65535, and the maximum value of the 32-bit counter is 4294967295.
 
-**Counting frequency **：As for the number of counts within the counter time unit under the timer mode, since the system clock frequency is fixed, the timer time can be calculated according to the counter count value. `Timing time = count value / count frequency`. For example, if the counting frequency is 1 MHz, the counter counts once is 1 / 1000000 second. That is, every 1 microsecond counter is incremented by one (or subtract one), at this time, the maximum timing capability of the 16-bit counter is 65535 microseconds, which is 65.535 milliseconds. 
+**Counting frequency **：As for the number of counts within the counter time unit under the timer mode, since the system clock frequency is fixed, the timer time can be calculated according to the counter count value. `Timing time = count value / count frequency`. For example, if the counting frequency is 1 MHz, the counter counts once is 1 / 1000000 second. That is, every 1 microsecond counter is incremented by one (or subtract one), at this time, the maximum timing capability of the 16-bit counter is 65535 microseconds, which is 65.535 milliseconds.
 
 ## Access Hardware Timer Device
 
@@ -46,7 +46,7 @@ In general, the hardware timer device name registered to the system is timer0, t
 
 ```c
 #define HWTIMER_DEV_NAME   "timer0"     /* timer name */
-rt_device_t hw_dev;						/* timer device handle */	
+rt_device_t hw_dev;                     /* timer device handle */
 /* find timer device */
 hw_dev = rt_device_find(HWTIMER_DEV_NAME);
 ```
@@ -71,7 +71,7 @@ An example of use is as follows:
 
 ```c
 #define HWTIMER_DEV_NAME   "timer0"     /* timer name */
-rt_device_t hw_dev;						/* timer device handle */	
+rt_device_t hw_dev;                     /* timer device handle */
 /* find timer device */
 hw_dev = rt_device_find(HWTIMER_DEV_NAME);
 /* to open the timer device in read-write mode */
@@ -97,7 +97,7 @@ An example of use is as follows：
 
 ```c
 #define HWTIMER_DEV_NAME   "timer0"     /* timer name */
-rt_device_t hw_dev;						/* timer device handle */
+rt_device_t hw_dev;                     /* timer device handle */
 
 /* timer timeout callback function */
 static rt_err_t timeout_cb(rt_device_t dev, rt_size_t size)
@@ -142,7 +142,7 @@ The command control words available for the hardware timer device are as follows
 | **Control word** | Description                        |
 | ---------------------- | ------------------------ |
 | HWTIMER_CTRL_FREQ_SET | set the counting frequency |
-| HWTIMER_CTRL_STOP 	| stop the timer |
+| HWTIMER_CTRL_STOP     | stop the timer |
 | HWTIMER_CTRL_INFO_GET | get timer feature information |
 | HWTIMER_CTRL_MODE_SET | set timer mode |
 
@@ -153,15 +153,15 @@ Get the timer parameter arg,which is a pointer to the structure struct rt_hwtime
 When setting the timer mode, the parameter arg can take the following values：
 
 ```c
-HWTIMER_MODE_ONESHOT	/* Single timing */
-HWTIMER_MODE_PERIOD		/* Periodic timing */
+HWTIMER_MODE_ONESHOT    /* Single timing */
+HWTIMER_MODE_PERIOD     /* Periodic timing */
 ```
 
 An example of using the timer count frequency and timing mode is as follows:
 
 ```c
 #define HWTIMER_DEV_NAME   "timer0"     /* timer name */
-rt_device_t hw_dev;						/* timer device handle */
+rt_device_t hw_dev;                     /* timer device handle */
 rt_hwtimer_mode_t mode;                 /* timer mode */
 rt_uint32_t freq = 10000;               /* couting frequency */
 
@@ -223,9 +223,9 @@ An example of using the timer timeout value is as follows:
 
 ```c
 #define HWTIMER_DEV_NAME   "timer0"     /* timer name */
-rt_device_t hw_dev;						/* timer device handle */
+rt_device_t hw_dev;                     /* timer device handle */
 rt_hwtimer_mode_t mode;                 /* timer mode */
-rt_hwtimerval_t timeout_s;		        /* Timer timeout value */
+rt_hwtimerval_t timeout_s;              /* Timer timeout value */
 
 /* Timer timeout callback function */
 static rt_err_t timeout_cb(rt_device_t dev, rt_size_t size)
@@ -276,7 +276,7 @@ rt_size_t rt_device_read(rt_device_t dev, rt_off_t pos, void* buffer, rt_size_t 
 An example of use is shown below：
 
 ```c
-rt_hwtimerval_t timeout_s;		/* Used to save the time the timer has elapsed */
+rt_hwtimerval_t timeout_s;      /* Used to save the time the timer has elapsed */
 /* Read the elapsed time of the timer  */
 rt_device_read(hw_dev, 0, &timeout_s, sizeof(timeout_s));
 ```
@@ -303,7 +303,7 @@ To close the device interface and open the device interface should be used in pa
 
 ```c
 #define HWTIMER_DEV_NAME   "timer0"     /* timer name */
-rt_device_t hw_dev;						/* timer device handle */	
+rt_device_t hw_dev;                     /* timer device handle */
 /* find timer device */
 hw_dev = rt_device_find(HWTIMER_DEV_NAME);
 ... ...
@@ -319,7 +319,7 @@ The specific use of the hardware timer device can refer to the following sample 
 1. First find the device handle based on the timer device name "timer0".
 2. Open the device "timer0" in read-write mode.
 3. Set the timer timeout callback function.
-4. Set the timer mode to periodic timer and set the timeout period to 5 seconds. At this time, the timer starts. 
+4. Set the timer mode to periodic timer and set the timeout period to 5 seconds. At this time, the timer starts.
 5. Read the timer after 3500ms delay, the read value will be displayed in seconds and microseconds.
 
 ```c

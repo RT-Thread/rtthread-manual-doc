@@ -6,7 +6,7 @@ A file system is a set of abstract data types that implements the storage, hiera
 
 This chapter explains the RT-Thread file system and introduces you to the architecture, features, and usage of the RT-Thread virtual file system.
 
-## An Introduction to DFS 
+## An Introduction to DFS
 
 DFS is a virtual file system component provided by RT-Thread. Its full name is Device File System which is a device virtual file system. The name of the file system uses a style similar to UNIX files and folders. The directory structure is as follows:
 
@@ -14,7 +14,7 @@ DFS is a virtual file system component provided by RT-Thread. Its full name is D
 
 In RT-Thread DFS, the file system has a uniform root directory, which is represented by `/`. The *f1.bin* file in the root directory is represented by `/f1.bin`,  and the `/f1.bin` directory in the 2019 directory is represented by `/data/2019/f1.bin`.  That is, the partition symbol of the directory is `/`, which is exactly the same as UNIX/Linux, and is different from Windows (the `\` is used as the separator of the directory on the Windows operating system).
 
-### The Architecture of DFS 
+### The Architecture of DFS
 
 The main features of the RT-Thread DFS component are:
 
@@ -28,7 +28,7 @@ The hierarchical structure of DFS is shown in the following figure, which is mai
 
 ### POSIX Interface Layer
 
-POSIX stands for Portable Operating System Interface of UNIX (POSIX). The POSIX standard defines the interface standard that the operating system should provide for applications. It is a general term for a series of API standards defined by IEEE for software to run on various UNIX operating systems. 
+POSIX stands for Portable Operating System Interface of UNIX (POSIX). The POSIX standard defines the interface standard that the operating system should provide for applications. It is a general term for a series of API standards defined by IEEE for software to run on various UNIX operating systems.
 
 The POSIX standard is intended to achieve software portability at the source code level. In other words, a program written for a POSIX-compatible operating system should be able to compile and execute on any other POSIX operating system (even from another vendor). RT-Thread supports the POSIX standard interface, so it is easy to port Linux/Unix programs to the RT-Thread operating system.
 
@@ -42,7 +42,7 @@ Users can register specific file systems to DFS, such as FatFS, RomFS, DevFS, et
 
 * FatFS is a Microsoft FAT format compatible file system developed for small embedded devices. It is written in ANSI C and has good hardware independence and portability. It is the most commonly used file system type in RT-Thread.
 * The traditional RomFS file system is a simple, compact, read-only file system that does not support dynamic erasing and saving or storing data in order, thus it supports applications to run in XIP (execute In Place) method and save RAM space while the system is running.
-* The Jffs2 file system is a log flash file system. It is mainly used for NOR flash memory, based on MTD driver layer, featuring: readable and writable, supporting data compression, Hash table based log file system, and providing crash/power failure security protection, write balance support, etc.. 
+* The Jffs2 file system is a log flash file system. It is mainly used for NOR flash memory, based on MTD driver layer, featuring: readable and writable, supporting data compression, Hash table based log file system, and providing crash/power failure security protection, write balance support, etc..
 * DevFS is the device file system. After the function is enabled in the RT-Thread operating system, the devices in the system can be virtualized into files in the `/dev` folder, so that the device can use the interfaces such as `read` and `write` according to the operation mode of the file to operate.
 * NFS (Network File System) is a technology for sharing files over a network between different machines and different operating systems. In the development and debugging phase of the operating system, this technology can be used to build an NFS-based root file system on the host and mount it on the embedded device, which can easily modify the contents of the root file system.
 * UFFS is short for Ultra-low-cost Flash File System. It is an open source file system developed by Chinese people and used for running Nand Flash in small memory environments such as embedded devices. Compared with the Yaffs file system which often used in embedded devices, it has the advantages of less resource consumption, faster startup speed and free.
@@ -129,7 +129,7 @@ Take the elm-FAT file system format block device as an example. The formatting p
 You can also format the file system using the `mkfs` command. The result of formatting the block device sd0 is as follows:
 
 ```shell
-msh />mkfs sd0                    # Sd0 is the name of the block device, the command will format by default 
+msh />mkfs sd0                    # Sd0 is the name of the block device, the command will format by default
 sd0 is elm-FAT file system
 msh />
 msh />mkfs -t elm sd0             # Use the -t parameter to specify the file system type as elm-FAT file system
@@ -386,7 +386,7 @@ int mkdir(const char *path, mode_t mode);
 | 0        | create directory successfully |
 | -1      | fail to create directory |
 
-This function is used to create a directory as a folder, the parameter path is the absolute path of the directory, the parameter mode is not enabled in the current version, so just fill in the default parameter 0x777. 
+This function is used to create a directory as a folder, the parameter path is the absolute path of the directory, the parameter mode is not enabled in the current version, so just fill in the default parameter 0x777.
 
 Delete a directory using the rmdir() function:
 
@@ -676,7 +676,7 @@ hello rt-thread!!!
 Use the `rm` command to delete a folder or file. The result is as follows:
 
 ```c
-msh />ls                                # view the information of current directory 
+msh />ls                                # view the information of current directory
 Directory /:
 rt-thread           <DIR>
 hello.txt           18
@@ -732,7 +732,7 @@ MSH_CMD_EXPORT(readwrite_sample, readwrite sample);
 
 ```
 
-### An Example of Changing the File Name 
+### An Example of Changing the File Name
 
 The sample code in this section shows how to modify the file name. The program creates a function `rename_sample()` that manipulates the file and exports it to the msh command list. This function calls the `rename()` function to rename the file named `text.txt` to `text1.txt`. The sample code is as follows:
 
@@ -1018,7 +1018,7 @@ After running the sample, you can see that the first time you read the root dire
 
 ### Q: What should I do if the program gets stuck during the test file system?
 
-  **A:** Try using the debugger or print some necessary debugging information to determine where the program is stuck and ask questions. 
+  **A:** Try using the debugger or print some necessary debugging information to determine where the program is stuck and ask questions.
 
 ### Q: How can I check the problem of the file system step by step?
 

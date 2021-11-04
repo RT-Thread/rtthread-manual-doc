@@ -104,12 +104,12 @@ Slave address (addr): Supports 7-bit and 10-bit binary addresses. You need to vi
 The flags `flags` can be defined as macros that can be combined with other macros using the bitwise operation "|" as needed.
 
 ```c
-#define RT_I2C_WR              0x0000   	 /* Write flag */
-#define RT_I2C_RD              (1u << 0) 	 /* Read flag */
-#define RT_I2C_ADDR_10BIT      (1u << 2) 	 /* 10-bit address mode */
-#define RT_I2C_NO_START        (1u << 4) 	 /* No start condition */
-#define RT_I2C_IGNORE_NACK     (1u << 5) 	 /* Ignore NACK */
-#define RT_I2C_NO_READ_ACK     (1u << 6)	 /* Do not send ACK when reading */
+#define RT_I2C_WR              0x0000        /* Write flag */
+#define RT_I2C_RD              (1u << 0)     /* Read flag */
+#define RT_I2C_ADDR_10BIT      (1u << 2)     /* 10-bit address mode */
+#define RT_I2C_NO_START        (1u << 4)     /* No start condition */
+#define RT_I2C_IGNORE_NACK     (1u << 5)     /* Ignore NACK */
+#define RT_I2C_NO_READ_ACK     (1u << 6)     /* Do not send ACK when reading */
 ```
 
 Examples of use are as follows:
@@ -127,10 +127,10 @@ static rt_err_t read_regs(struct rt_i2c_bus_device *bus, rt_uint8_t len, rt_uint
 {
     struct rt_i2c_msg msgs;
 
-    msgs.addr = AHT10_ADDR;		/* Slave address */
-    msgs.flags = RT_I2C_RD;		/* Read flag */
-    msgs.buf = buf;				/* Read and write data buffer pointer　*/
-    msgs.len = len;				/* Read and write data bytes */
+    msgs.addr = AHT10_ADDR;     /* Slave address */
+    msgs.flags = RT_I2C_RD;     /* Read flag */
+    msgs.buf = buf;             /* Read and write data buffer pointer　*/
+    msgs.len = len;             /* Read and write data bytes */
 
     /* Call the I2C device interface to transfer data */
     if (rt_i2c_transfer(bus, &msgs, 1) == 1)

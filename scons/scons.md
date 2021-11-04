@@ -200,9 +200,9 @@ cwd = str(Dir('#'))
 objs = []
 list = os.listdir(cwd)
 for d in list:
-	path = os.path.join(cwd， d)
+    path = os.path.join(cwd， d)
        if os.path.isfile(os.path.join(path， 'SConscript')):
-       	objs = objs + SConscript(os.path.join(d， 'SConscript'))
+        objs = objs + SConscript(os.path.join(d， 'SConscript'))
 Return('objs')
 ```
 
@@ -342,7 +342,7 @@ else:
     LINKFLAGS = ''
 
 if GetDepend('FINSH_USING_MSH'):
-	src = src + msh_src
+    src = src + msh_src
 if not GetDepend('FINSH_USING_MSH_ONLY'):
     src = src + fsh_src
 
@@ -425,23 +425,23 @@ There is already a Kconfig file for this BSP in the stm32f10x-HAL BSP directory,
 
 ```shell
 menu "hello module"                            # create a "hello module" menu
-                                               
+
     config RT_USING_HELLO                      # RT_USING_HELLO configuration options
-        bool "Enable hello module"             # RT_USING_HELLO is a bool variable and display as "Enable hello module" 
+        bool "Enable hello module"             # RT_USING_HELLO is a bool variable and display as "Enable hello module"
         default y                              # RT_USING_HELLO can take values y and n, default y
         help                                   # If use help, it would display "this hello module only used for test"
-        this hello module only used for test   
-                                               
+        this hello module only used for test
+
     config RT_HELLO_NAME                       # RT_HELLO_NAME configuration options
         string "hello name"                    # RT_HELLO_NAME is a string variable and the menu show as "hello name"
-        default "hello"                        # default name is "hello"   
-                                               
+        default "hello"                        # default name is "hello"
+
     config RT_HELLO_VALUE                      # RT_HELLO_VALUE configuration options
         int "hello value"                      # RT_HELLO_VALUE is an int variable and the menu show as "hello value"
         default 8                              # the default value is 8
-                                               
+
 endmenu                                        # the hello menu is end
-        
+
 ```
 
 After entering the stm32f10x-HAL BSP directory using the Env tool, you can use the menuconfig command to see the configuration menu of the new hello module at the bottom of the main page. After entering the menu, the following figure is displayed.
@@ -500,23 +500,23 @@ CPU='cortex-m3'
 CROSS_TOOL='gcc'
 
 if os.getenv('RTT_CC'):
-	CROSS_TOOL = os.getenv('RTT_CC')
+    CROSS_TOOL = os.getenv('RTT_CC')
 
 # cross_tool provides the cross compiler
 # EXEC_PATH is the compiler execute path, for example, CodeSourcery, Keil MDK, IAR
 
 if  CROSS_TOOL == 'gcc':
-	PLATFORM 	= 'gcc'
-	EXEC_PATH 	= '/usr/local/gcc-arm-none-eabi-5_4-2016q3/bin/'
+    PLATFORM    = 'gcc'
+    EXEC_PATH   = '/usr/local/gcc-arm-none-eabi-5_4-2016q3/bin/'
 elif CROSS_TOOL == 'keil':
-	PLATFORM 	= 'armcc'
-	EXEC_PATH 	= 'C:/Keilv5'
+    PLATFORM    = 'armcc'
+    EXEC_PATH   = 'C:/Keilv5'
 elif CROSS_TOOL == 'iar':
-	PLATFORM 	= 'iar'
-	EXEC_PATH 	= 'C:/Program Files/IAR Systems/Embedded Workbench 6.0 Evaluation'
+    PLATFORM    = 'iar'
+    EXEC_PATH   = 'C:/Program Files/IAR Systems/Embedded Workbench 6.0 Evaluation'
 
 if os.getenv('RTT_EXEC_PATH'):
-	EXEC_PATH = os.getenv('RTT_EXEC_PATH')
+    EXEC_PATH = os.getenv('RTT_EXEC_PATH')
 
 BUILD = 'debug'
 
@@ -574,10 +574,10 @@ If the rtconfig.py file has the following code, comment out the following code w
 
 ```c
 if os.getenv('RTT_CC'):
-	CROSS_TOOL = os.getenv('RTT_CC')
+    CROSS_TOOL = os.getenv('RTT_CC')
 ... ...
 if os.getenv('RTT_EXEC_PATH'):
-	EXEC_PATH = os.getenv('RTT_EXEC_PATH')
+    EXEC_PATH = os.getenv('RTT_EXEC_PATH')
 ```
 
 The above 2 `if` judgments will set CROSS_TOOL and EXEC_PATH to the default value of Env.

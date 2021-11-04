@@ -57,8 +57,8 @@ rt_device_t rt_device_find(const char* name);
 In general, the names of the ADC device registered to the system are adc0, adc1, etc., and an usage example is as follows:
 
 ```c
-#define ADC_DEV_NAME        "adc1"	/* ADC device name */
-rt_adc_device_t adc_dev;		    /* ADC device handle */	
+#define ADC_DEV_NAME        "adc1"  /* ADC device name */
+rt_adc_device_t adc_dev;            /* ADC device handle */
 /* find the device */
 adc_dev = (rt_adc_device_t)rt_device_find(ADC_DEV_NAME);
 ```
@@ -83,9 +83,9 @@ rt_err_t rt_adc_enable(rt_adc_device_t dev, rt_uint32_t channel);
  An usage example is as follows:
 
 ```c
-#define ADC_DEV_NAME        "adc1"	/* ADC device name */
+#define ADC_DEV_NAME        "adc1"  /* ADC device name */
 #define ADC_DEV_CHANNEL     5       /* ADC channel */
-rt_adc_device_t adc_dev;		    /* ADC device handle */	
+rt_adc_device_t adc_dev;            /* ADC device handle */
 /* find the device */
 adc_dev = (rt_adc_device_t)rt_device_find(ADC_DEV_NAME);
 /* enable the device */
@@ -110,12 +110,12 @@ rt_uint32_t rt_adc_read(rt_adc_device_t dev, rt_uint32_t channel);
 An example of using the ADC sampled voltage value is as follows:
 
 ```c
-#define ADC_DEV_NAME        "adc1"	    /* ADC device name */
+#define ADC_DEV_NAME        "adc1"      /* ADC device name */
 #define ADC_DEV_CHANNEL     5           /* ADC channel */
 #define REFER_VOLTAGE       330         /* Reference voltage 3.3V, data accuracy multiplied by 100 and reserve 2 decimal places*/
 #define CONVERT_BITS        (1 << 12)   /* The number of conversion bits is 12  */
 
-rt_adc_device_t adc_dev;		        /* ADC device handle */	
+rt_adc_device_t adc_dev;                /* ADC device handle */
 rt_uint32_t value；
 /* find the device */
 adc_dev = (rt_adc_device_t)rt_device_find(ADC_DEV_NAME);
@@ -150,9 +150,9 @@ rt_err_t rt_adc_disable(rt_adc_device_t dev, rt_uint32_t channel);
 An example:
 
 ```c
-#define ADC_DEV_NAME        "adc1"	/* ADC device name */
+#define ADC_DEV_NAME        "adc1"  /* ADC device name */
 #define ADC_DEV_CHANNEL     5       /* ADC channel */
-rt_adc_device_t adc_dev;		    /* ADC device handle */	
+rt_adc_device_t adc_dev;            /* ADC device handle */
 rt_uint32_t value；
 /* find the device */
 adc_dev = (rt_adc_device_t)rt_device_find(ADC_DEV_NAME);

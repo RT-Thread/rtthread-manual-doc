@@ -4,13 +4,13 @@ This chapter introduces the basics of RT-Thread kernel, including: introduction 
 
 A brief introduction to the RT-Thread kernel, starting with the software architecture to explain the composition and implementation of the real-time kernel, introduces some RT-Thread kernel-related concepts and basic knowledge for beginners, so that beginners have a preliminary understanding of the kernel. After learning this chapter, readers will have a basic understanding of the RT-Thread kernel, including what the kernel is composed of, how the system start up, how memory is distributed, and methods of kernel configuration.
 
-## Introduction to RT-Thread Kernel 
+## Introduction to RT-Thread Kernel
 
 Kernel is the most basic and important part of the operating system. The figure below shows the RT-Thread core architecture diagram. The kernel is on top of the hardware layer. The kernel includes the kernel library and real-time kernel implementation.
 
 ![RT-Thread Kernel and its Substructure](figures/03kernel_Framework.png)
 
-The kernel library is a small set of C library-like function implementation subsets to ensure that the kernel can run independently. The built-in C library will be somewhat different depending on the compiler. When using the GNU GCC compiler, it will carry more implementations of standard C Library. 
+The kernel library is a small set of C library-like function implementation subsets to ensure that the kernel can run independently. The built-in C library will be somewhat different depending on the compiler. When using the GNU GCC compiler, it will carry more implementations of standard C Library.
 
 >C library: Also called C Runtime Library, it provides functions like "strcpy", "memcpy", and some also include the implementation of "printf" and "scanf" functions. The RT-Thread Kernel Service Library provides only a small portion of the C library function implementation used by the kernel. To avoid duplicate names with the standard C library, the rt_ prefix is added before these functions.
 
@@ -24,7 +24,7 @@ Thread management will be covered in detail in the "Thread Management" chapter.
 
 ### Clock Management
 
-RT-Thread's Clock management is based on clock beat, which is the smallest clock unit in the RT-Thread operating system. The RT-Thread timer provides two types of timer mechanisms: the first type is a one-shot timer, which triggers only one timer event after startup and then stops automatically. The second type is a periodic trigger timer, which periodically triggers timer events until the user manually stops the timer or it will continue to operate. 
+RT-Thread's Clock management is based on clock beat, which is the smallest clock unit in the RT-Thread operating system. The RT-Thread timer provides two types of timer mechanisms: the first type is a one-shot timer, which triggers only one timer event after startup and then stops automatically. The second type is a periodic trigger timer, which periodically triggers timer events until the user manually stops the timer or it will continue to operate.
 
 In addition, depending on the context in which the timeout function is executed, the RT-Thread timer can be set to HARD_TIMER mode or SOFT_TIMER mode.
 
@@ -48,7 +48,7 @@ The concept of mailbox and message queue will be explained in detail in the "Int
 
 RT-Thread allows static memory pool management and dynamic memory heap management. When static memory pool has available memory, the time allocated to the memory block will be constant; when the static memory pool is empty, the system will then request for suspending or blocking the thread of the memory block. (that is, the thread will abandon the request and return, if after waiting for a while, the memory block is not obtained or the thread will abandon and return immediately. The waiting time depends on the waiting time parameter set when the memory block is applied). When other threads release the memory block to the memory pool, if there is threads that are suspending and waiting to be  allocated of memory blocks, the system will wake up the thread.
 
-Under circumstances of different system resources, the dynamic memory heap management module respectively provides memory management algorithms for small memory systems and SLAB memory management algorithm for large memory systems. 
+Under circumstances of different system resources, the dynamic memory heap management module respectively provides memory management algorithms for small memory systems and SLAB memory management algorithm for large memory systems.
 
 There is also a dynamic memory heap management called memheap, which is suitable for memory heaps   in systems with multiple addresses that can be discontinuous. Using memheap, you can "stick" multiple memory heaps together, letting the user operate as if he was operating a memory heap .
 
@@ -60,7 +60,7 @@ RT-Thread uses PIN, I2C, SPI, USB, UART, etc. as peripheral devices, and is unif
 
 The concept of I/O device management will be explained in the "Device Model" and "General Equipment" chapters.
 
-## RT-Thread Startup Process 
+## RT-Thread Startup Process
 
 The understanding of most codes usually starts from learning the startup process. We will firstly look for the source of the startup. Taking MDK-ARM as an example, the user program entry for MDK-ARM is the main() function, which is located in the main.c file. The launching of the system starts from the assembly code startup_stm32f103xe.s, then jumps to the C code, initializes the RT-Thread system function, and finally enters the user program entry main().
 
@@ -131,7 +131,7 @@ This part of the startup code can be roughly divided into four parts:
 
 (2) Initialize system kernel objects, such as timers, schedulers, and signals;
 
-(3) create a main thread, initialize various modules in the main thread one by one; 
+(3) create a main thread, initialize various modules in the main thread one by one;
 
 (4) Initialize the timer thread, idle thread, and start the scheduler.
 
@@ -163,7 +163,7 @@ Build Time Elapsed: 00:00:07
 
 The Program Size mentioned above contains the following sections:
 
-1) Code: code segment, section of code that store the program;  
+1) Code: code segment, section of code that store the program;
 
 2) RO-data: read-only data segment, stores the constants defined in the program;
 
@@ -295,7 +295,7 @@ void thread1_entry(void* parameter)
         for (i = 0; i < 10; i ++)
         {
             rt_kprintf("%d\n", i);
-    
+
             /* Delay 100ms */
             rt_thread_mdelay(100);
         }
@@ -331,10 +331,10 @@ int thread_sample_init()
                             thread1_entry, RT_NULL,
                             &thread1_stack[0], sizeof(thread1_stack),
                             200, 10);
-    
+
     /* Start thread */
     if (result == RT_EOK) rt_thread_startup(&thread1);
-    
+
     /* Create thread 2 */
     /* The thread entry is thread2_entry and the parameter is RT_NULL
      *  Stack space is 512, priority is 250, and time slice is 25 OS Tick
@@ -342,10 +342,10 @@ int thread_sample_init()
     thread2_ptr = rt_thread_create("thread2",
                                 thread2_entry, RT_NULL,
                                 512, 250, 25);
-    
+
     /* Start thread */
     if (thread2_ptr != RT_NULL) rt_thread_startup(thread2_ptr);
-    
+
     return 0;
 }
 ```
@@ -376,9 +376,9 @@ The advantages of this design approach are:
 
 (2) Provide a unified object operation mode, simplify the operation of various specific objects, and improve the reliability of the system.
 
-Derivations from object control block rt_object in the above figure includes: thread object, memory pool object, timer object, device object and IPC object (IPC: Inter-Process Communication. In RT-Thread real-time operating system, IPC objects is used for synchronization and communicate between threads); derivations from IPC objects includes: semaphores, mutexes, events, mailboxes, message queues, signals, etc. 
+Derivations from object control block rt_object in the above figure includes: thread object, memory pool object, timer object, device object and IPC object (IPC: Inter-Process Communication. In RT-Thread real-time operating system, IPC objects is used for synchronization and communicate between threads); derivations from IPC objects includes: semaphores, mutexes, events, mailboxes, message queues, signals, etc.
 
-### Object Control Block 
+### Object Control Block
 
 Data structure of kernel object control block:
 
@@ -501,7 +501,7 @@ When calling the above interface, the system first needs to obtain object inform
 | object handle allocated successfully | Allocate successfully |
 | RT_NULL            | Fail to allocate               |
 
-#### Delete Object 
+#### Delete Object
 
 For a dynamic object, when it is no longer used, you can call the following interface to delete the object and release the corresponding system resources:
 
@@ -539,7 +539,7 @@ An important feature of RT-Thread is its high degree of tailorability, which all
 
 Configuration is mainly done by modifying the file under project directory - rtconfig.h. User can conditionally compile the code by opening/closing the macro definition in the file, and finally achieve the purpos e of system configuration and cropping, as follows:
 
-（1）RT-Thread Kernel part 
+（1）RT-Thread Kernel part
 
 ```c
 /* Indicates the maximum length of the name of the kernel object. If the maximum length of the name of the object in the code is greater than the length of the macro definition,
@@ -709,13 +709,13 @@ Macro definitions are often used in RT-Thread. For example, some common macro de
 #define RT_UNUSED                   __attribute__((unused))
 ```
 
-4）RT_WEAK，definition is as follows, often used to define functions, when linking the function, the compiler will link the function without the keyword prefix first and link the function modified by weak if it can't find those functions. 
+4）RT_WEAK，definition is as follows, often used to define functions, when linking the function, the compiler will link the function without the keyword prefix first and link the function modified by weak if it can't find those functions.
 
 ```c
 #define RT_WEAK                     __weak
 ```
 
-5）ALIGN(n)，definition is as follows, is used to align its stored address with n bytes when allocating an address space to an object. Here, n can be the power of 2. Byte alignment not only facilitates quick CPU access, but also save memory space if byte alignment  is properly used. 
+5）ALIGN(n)，definition is as follows, is used to align its stored address with n bytes when allocating an address space to an object. Here, n can be the power of 2. Byte alignment not only facilitates quick CPU access, but also save memory space if byte alignment  is properly used.
 
 ```c
 #define ALIGN(n)                    __attribute__((aligned(n)))
