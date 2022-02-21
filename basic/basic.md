@@ -1,8 +1,8 @@
 # Kernel Basics
 
-This chapter introduces the basics of RT-Thread kernel, including: introduction to kernel, startup process for the system and some part of the kernel configuration, laying the foundation for the following chapters.
+This chapter introduces the fundenmental concepts of RT-Thread kernel, including: introduction of the kernel itslef, bootup processes and some areas of the kernel configurations.  
 
-A brief introduction to the RT-Thread kernel, starting with the software architecture to explain the composition and implementation of the real-time kernel, introduces some RT-Thread kernel-related concepts and basic knowledge for beginners, so that beginners have a preliminary understanding of the kernel. After learning this chapter, readers will have a basic understanding of the RT-Thread kernel, including what the kernel is composed of, how the system start up, how memory is distributed, and methods of kernel configuration.
+In the nutshell, this is only a brief introduction to software architecture decomposition and implementation of the real-time kernel. This will give understanding and concepts of how RT-Thread kernel works togther. After learning from this chapter, readers will have basic knowledge of each kernel components, system bootup proccesses, memory allocation and distrubtion, and methods of kernel configurations.
 
 ## Introduction to RT-Thread Kernel
 
