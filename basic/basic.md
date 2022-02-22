@@ -6,15 +6,15 @@ In the nutshell, this is only a brief introduction to software architecture deco
 
 ## Introduction to RT-Thread Kernel
 
-Kernel is the most basic and important part of the operating system. The figure below shows the RT-Thread core architecture diagram. The kernel is on top of the hardware layer. The kernel includes the kernel library and real-time kernel implementation.
+Kernel is the most basic and fundenmental part of an Operating System. Kernel service library and RT-Thread kernel libraries are interfacing between hardware and components/service layer. This includes the implementation of real-time kernel service library (rtservice.h/kservice.c) and other RT-Thread kernel libraries such as object management, thread management and scheduler, inter-thread communication management, clock management and memory management respectively. Below diagram is the core architecture diagram of the core kernel.
 
 ![RT-Thread Kernel and its Substructure](figures/03kernel_Framework.png)
 
-The kernel library is a small set of C library-like function implementation subsets to ensure that the kernel can run independently. The built-in C library will be somewhat different depending on the compiler. When using the GNU GCC compiler, it will carry more implementations of standard C Library.
+Implementation of core kernel libraries are similar to a small set of standard C runtime library and it can run independently. For example, Standard C library (C runtime library) provides "strcpy", "memcpy", "printf", "scanf" and other function implementations. RT-Thread kernel libraries also provide the function implementations which are mainly used by Core Kernel. However, to avoid name conflicts, specifically functions' names are preceded with rt_.
 
->C library: Also called C Runtime Library, it provides functions like "strcpy", "memcpy", and some also include the implementation of "printf" and "scanf" functions. The RT-Thread Kernel Service Library provides only a small portion of the C library function implementation used by the kernel. To avoid duplicate names with the standard C library, the rt_ prefix is added before these functions.
 
-Real-time kernel implementation includes: object management, thread management and scheduler, inter-thread communication management, clock management and memory management, etc. The minimum resource occupation of the kernel is 3KB ROM, 1.2KB RAM.
+The built of the Kernel will be vary depending on the complier. For example, using GNU GCC compiler, it will use more implementation from the standard C library. Last but not least, the minimum resource requirements of the Kernel is 3KB ROM and 1.2KB RAM.
+
 
 ### Thread Scheduling
 
