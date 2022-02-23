@@ -1,7 +1,6 @@
 # Kernel Basics
 
-This chapter gives a brief introduction to the software architecture of the RT-Thread kernel, beginning with its composition and implementation.  While also introducing RT-Thread kernel-related concepts for beginners.  
-After understanding this chapter, readers will have an elementary understanding of the RT Thread kernel and will be able to answer questions such as -
+This chapter gives a brief introduction to the software architecture of the RT-Thread kernel, beginning with its composition and implementation.  While also introducing RT-Thread kernel-related concepts for beginners. After understanding this chapter, readers will have an elementary understanding of the RT Thread kernel and will be able to answer questions such as:
 - What are the constituents of the kernel? 
 - How does the system startup? 
 - How is the memory distributed?
