@@ -30,23 +30,32 @@ The built of the Kernel will be vary depending on the complier. For example, usi
 
 ### Thread Scheduling
 
-Thread is the smallest scheduling unit in the RT-Thread operating system. Thread scheduling algorithm is a priority-based full preemptive multi-thread scheduling algorithm, that is, except the interrupt handler, the code of the scheduler's locked part, and the code that prohibits the interrupt, other parts of the system can be preempted, including the thread scheduler itself. The system supports 256 thread priorities (can also be changed to a maximum of 32 or 8 thread priority via configuration file; for STM32 default configuration, it is set as 32 thread priorities), 0 priority represents highest priority, and lowest priority is reserved for idle threads; at the same time, it also supports creating multiple threads with the same priority. The same priority threads are scheduled with a time slice rotation scheduling algorithm, so that each thread runs for the same time; in addition, when the scheduler is looking for threads that are at the highest priority thread and ready, the elapsed time is constant. The system does not limit the number of threads, the number of threads is only related to the specific memory of the hardware platform.
+Thread is the smallest scheduling unit in the RT-Thread operating system. The thread scheduling algorithm is a **Priority-based Full Preemptive Multi-Thread** scheduling algorithm.  
+The system can support up to 256(0 - 255) thread priorities. For systems with tight resources, configurations with 8 or 32 thread priorities can be chosen(For example, STM32 has 32 thread priorities as per the default configuration). Lower numbers have a higher priority where 0 represents the highest priority furthermore the lowest priority(highest number) is reserved for idle threads.  
+RT-Thread supports the creation of multiple threads with the same priority. Threads having the same priority are scheduled with a Time Slice Rotation Scheduling algorithm so that each thread runs for the same amount of time.  
+The number of threads is bounded by the memory of the hardware platform and not the system.
 
 Thread management will be covered in detail in the "Thread Management" chapter.
 
 ### Clock Management
 
-RT-Thread's Clock management is based on clock beat, which is the smallest clock unit in the RT-Thread operating system. The RT-Thread timer provides two types of timer mechanisms: the first type is a one-shot timer, which triggers only one timer event after startup and then stops automatically. The second type is a periodic trigger timer, which periodically triggers timer events until the user manually stops the timer or it will continue to operate.
+RT-Thread's Clock management is based upon a **clock beat**, which is the smallest clock unit in the RT-Thread operating system.  
+The RT-Thread timer provides two types of timer mechanisms: 
+- **One-Shot Timer** - Triggers only one timer event after startup and then stops automatically. 
+- **Periodic Trigger Timer** - Periodically triggers timer events until the user manually stops the timer or it will continue to operate.
 
-In addition, depending on the context in which the timeout function is executed, the RT-Thread timer can be set to HARD_TIMER mode or SOFT_TIMER mode.
+The RT-Thread timer can be set to the `HARD_TIMER` or the `SOFT_TIMER` mode depending on the context in which the timeout function is executed. 
 
-Usually, the timer service is completed using a timer timing callback function (that is, a timeout function). The user can select the appropriate type of timer according to his own real-time requirements for timing processing.
+The timer service is concluded using a timer timing callback i.e. a timeout function. The user can select the appropriate type of timer according to their real-time requirements for timing processing.  
 
-Timer will be explained in the "Clock Management" chapter.
+Timer will be explained further in the "Clock Management" chapter.
 
 ### Synchronization between Threads
 
-RT-Thread uses thread semaphores, mutexes, and event sets to achieve inter-thread synchronization. Thread synchronizes through the acquisition and release of semaphore and mutexes; the mutex uses priority inheritance to solve the common priority inversion problem in the real-time system. The thread synchronization mechanism allows threads to wait according to priorities or to acquire semaphores or mutexes following the first-in first-out method. Threads synchronize through sending and receiving of events; event sets allows "or trigger" and "and trigger" for multiple events, suitable for situations where threads are waiting for multiple events.
+RT-Thread uses thread semaphores, mutexes, and event sets to achieve inter-thread synchronization. 
+Thread synchronizations happen through the acquisition and release of semaphore and mutexes.  
+The mutex uses priority inheritance to solve the common priority inversion problem in the real-time system. The thread synchronization mechanism allows threads to wait according to priorities or to acquire semaphores/mutexes following the First In First Out(FIFO) method.  
+Event sets are primarily used for synchronization between threads, they can achieve one-to-many and many-to-many synchronization. It allows "**OR** trigger"(*independent synchronization*) and "**AND** trigger"(*associative synchronization*) suitable for situations where threads are waiting for multiple events. 
 
 The concepts of semaphores, mutexes, and event sets are detailed in the "Inter-Thread Synchronization" chapter.
 
@@ -56,7 +65,7 @@ RT-Thread supports communication mechanisms such as mailbox, message queue, etc.
 
 The concept of mailbox and message queue will be explained in detail in the "Inter-Thread Communication" chapter.
 
-### **Memory Management**
+### Memory Management
 
 RT-Thread allows static memory pool management and dynamic memory heap management. When static memory pool has available memory, the time allocated to the memory block will be constant; when the static memory pool is empty, the system will then request for suspending or blocking the thread of the memory block. (that is, the thread will abandon the request and return, if after waiting for a while, the memory block is not obtained or the thread will abandon and return immediately. The waiting time depends on the waiting time parameter set when the memory block is applied). When other threads release the memory block to the memory pool, if there is threads that are suspending and waiting to be  allocated of memory blocks, the system will wake up the thread.
 
