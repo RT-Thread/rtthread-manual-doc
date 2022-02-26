@@ -1,32 +1,32 @@
 # User Manual of Env
 
-Env is a development tool from RT-Thread that provides a build environment, graphical system configuration, and package management capabilities for project based on the RT-Thread operating system.
+Env is a handy utility tool developed by RT-Thread team to build enviornment, graphical system configuration, and packages management for software projects that intend to run on RT-Thread operating system.
 
-Its built-in `menuconfig` provides an easy-to-use configuration tailoring tool. It can tailor the kernels, components and software packages freely, so that the system can be constructed by building blocks.
+It is a wrapper tool for build-in menuconfig; an open source GUI tool which is designed to tailor for ease of use for developers. It can also be used to configure the kernel configuraiton parameters, components and software packages so that developers can construct the system like lego blocks. 
 
 ## Main Features
 
-- menuconfig is a graphical configuration interface with good interaction and strong operation logic;
-- each option can be viewed with help, configuration does not need to consult document;
-- flexible use, automatic processing of dependencies;
-- automatically generate `rtconfig.h`, no need manual modification;
-- use `scons` tool to generate project, provide compilation environment, easy operation;
-- provides a variety of software packages, modular software packages coupling association less, good maintainability;
-- software package can be downloaded online, They are modular, low-coupling, and highly reliable.
+- Menuconfig provides graphical interface to interact with operational logic and congfiguration parameters
+- Each configuration option come with help session by default.
+- It automates dependencies installation process.
+- Automatically generate rtconfig.h without manual modification.
+- It uses scons tool to streamline build project and compliation enviornment.
+- Modular software packages and decoupling design make it easier to maintain.
+- It also featured with point and click to download additional software packages and dependencies directly from Internet.
 
 ## Preparation
 
-The Env tool includes the rt-thread source code development and compilation environment and the package management system.
+  Env tool come with source code builder, compilation enviornment and package management system.
 
 - [Download the Env tool]().
-- Install git. Git supports the software package management. Download link for git: https://git-scm.com/downloads. Install git under the instruction,and add git to the system environment variables.
-- Note that in the work environment, all routess are not allowed to have Chinese characters or Spaces.
+- Install Git (download link - https://git-scm.com/downloads). Follow git installation instructions and configure environment variable to add git.
+- Take a note for working environment, all paths are not allowed to have Chinese characters or Spaces.
 
 ## User Guide of Env
 
 ### Open the control Console
 
-The rt-thread software package environment is mainly based on the command line console and assisted by the character interface, so that the rt-thread development environment can be set up by minimizing the modification of configuration files.
+The rt-thread software package environment is mainly based on the command line console so that the rt-thread development environment can be set up by minimizing the modification of configuration files.
 
 There are two ways to open the console:
 
