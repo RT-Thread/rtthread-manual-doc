@@ -1,18 +1,15 @@
 # Virtual File System
 
-In the early embedded systems, the amount of data to be stored was relatively small, and the data types were relatively simple. The data was stored by directly writing data at a specified address in the storage device. However, with the development of the embedded device's functions, more and more data needs to be stored, and it is more and more complicated. It is very cumbersome to use the old method to store and manage data. So we need new data management methods to simplify the organizational forms of storing data, which is the file system we will introduce next.
+In early days, the amount of data to be stored in embedded systems was relatively small and data types were relatively simple.
+The data were stored by directly writing to a specific address in storage devices. However, with today modern technology, embedded device's functions are getting complicated and required more data storage. Therefore, we need new data management methods to simplify and organize the data storage.
 
-A file system is a set of abstract data types that implements the storage, hierarchical organization, access and retrieval of data. It is a mechanism for providing underlying data access to users. Files are usually the basic units that stored in a file system, that is, data is organized in a single file. When there are a lot of files, it will lead to numerous files, and it is difficult to classify and rename them. And the folder exists as a container for multiple files.
-
-This chapter explains the RT-Thread file system and introduces you to the architecture, features, and usage of the RT-Thread virtual file system.
+A file system is made up of abstract data types and also a mechanism for providing data access, retrieve, implements, and store them in hierarchical structure. A folder contains multiple files and a file contains multiple organized data on the file system. This chapter explains about the RT-Thread file system, architecture, features and usage of virtual file system in RT-Thread OS.
 
 ## An Introduction to DFS
 
-DFS is a virtual file system component provided by RT-Thread. Its full name is Device File System which is a device virtual file system. The name of the file system uses a style similar to UNIX files and folders. The directory structure is as follows:
+Device File System (DFS) is a virtual file system component and name structure is similar to UNIX files and folders. Following is the files and folders structure:
 
-![Figure of the Directory Structure](figures/fs-dir.png)
-
-In RT-Thread DFS, the file system has a uniform root directory, which is represented by `/`. The *f1.bin* file in the root directory is represented by `/f1.bin`,  and the `/f1.bin` directory in the 2019 directory is represented by `/data/2019/f1.bin`.  That is, the partition symbol of the directory is `/`, which is exactly the same as UNIX/Linux, and is different from Windows (the `\` is used as the separator of the directory on the Windows operating system).
+The root directory is represented by "/". For example, if users want to access to f1.bin file under root directory, it can be accessed by "/f1.bin". If users want to access to f1.bin file under /2019 folder, it can be accessed by "/data/2019/f1.bin" according to their folder paths as in UNIX/Linux unlike Windows System.
 
 ### The Architecture of DFS
 
@@ -62,7 +59,7 @@ The initialization process of the file system is generally divided into the foll
 3. Create a block device on the memory.
 4. Format the block device.
 5. Mount the block device to the DFS directory.
-6. When the file system is no longer in use, you can uninstall it.
+6. When the file system is no longer in use, you can unmount it.
 
 ### Initialize the DFS Component
 
@@ -974,7 +971,7 @@ hello_5
 
 After running the sample, you can see that the first time you read the root directory information, it starts from the first folder and prints out all the directory information in the root directory. When the directory information is printed for the second time, since the starting position of the reading is set to the position of the third folder by using the `seekdir()` function, the second time when reading the root directory is from the third folder. Start reading until the last folder, only the directory information from `hello_3` to `hello_5` is printed.
 
-## Common Questions
+## FAQ
 
 ### Q: What should I do if I find that the file name or folder name is not displayed properly?
 
