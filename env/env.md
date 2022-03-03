@@ -2,7 +2,7 @@
 
 Env is a handy utility tool developed by RT-Thread team to build enviornment, graphical system configuration, and packages management for software projects that intend to run on RT-Thread operating system.
 
-It is a wrapper tool for build-in menuconfig; an open source GUI tool which is designed to tailor for ease of use for developers. It can also be used to configure the kernel configuraiton parameters, components and software packages so that developers can construct the system like lego blocks. 
+It is a wrapper tool for build-in menuconfig; an open source GUI tool which is designed to tailor for ease of use for developers. It can also be used to configure the kernel configuraiton parameters, components and software packages so that developers can construct the system like lego blocks.
 
 ## Main Features
 

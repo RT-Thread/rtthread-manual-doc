@@ -1,10 +1,10 @@
 # Kernel Basics
 
-This chapter gives a brief introduction to the software architecture of the RT-Thread kernel, beginning with its composition and implementation.  While also introducing RT-Thread kernel-related concepts for beginners.  
+This chapter gives a brief introduction to the software architecture of the RT-Thread kernel, beginning with its composition and implementation.  While also introducing RT-Thread kernel-related concepts for beginners.
 After understanding this chapter, readers will have an elementary understanding of the RT Thread kernel and will be able to answer questions such as -
 
-- What are the constituents of the kernel? 
-- How does the system startup? 
+- What are the constituents of the kernel?
+- How does the system startup?
 - How is the memory distributed?
 - What are the methods of kernel configuration?
 
@@ -32,32 +32,32 @@ The built of the Kernel will be vary depending on the complier. For example, usi
 
 ### Thread Scheduling
 
-Thread is the smallest scheduling unit in the RT-Thread operating system. The thread scheduling algorithm is a **Priority-based Full Preemptive Multi-Thread** scheduling algorithm.  
-The system can support up to 256(0 - 255) thread priorities. For systems with tight resources, configurations with 8 or 32 thread priorities can be chosen(For example, STM32 has 32 thread priorities as per the default configuration). Lower numbers have a higher priority where 0 represents the highest priority furthermore the lowest priority(highest number) is reserved for idle threads.  
-RT-Thread supports the creation of multiple threads with the same priority. Threads having the same priority are scheduled with a Time Slice Rotation Scheduling algorithm so that each thread runs for the same amount of time.  
+Thread is the smallest scheduling unit in the RT-Thread operating system. The thread scheduling algorithm is a **Priority-based Full Preemptive Multi-Thread** scheduling algorithm.
+The system can support up to 256(0 - 255) thread priorities. For systems with tight resources, configurations with 8 or 32 thread priorities can be chosen(For example, STM32 has 32 thread priorities as per the default configuration). Lower numbers have a higher priority where 0 represents the highest priority furthermore the lowest priority(highest number) is reserved for idle threads.
+RT-Thread supports the creation of multiple threads with the same priority. Threads having the same priority are scheduled with a Time Slice Rotation Scheduling algorithm so that each thread runs for the same amount of time.
 The number of threads is bounded by the memory of the hardware platform and not the system.
 
 Thread management will be covered in detail in the "Thread Management" chapter.
 
 ### Clock Management
 
-RT-Thread's Clock management is based upon a **clock beat**, which is the smallest clock unit in the RT-Thread operating system.  
-The RT-Thread timer provides two types of timer mechanisms: 
-- **One-Shot Timer** - Triggers only one timer event after startup and then stops automatically. 
+RT-Thread's Clock management is based upon a **clock beat**, which is the smallest clock unit in the RT-Thread operating system.
+The RT-Thread timer provides two types of timer mechanisms:
+- **One-Shot Timer** - Triggers only one timer event after startup and then stops automatically.
 - **Periodic Trigger Timer** - Periodically triggers timer events until the user manually stops the timer or it will continue to operate.
 
-The RT-Thread timer can be set to the `HARD_TIMER` or the `SOFT_TIMER` mode depending on the context in which the timeout function is executed. 
+The RT-Thread timer can be set to the `HARD_TIMER` or the `SOFT_TIMER` mode depending on the context in which the timeout function is executed.
 
-The timer service is concluded using a timer timing callback i.e. a timeout function. The user can select the appropriate type of timer according to their real-time requirements for timing processing.  
+The timer service is concluded using a timer timing callback i.e. a timeout function. The user can select the appropriate type of timer according to their real-time requirements for timing processing.
 
 Timer will be explained further in the "Clock Management" chapter.
 
 ### Synchronization between Threads
 
-RT-Thread uses thread semaphores, mutexes, and event sets to achieve inter-thread synchronization. 
-Thread synchronizations happen through the acquisition and release of semaphore and mutexes.  
-The mutex uses priority inheritance to solve the common priority inversion problem in the real-time system. The thread synchronization mechanism allows threads to wait according to priorities or to acquire semaphores/mutexes following the First In First Out(FIFO) method.  
-Event sets are primarily used for synchronization between threads, they can achieve one-to-many and many-to-many synchronization. It allows "**OR** trigger"(*independent synchronization*) and "**AND** trigger"(*associative synchronization*) suitable for situations where threads are waiting for multiple events. 
+RT-Thread uses thread semaphores, mutexes, and event sets to achieve inter-thread synchronization.
+Thread synchronizations happen through the acquisition and release of semaphore and mutexes.
+The mutex uses priority inheritance to solve the common priority inversion problem in the real-time system. The thread synchronization mechanism allows threads to wait according to priorities or to acquire semaphores/mutexes following the First In First Out(FIFO) method.
+Event sets are primarily used for synchronization between threads, they can achieve one-to-many and many-to-many synchronization. It allows "**OR** trigger"(*independent synchronization*) and "**AND** trigger"(*associative synchronization*) suitable for situations where threads are waiting for multiple events.
 
 The concepts of semaphores, mutexes, and event sets are detailed in the "Inter-Thread Synchronization" chapter.
 
