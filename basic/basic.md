@@ -63,31 +63,37 @@ The concepts of semaphores, mutexes, and event sets are detailed in the "Inter-T
 
 ### Inter-Thread Communication
 
-RT-Thread supports communication mechanisms such as mailbox, message queue, etc. The length of a message in the mailbox is fixed to 4 bytes; message queue can receive messages in variable-length and cache the messages in its own memory space. Compared to message queue, mailbox is more efficient. The sending action of the mailbox and message queue can be safely used in the interrupt service routine. The communication mechanism allows threads to wait by priority or to acquire by first in first out method.
-
+RT-Thread supports communication mechanisms such as mailbox, message queue, etc. The mailbox's message length is fixed to 4 bytes. Whereas, message queue can receive messages in variable size and cache the messages in its own memory space.  
+Compared to a message queue, a mailbox is more efficient. The sending action of the mailbox and message queue can be safely used in an ISR (Interrupt Service Routine). The communication mechanism allows threads to wait by priority or to acquire by the First In First Out (FIFO) method.  
 The concept of mailbox and message queue will be explained in detail in the "Inter-Thread Communication" chapter.
 
 ### Memory Management
 
-RT-Thread allows static memory pool management and dynamic memory heap management. When static memory pool has available memory, the time allocated to the memory block will be constant; when the static memory pool is empty, the system will then request for suspending or blocking the thread of the memory block. (that is, the thread will abandon the request and return, if after waiting for a while, the memory block is not obtained or the thread will abandon and return immediately. The waiting time depends on the waiting time parameter set when the memory block is applied). When other threads release the memory block to the memory pool, if there is threads that are suspending and waiting to be  allocated of memory blocks, the system will wake up the thread.
+RT-Thread allows:
+1. Static Memory Pool
+2. Dynamic Memory Pool  
 
-Under circumstances of different system resources, the dynamic memory heap management module respectively provides memory management algorithms for small memory systems and SLAB memory management algorithm for large memory systems.
+When the static memory pool has available memory, the time allocated to the memory block will be constant. 
+When the static memory pool is empty, the system will then request for suspending or blocking the thread of the memory block. The thread will abandon the request and return if the memory block is not obtained after waiting for a while, or the thread will abandon and return immediately. The waiting time depends on the waiting time parameter set when the memory block is applied. When other threads release the memory block to the memory pool, the system will wake up the thread if there are suspended threads waiting to be allocated of memory blocks.
 
-There is also a dynamic memory heap management called memheap, which is suitable for memory heaps   in systems with multiple addresses that can be discontinuous. Using memheap, you can "stick" multiple memory heaps together, letting the user operate as if he was operating a memory heap .
+Under circumstances of different system resources, the dynamic memory heap management module respectively provides memory management algorithms for small memory systems and SLAB memory management algorithms for large memory systems.
+
+There is also a dynamic memory heap management called memheap, suitable for memory heaps in systems with multiple addresses that can be discontinuous. Using memheap, the user can "paste" multiple memory heaps together, letting them operate as if operating a memory heap.
 
 The concept of memory management will be explained in the "Memory Management" chapter.
 
 ### I/O Device Management
 
-RT-Thread uses PIN, I2C, SPI, USB, UART, etc. as peripheral devices, and is uniformly registered through the device. It realized a device management subsystem accessed by the name, and  it can access hardware devices according to a unified API interface. On the device driver interface, depending on the characteristics of the embedded system, corresponding events can be attached to different devices. When the device event is triggered, the driver notifies the upper application program.
+RT-Thread uses I2C, SPI, USB, UART, etc., as peripheral devices and is uniformly registered through the device. It realized a device management subsystem accessed by the name, and it can access hardware devices according to a unified API interface. On the device driver interface, depending on the characteristics of the embedded system, corresponding events can be attached to different devices. The driver notifies the upper application program when the device event is triggered.
 
 The concept of I/O device management will be explained in the "Device Model" and "General Equipment" chapters.
 
 ## RT-Thread Startup Process
 
-The understanding of most codes usually starts from learning the startup process. We will firstly look for the source of the startup. Taking MDK-ARM as an example, the user program entry for MDK-ARM is the main() function, which is located in the main.c file. The launching of the system starts from the assembly code startup_stm32f103xe.s, then jumps to the C code, initializes the RT-Thread system function, and finally enters the user program entry main().
+The understanding of most codes usually starts from learning the startup process. We will firstly look for the source of the startup. Taking MDK-ARM as an example, the user program entry for MDK-ARM is the main() function located in the main.c file. The launching of the system starts from the assembly code startup_stm32f103xe.s, jumps to the C code, initializes the RT-Thread system function, and finally enters the user program entry main().
 
-To complete the RT-Thread system function initialization before entering main(), we used the MDK extensions  `$Sub$$` and  `$Super$$`. You can add the prefix of `$Sub$$` to main to make it a new function  `$Sub$$main`.`$Sub$$main`can call some functions to be added before main. ( Here, RT-Thread system initialization function is added.) Then, call `$Super$$main` to the main() function, so that the user does not have to manage the system initialization before main().
+To complete the RT-Thread system function initialization before entering main(), we used the MDK extensions  `$Sub$$` and  `$Super$$`. Users can add the prefix of `$Sub$$` to main to make it a new function `$Sub$$main`.  
+`$Sub$$main` can call some functions to be added before main (here, RT-Thread system initialization function is added). Then, call `$Super$$main` to the main() function so that the user does not have to manage the system initialization before main(). 
 
 For more information on the use of the `$Sub$$` and `$Super$$`extensions, see the ARM® Compiler v5.06 for μVision®armlink User Guide.
 
@@ -97,13 +103,13 @@ Let's take a look at this code defined in components.c:
 /* $Sub$$main Function */
 int $Sub$$main(void)
 {
-  rtthread_startup();
-  return 0;
+  rtthread_startup();
+  return 0;
 }
 ```
 
-
-Here, the`$Sub$$main`function simply calls the rtthread_startup() function. RT-Thread allows multiple platforms and multiple compilers, and the rtthread_startup() function is a uniform entry point specified by RT-Thread, so the `$Sub$$main` function simply only needs to call the rtthread_startup() function (RT-Thread compiled using compiler GNU GCC is an example where it jumps directly from the assembly startup code section to the rtthread_startup() function and start the execution of the first C code). The rtthread_startup() function can be found in the code of components.c, the startup process of RT-Thread is as shown below:
+Here, the `$Sub$$main` function simply calls the rtthread_startup() function. RT-Thread allows multiple platforms and multiple compilers, and the rtthread_startup() function is a uniform entry point specified by RT-Thread, so the `$Sub$$main` function only needs to call the rtthread_startup() function (RT-Thread compiled using compiler GNU GCC is an example where it jumps directly from the assembly startup code section to the rtthread_startup() function and starts the execution of the first C code).  
+The rtthread_startup() function can be found in the code of components.c, the startup process of RT-Thread is as shown below:
 
 ![System startup process](figures/03Startup_process.png)
 
@@ -150,16 +156,12 @@ int rtthread_startup(void)
 
 This part of the startup code can be roughly divided into four parts:
 
-(1) Initialize hardware related to the system;
+1. Initialize hardware related to the system.
+2. Initialize system kernel objects, such as timers, schedulers, and signals.
+3. Create the main thread initialize various modules in the main thread one by one.
+4. Initialize the timer thread, idle thread, and start the scheduler.
 
-(2) Initialize system kernel objects, such as timers, schedulers, and signals;
-
-(3) create a main thread, initialize various modules in the main thread one by one;
-
-(4) Initialize the timer thread, idle thread, and start the scheduler.
-
-Set the system clock in rt_hw_board_init() to provide heartbeat and serial port initialization for the system, bound the system's input and output terminals to this serial port, and subsequent system operation information will be printed out from the serial port later.
-
+Set the system clock in rt_hw_board_init() to provide heartbeat and serial port initialization for the system, bound to the system's input and output terminals to this serial port. Subsequent system operation information will be printed out from the serial port later.  
 The main() function is the user code entry for RT-Thread, and users can add their own applications to the main() function.
 
 ```c
