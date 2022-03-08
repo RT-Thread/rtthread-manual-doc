@@ -74,8 +74,8 @@ Use Python-based [scons](http://www.scons.org) for command-line builds.
 
 RT-Thread BSP can be compiled directly and downloaded to the corresponding development board for use. In addition, RT-Thread also provides qemu-vexpress-a9 BSP, which can be used without hardware platform. See the getting started guide below for details.
 
-- [Getting Started of QEMU (Windows)](documentation/quick_start_qemu/quick_start_qemu.md)
-- [Getting Started of QEMU (Ubuntu)](documentation/quick_start_qemu/quick_start_qemu_linux.md)
+- [Getting Started of QEMU (Windows)](quick-start/quick_start_qemu/quick_start_qemu.md)
+- [Getting Started of QEMU (Ubuntu)](quick-start/quick_start_qemu/quick_start_qemu_linux.md)
 
 # Help
 
