@@ -1,3 +1,7 @@
+# Attention
+## ⚠️ This repository is no longer maintained any more. Please move to: https://github.com/RT-Thread/rt-thread/tree/master/documentation
+
+
 # RT-Thread
 
 RT-Thread (Real-Time Thread) is an open source embedded real-time operating system and released under Apache License v2.0. It has a strong scalability: from a nano kernel running on a tiny MCU, for example ARM Cortex-M0, or Cortex-M3/4/7, to a rich feature system running on MIPS32, ARM Cortex-A, even the emerging open source RISC-V architecture is supported. RT-Thread can run either on single-core systems or on symmetric multi-core processors(SMP) systems.
